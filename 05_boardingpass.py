@@ -791,10 +791,11 @@ BBFBFBBRRL
 FFBFFBBLRR
 FBBFFBFLLR""".split()
 
+def getid1(boardingpass):
+    return int(re.sub("B|R", "1", re.sub("F|L", "0", boardingpass)), 2)
+
 def getid(boardingpass):
-    row = functools.reduce(lambda acc, ch: acc*2 + (1 if ch == "B" else 0), boardingpass[0:7], 0)
-    col = functools.reduce(lambda acc, ch: acc*2 + (1 if ch == "R" else 0), boardingpass[7:10], 0)
-    return row*8 + col
+    return int(boardingpass.translate("".maketrans("BRFL","1100")), 2)
 
 print("Test GetId", getid("FBFBBFFRLR"))
 
