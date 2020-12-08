@@ -7,56 +7,73 @@ public class Day8
 {
     public void Solve()
     {
-        var program =
+        var program = 
             File.ReadAllLines("08.txt")
-                .Select(s => s.Split(" "))
-                .Select(a => (op: a[0], arg: int.Parse(a[1])))
+                .Select(Inst.Parse)
                 .ToList();
 
-        Console.WriteLine($"Part One: {Run(program).acc}");
-        //Console.WriteLine($"Part Two: {GetAccOfFixedProgram(program)}");
+        Console.WriteLine($"Part One: {Run(program).Acc}");
+        Console.WriteLine($"Part Two: {RunFixedProgram(program).Acc}");
     }
 
-    (bool looped, int acc) Run(List<(string op, int arg)> program)
+    public record Vm(int Acc = 0, int Ip = 0, bool Halted = false)
     {
-        var ip = 0;
-        var acc = 0;
-        var visited = new HashSet<int>();
-        while (ip < program.Count)
-        {
-            var inst = program[ip];
-            if (!visited.Add(ip)) return (true, acc);
-            ip = inst.op switch {
-                "acc" => ip + 1 + (acc+=inst.arg) - acc, // Mua-ha-haha!!! >:D
-                "jmp" => ip + inst.arg,
-                _ => ip + 1,
+        public Vm Execute(Inst instruction) =>
+            instruction switch
+            {
+                Acc(var x) => this with { Ip = Ip + 1, Acc = Acc + x },
+                Jmp(var x) => this with { Ip = Ip + x },
+                Nop(_) => this with { Ip = Ip + 1 },
+                var op => throw new Exception($"{op}")
+            };
+    }
+
+    public abstract record Inst {
+        public static Inst Parse(string line) {
+            var ps = line.Split(" ");
+            var op = ps[0];
+            var arg = int.Parse(ps[1]);
+            return op switch
+            {
+                "nop" => new Nop(arg),
+                "jmp" => new Jmp(arg),
+                "acc" => new Acc(arg),
+                _ => throw new Exception(op)
             };
         }
-        return (false, acc);
+    }
+    public sealed record Nop(int Arg) : Inst;
+    public sealed record Jmp(int Arg) : Inst;
+    public sealed record Acc(int Arg) : Inst;
+
+    Vm Run(IReadOnlyList<Inst> program)
+    {
+        var vm = new Vm();
+        var visited = new HashSet<int>();
+        while (vm.Ip < program.Count && visited.Add(vm.Ip))
+            vm = vm.Execute(program[vm.Ip]);
+        return vm with { Halted = vm.Ip >= program.Count };
     }
 
-    int GetAccOfFixedProgram(List<(string op, int arg)> program)
+    Vm RunFixedProgram(List<Inst> program)
     {
         return
-            Mutate(program)
+            EnumerateMutations(program)
             .Select(Run)
-            .Where(res => !res.looped)
-            .First()
-            .acc;
+            .First(res => res.Halted);
     }
 
-    IEnumerable<List<(string op, int arg)>> Mutate(List<(string op, int arg)> program)
+    IEnumerable<List<Inst>> EnumerateMutations(List<Inst> program)
     {
         for (var index = 0; index < program.Count; index++)
         {
             var inst = program[index];
-            var newOp = inst.op switch
+            program[index] = inst switch
             {
-                "nop" => "jmp",
-                "jmp" => "nop",
+                Nop(var x) => new Jmp(x),
+                Jmp(var x) => new Nop(x),
                 var op => op
             };
-            program[index] = (newOp, inst.arg);
             yield return program;
             program[index] = inst;
         }
