@@ -605,27 +605,16 @@ vibrant coral bags contain 3 drab turquoise bags, 4 striped beige bags, 1 wavy t
 faded gray bags contain 3 striped purple bags."""
 
 
-# inp = test_inp
+def extractall(text, regex, parsers):
+    res = []
+    for m in re.findall(regex, text):
+        res.append([parser(g) for g, parser in zip(m, parsers)])
+    return res
 
 
-def parsereq(req):
-    i = req.find(" ")
-    return int(req[0:i]), req[i + 1:]
-
-
-def parseline(line):
-    m = re.match("^(.+) bags contain (.+)\\.$", line)
-    who = m.group(1)
-    if m.group(2) == "no other bags":
-        return who, []
-    else:
-        v = m.group(2)
-        v = v.replace(" bags", "")
-        v = v.replace(" bag", "")
-        return who, list(map(parsereq, re.split(", ", v)))
-
-
-rules = list(map(parseline, inp.split("\n")))
+rules = extractall(inp,
+                   r"(.+) bags contain (.+)\.",
+                   [str, lambda x: extractall(x, r"(\d+) (\w+ \w+) bags?", [int, str])])
 
 
 def search_outer_bags(start, v):
