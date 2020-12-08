@@ -14,7 +14,7 @@ public class Day8
                 .ToList();
 
         Console.WriteLine($"Part One: {Run(program).acc}");
-        Console.WriteLine($"Part Two: {GetAccOfFixedProgram(program)}");
+        //Console.WriteLine($"Part Two: {GetAccOfFixedProgram(program)}");
     }
 
     (bool looped, int acc) Run(List<(string op, int arg)> program)
@@ -26,19 +26,11 @@ public class Day8
         {
             var inst = program[ip];
             if (!visited.Add(ip)) return (true, acc);
-            switch (inst.op)
-            {
-                case "acc":
-                    acc += inst.arg;
-                    ip++;
-                    break;
-                case "nop":
-                    ip++;
-                    break;
-                case "jmp":
-                    ip += inst.arg;
-                    break;
-            }
+            ip = inst.op switch {
+                "acc" => ip + 1 + (acc+=inst.arg) - acc, // Mua-ha-haha!!! >:D
+                "jmp" => ip + inst.arg,
+                _ => ip + 1,
+            };
         }
         return (false, acc);
     }
