@@ -5,7 +5,7 @@ using System.Linq;
 
 public class Day8
 {
-    void Solve()
+    public void Solve()
     {
         var program =
             File.ReadAllLines("08.txt")
