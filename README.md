@@ -33,4 +33,4 @@ Day 8. Началась неделя C#
 
 Day 9. Хорошо обходиться без возни с индексами там, где это можно!
 
-Day 10. Внезапно, хорошо [пригодился](https://github.com/xoposhiy/aoc2020/blob/main/10.cs#L17) малоизвестный всем ToLookup. [Дважды!](https://github.com/xoposhiy/aoc2020/blob/main/10.cs#L20)
+Day 10. Внезапно, хорошо [пригодился](https://github.com/xoposhiy/aoc2020/blob/main/10.cs#L17) малоизвестный всем ToLookup.
