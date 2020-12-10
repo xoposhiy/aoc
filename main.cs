@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 //new Day8().Solve();
-new Day9().Solve();
+//new Day9().Solve();
+new Day10().Solve();
 
 /*
 T[] ParseMany<T>(string input, string pattern, Func<string, string, T> parse){
