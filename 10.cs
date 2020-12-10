@@ -25,7 +25,7 @@ public class Day10
 
         Console.WriteLine($"Part Two: {dp[deviceJoltage]}");
 
-        // Alternative solution with queue
+        // Part2 alternative solution with queue
         var counts = new Queue<(long joltage, long count)>();
         counts.Enqueue((0, 1));
         foreach (var joltage in joltageRatings.Skip(1))
@@ -36,7 +36,7 @@ public class Day10
         }
         Console.WriteLine($"Part Two (with queue): {counts.Last()}");
 
-        // Alternative solution in one expression
+        // Part2 alternative solution in one expression
         var ans = joltageRatings.Skip(1)
             .Aggregate(
                 new[] { (joltage: 0L, count: 1L) }, 
