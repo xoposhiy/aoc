@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using static System.Linq.Enumerable;
-using static System.Math;
-    
+
 public class Day11
 {
     public void Solve()
@@ -14,10 +11,8 @@ public class Day11
         var map = File.ReadLines("11.txt")
             .Select(line => line.ToCharArray())
             .ToArray();
-        var sw = Stopwatch.StartNew();
         PlacePeople(map);
-        Console.WriteLine(sw.Elapsed);
-        Console.WriteLine(map.SelectMany(c => c).Count(c => c == '#'));
+        Console.WriteLine($"Part One: {GetOccupiedSeatsCount(map)}");
         map = File.ReadLines("11.txt")
             .Select(line => line.ToCharArray())
             .ToArray();
@@ -31,43 +26,41 @@ public class Day11
         Console.WriteLine($"Part Two: {map.SelectMany(c => c).Count(c => c == '#')}");
     }
 
-    private IEnumerable<(int x, int y)> GetFreeNeighbors(int x, int y, char[][] map)
+    private static int GetOccupiedSeatsCount(char[][] map)
     {
-        return
-            from nx in Range(x-1, 3)
-            from ny in Range(x-1, 3)
-            where nx != 0 || ny != 0
-            where nx >= 0 && nx < map[0].Length && ny >= 0 && ny < map.Length
-            where map[ny][nx] == 'L'
-            select (nx, ny);
+        var occupiedSeatsCount = map.SelectMany(c => c).Count(c => c == '#');
+        return occupiedSeatsCount;
     }
 
-    private bool WillBecomeOccupied(int x, int y, char[][] map)
+    private IEnumerable<Vec> GetFreeNeighbors(Vec p, char[][] map)
     {
-        if (map[y][x] != 'L') return false;
-        return GetFreeNeighbors(x, y, map).Count() < 4;
+        return p.GetNeighbors8().Where(pos => map.EqAt(pos, 'L'));
+    }
+
+    private bool WillBecomeOccupied(Vec p, char[][] map)
+    {
+        if (!map.EqAt(p, 'L')) return false;
+        return GetFreeNeighbors(p, map).Count() < 4;
     }
 
     private void PlacePeople(char[][] map)
     {
-        var front = (
-                from y in Range(0, map.Length)
-                from x in Range(0, map[0].Length)
-                where WillBecomeOccupied(x, y, map)
-                select (x, y)
-                ).ToHashSet();
+        var front = 
+            map.Indices()
+            .Where(p => WillBecomeOccupied(p, map))
+            .ToHashSet();
         foreach (var (x, y) in front)
             map[y][x] = '#';
         while (front.Count > 0)
         {
             var emptyFront = front
-                .SelectMany(p => GetFreeNeighbors(p.x, p.y, map))
+                .SelectMany(p => GetFreeNeighbors(p, map))
                 .ToList();
             foreach (var (x, y) in emptyFront)
                 map[y][x] = '0';
             front = emptyFront
-                .SelectMany(p => GetFreeNeighbors(p.x, p.y, map))
-                .Where(p => WillBecomeOccupied(p.x, p.y, map))
+                .SelectMany(p => GetFreeNeighbors(p, map))
+                .Where(p => WillBecomeOccupied(p, map))
                 .ToHashSet();
             foreach (var (x, y) in front)
                 map[y][x] = '#';
@@ -78,7 +71,7 @@ public class Day11
     {
         var h = map.Length;
         var w = map[0].Length;
-        var next = Enumerable.Range(0, h).Select(y => new char[w]).ToArray();
+        var next = Range(0, h).Select(y => new char[w]).ToArray();
         for (var y = 0; y < h; y++)
             for (var x = 0; x < w; x++)
                 if (map[y][x] == '.')
@@ -87,12 +80,7 @@ public class Day11
                 }
                 else
                 {
-                    var ns =
-                        from dx in new[] { -1, 0, 1 }
-                        from dy in new[] { -1, 0, 1 }
-                        where dx != 0 || dy != 0
-                        select (dx, dy);
-                    var occupiedCount = ns.Select(d => GetSeatInDirection(map, x, y, d.dx, d.dy)).Count(c => c == '#');
+                    var occupiedCount = Vec.Directions8.Select(d => GetSeatInDirection(map, x, y, d.X, d.Y)).Count(c => c == '#');
                     next[y][x] = occupiedCount == 0 ? '#' : occupiedCount >= 5 ? 'L' : map[y][x];
                 }
 

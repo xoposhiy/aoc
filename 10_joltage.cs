@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 public class Day10
 {
@@ -45,45 +44,20 @@ public class Day10
                     current
                         .Append((joltage, current.Where(c => c.joltage >= joltage - 3).Sum(c => c.count)))
                         .ToArray())
-            .Last();
-        Console.WriteLine($"Part Two (one expression with aggregate): {candidates.Last().count}");
+            .Last().count;
+        Console.WriteLine($"Part Two (one expression with aggregate): {ans}");
 
         // Part2 alternative solution with diff analysis.
 
         var freq = joltageRatings
             .Zip(joltageRatings.Skip(1), (a, b) => b - a)
             .ConstantSegments()
-            .Where(s => s.value == 1)
-            .GroupBy(s => s.length)
-            .ToDictionary(g => g.Key, g => g.Count());
+            .Where(segment => segment.value == 1)
+            .GroupBy(segment => segment.length)
+            .ToDictionary(group => group.Key, group => group.Count());
         var mathAns = Math.Pow(7, freq[4]) * Math.Pow(4, freq[3]) * Math.Pow(2, freq[2]);
         
 
         Console.WriteLine($"Part Two (Everybody step back! I am going to use... MATH!!!111): {mathAns}");
-    }
-}
-
-public static class Extensions
-{
-    public static IEnumerable<(T value, int length)> ConstantSegments<T>(this IEnumerable<T> items) where T : IEquatable<T>
-    {
-        var isFirst = true;
-        T value = default;
-        var length = 1;
-        foreach (var item in items)
-        {
-            if (!isFirst && item.Equals(value))
-                length++;
-            else
-            {
-                if (!isFirst)
-                    yield return (value, length);
-                length = 1;
-            }
-            value = item;
-            isFirst = false;
-        }
-        if (!isFirst)
-            yield return (value, length);
     }
 }

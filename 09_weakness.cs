@@ -96,4 +96,6 @@ public class Day9
         }
         throw new Exception("no weakness");
     }
+    
+
 }
