@@ -37,17 +37,20 @@ public class Day11
         return p.GetNeighbors8().Where(pos => map.EqAt(pos, 'L'));
     }
 
-    private bool WillBecomeOccupied(Vec p, char[][] map)
+    private bool WillBecomeOccupiedAfter2Ticks(Vec p, char[][] map)
     {
         if (!map.EqAt(p, 'L')) return false;
         return GetFreeNeighbors(p, map).Count() < 4;
     }
 
+    
+    
+    
     private void PlacePeople(char[][] map)
     {
         var front = 
             map.Indices()
-            .Where(p => WillBecomeOccupied(p, map))
+            .Where(p => WillBecomeOccupiedAfter2Ticks(p, map))
             .ToHashSet();
         foreach (var (x, y) in front)
             map[y][x] = '#';
@@ -60,12 +63,16 @@ public class Day11
                 map[y][x] = '0';
             front = emptyFront
                 .SelectMany(p => GetFreeNeighbors(p, map))
-                .Where(p => WillBecomeOccupied(p, map))
+                .Where(p => WillBecomeOccupiedAfter2Ticks(p, map))
                 .ToHashSet();
             foreach (var (x, y) in front)
                 map[y][x] = '#';
         }
     }
+    
+    
+    
+    
 
     private char[][] Step2(char[][] map)
     {
