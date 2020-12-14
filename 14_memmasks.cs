@@ -41,7 +41,6 @@ public class Day14
                 }
             }
         }
-
         return mem.Values.Sum();
     }
 
@@ -95,7 +94,7 @@ public class Day14
                     mem[address] = (value | mask1) & mask0;
                 else
                 {
-                    for (var subMaskX = maskX; ;subMaskX = (subMaskX - 1) & maskX)
+                    for (var subMaskX = maskX; ; subMaskX = (subMaskX - 1) & maskX)
                     {
                         mem[(address & ~maskX) | subMaskX | mask1] = value;
                         if (subMaskX == 0) break;
