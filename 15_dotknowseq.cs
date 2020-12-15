@@ -8,7 +8,7 @@ public class Day15
     public void Solve()
     {
         var input = File.ReadAllText("15.txt").Split(",").Select(int.Parse).ToArray();
-        Console.WriteLine($"Test: {GetNth(new []{0, 3, 6}, 2020)} ?= 436");
+        Console.WriteLine($"Test: {GetNth(new[] { 0, 3, 6 }, 2020)} ?= 436");
         Console.WriteLine($"Part One: {GetNth(input, 2020)}");
         Console.WriteLine($"Part Two: {GetNth(input, 30000000)}");
     }
@@ -23,8 +23,8 @@ public class Day15
             if (i < input.Length)
                 say = input[i];
             else
-                say = i - d.GetValueOrDefault(lastSay, i);
-            d[lastSay] = i;
+                say = i - 1 - d.GetValueOrDefault(lastSay, i - 1);
+            d[lastSay] = i - 1;
             lastSay = say;
             if (log) Console.WriteLine(i + "\t" + say);
         }

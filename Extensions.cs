@@ -138,18 +138,11 @@ public static class Extensions
         return -1;
     }
 
-    public static TV GetOrCreate<TK, TV>(this IDictionary<TK, TV> d, TK key, Func<TK, TV> create)
+    public static TV GetValueOrCreate<TK, TV>(this IDictionary<TK, TV> d, TK key, Func<TK, TV> create)
     {
         TV v;
         if (d.TryGetValue(key, out v)) return v;
         return d[key] = create(key);
-    }
-
-    public static TV GetOrDefault<TK, TV>(this IDictionary<TK, TV> d, TK key, TV def = default)
-    {
-        TV v;
-        if (d.TryGetValue(key, out v)) return v;
-        return def;
     }
 
     public static int ElementwiseHashcode<T>(this IEnumerable<T> items)
