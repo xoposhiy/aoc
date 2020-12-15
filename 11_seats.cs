@@ -21,7 +21,7 @@ public class Day11
             map = Step2(map);
             var ans = map.SelectMany(c => c).Count(c => c == '#');
             //Console.WriteLine(string.Join("\n", map.Select(line => new string(line))));
-            Console.WriteLine(ans);
+            //Console.WriteLine(ans);
         }
         Console.WriteLine($"Part Two: {map.SelectMany(c => c).Count(c => c == '#')}");
     }

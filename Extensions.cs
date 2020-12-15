@@ -112,7 +112,7 @@ public static class Extensions
 
     public static bool InRange(this int v, int min, int max)
     {
-        return v >= min && v <= max;
+        return v >= min && v < max;
     }
 
     public static bool EqAt<T>(this T[][] matrix, Vec pos, T expectedValue) where T : IEquatable<T> 
@@ -122,7 +122,7 @@ public static class Extensions
 
     public static bool ContainsIndices<T>(this T[][] matrix, int i, int j)
     {
-        return i.InRange(0, matrix.Length - 1) && j.InRange(0, matrix[i].Length);
+        return i.InRange(0, matrix.Length) && j.InRange(0, matrix[i].Length);
     }
 
     public static int IndexOf<T>(this IReadOnlyList<T> readOnlyList, T value)

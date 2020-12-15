@@ -82,9 +82,10 @@ public class Day14
         {
             if (cmd[0] == "mask")
             {
-                mask0 = Convert.ToInt64(cmd[1].Replace('X', '1'), 2);
-                mask1 = Convert.ToInt64(cmd[1].Replace('X', '0'), 2);
-                maskX = Convert.ToInt64(cmd[1].Replace('1', '0').Replace('X', '1'), 2);
+                var mask = cmd[1];
+                mask0 = Convert.ToInt64(mask.Replace('X', '1'), 2);
+                mask1 = Convert.ToInt64(mask.Replace('X', '0'), 2);
+                maskX = Convert.ToInt64(mask.Replace('1', '0').Replace('X', '1'), 2);
             }
             else
             {
