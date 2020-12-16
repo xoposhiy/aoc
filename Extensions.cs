@@ -110,9 +110,9 @@ public static class Extensions
         return Enumerable.Repeat(item, count);
     }
 
-    public static bool InRange(this int v, int min, int max)
+    public static bool InRange(this int v, int minInclusive, int maxExclusive)
     {
-        return v >= min && v < max;
+        return v >= minInclusive && v < maxExclusive;
     }
 
     public static bool EqAt<T>(this T[][] matrix, Vec pos, T expectedValue) where T : IEquatable<T> 

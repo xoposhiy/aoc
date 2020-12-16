@@ -15,7 +15,7 @@ public class Day15
 
     private int GetNth(int[] input, int n, bool log = false)
     {
-        var d = new Dictionary<int, int>();
+        var d = new int[n];
         var say = 0;
         var lastSay = input[0];
         for (int i = 1; i < n; i++)
@@ -23,8 +23,8 @@ public class Day15
             if (i < input.Length)
                 say = input[i];
             else
-                say = i - 1 - d.GetValueOrDefault(lastSay, i - 1);
-            d[lastSay] = i - 1;
+                say = i - (d[lastSay] == 0 ? i : d[lastSay]);
+            d[lastSay] = i;
             lastSay = say;
             if (log) Console.WriteLine(i + "\t" + say);
         }

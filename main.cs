@@ -14,7 +14,8 @@ var sw = Stopwatch.StartNew();
 //new Day12().Solve();
 //new Day13().Solve();
 //new Day14().Solve();
-new Day15().Solve();
+//new Day15().Solve();
+new Day16().Solve();
 Console.WriteLine(sw.Elapsed);
 
 /*
