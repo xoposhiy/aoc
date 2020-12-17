@@ -20,13 +20,13 @@ public class Day17
         Console.WriteLine($"Part Two: {Simulate(state, GetNear4).Count}");
     }
 
-    private HashSet<V> Simulate(HashSet<V> state, Func<V, IEnumerable<V>> getNear)
+    private IReadOnlySet<V> Simulate(IReadOnlySet<V> state, Func<V, IEnumerable<V>> getNear)
     {
         return Range(0, 6)
             .Aggregate(state, (s, _) => Step(s, getNear));
     }
 
-    private static HashSet<V> Step(HashSet<V> activeCells, Func<V, IEnumerable<V>> getNear)
+    private static IReadOnlySet<V> Step(IReadOnlySet<V> activeCells, Func<V, IEnumerable<V>> getNear)
     {
         return activeCells
             .SelectMany(getNear)
