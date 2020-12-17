@@ -6,10 +6,8 @@ using static System.Linq.Enumerable;
 
 public class Day17
 {
-    public record V(int X, int Y, int Z = 0, int W = 0)
-    {
-
-    }
+    public record V(int X, int Y, int Z = 0, int W = 0);
+        
     public void Solve()
     {
         var map = File.ReadAllLines("17.txt");
