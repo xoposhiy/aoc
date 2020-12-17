@@ -51,3 +51,7 @@ Day 14. [ПЕРЕБОР ПОДМАСОК](https://e-maxx.ru/algo/all_submasks)!
 
 Day 15. Van Eck (Don't know) sequence. https://www.youtube.com/watch?v=etMJxB-igrc&ab_channel=Numberphile
 Странная задача. Простая, но супер сложно написать ее сразу без ошибки.
+
+Day 16. Визуализировать промежуточные данные в процессе решения - хорошо! Records в C# ничуть не снижают скорость, но помогают не запутываться.
+
+Day 17. Опять она! :\
