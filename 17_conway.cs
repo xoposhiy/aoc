@@ -16,7 +16,7 @@ public class Day17
         for (int x = 0; x < map[0].Length; x++)
             if (map[y][x] == '#')
                 state.Add(new V(x, y));
-        Console.WriteLine($"Part One: {Simulate(state, GetNear3).Count}");
+        //Console.WriteLine($"Part One: {Simulate(state, GetNear3).Count}");
         Console.WriteLine($"Part Two: {Simulate(state, GetNear4).Count}");
     }
 
@@ -27,20 +27,15 @@ public class Day17
         return state;
     }
 
-    private HashSet<V> Step(IReadOnlySet<V> state, Func<V, IEnumerable<V>> getNear)
+    private static HashSet<V> Step(HashSet<V> activeCells, Func<V, IEnumerable<V>> getNear)
     {
-        return 
-            state
+        var candidates = activeCells
             .SelectMany(getNear)
-            .Distinct()
-            .Where(p => WillBeAlive(p, state, getNear))
+            .ToLookup(p => p);
+        return candidates
+            .Where(g => g.Count() == 3 || g.Count() == 2 && activeCells.Contains(g.Key))
+            .Select(g => g.Key)
             .ToHashSet();
-    }
-
-    private bool WillBeAlive(V p, IReadOnlySet<V> state, Func<V, IEnumerable<V>> getNear)
-    {
-        var aliveCount = getNear(p).Count(state.Contains);
-        return aliveCount == 3 || aliveCount == 2 && state.Contains(p);
     }
 
     private static IEnumerable<V> GetNear3(V v)
