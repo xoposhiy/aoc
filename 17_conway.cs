@@ -16,24 +16,22 @@ public class Day17
         for (int x = 0; x < map[0].Length; x++)
             if (map[y][x] == '#')
                 state.Add(new V(x, y));
-        //Console.WriteLine($"Part One: {Simulate(state, GetNear3).Count}");
+        Console.WriteLine($"Part One: {Simulate(state, GetNear3).Count}");
         Console.WriteLine($"Part Two: {Simulate(state, GetNear4).Count}");
     }
 
     private HashSet<V> Simulate(HashSet<V> state, Func<V, IEnumerable<V>> getNear)
     {
-        for (int i = 0; i < 6; i++)
-            state = Step(state, getNear);
-        return state;
+        return Range(0, 6)
+            .Aggregate(state, (s, _) => Step(s, getNear));
     }
 
     private static HashSet<V> Step(HashSet<V> activeCells, Func<V, IEnumerable<V>> getNear)
     {
-        var candidates = activeCells
+        return activeCells
             .SelectMany(getNear)
-            .ToLookup(p => p);
-        return candidates
-            .Where(g => g.Count() == 3 || g.Count() == 2 && activeCells.Contains(g.Key))
+            .CountFrequency()
+            .Where(g => g.Value == 3 || g.Value == 2 && activeCells.Contains(g.Key))
             .Select(g => g.Key)
             .ToHashSet();
     }

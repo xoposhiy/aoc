@@ -32,6 +32,13 @@ public static class Extensions
             yield return (value, length);
     }
 
+    public static Dictionary<T, int> CountFrequency<T>(this IEnumerable<T> items)
+    {
+        var freq = new Dictionary<T, int>();
+        foreach (var item in items)
+            freq[item] = freq.GetValueOrDefault(item) + 1;
+        return freq;
+    }
     public static int IndexOf<T>(this IEnumerable<T> items, Func<T, bool> predicate)
     {
         var i = 0;
