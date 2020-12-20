@@ -39,6 +39,12 @@ public static class Extensions
             freq[item] = freq.GetValueOrDefault(item) + 1;
         return freq;
     }
+
+    public static Dictionary<K, int> CountFrequency<T, K>(this IEnumerable<T> items, Func<T, K> getKey)
+    {
+        return items.Select(getKey).CountFrequency();
+    }
+    
     public static int IndexOf<T>(this IEnumerable<T> items, Func<T, bool> predicate)
     {
         var i = 0;
@@ -171,6 +177,11 @@ public static class Extensions
     public static string StrJoin<T>(this IEnumerable<T> items, string delimiter)
     {
         return items == null ? "" : string.Join(delimiter, items);
+    }
+
+    public static string Reverse(this string s)
+    {
+        return new(s.ToCharArray().Reverse().ToArray());
     }
 
     public static string StrJoin<T>(this IEnumerable<T> items, string delimiter, Func<T, string> toString)
