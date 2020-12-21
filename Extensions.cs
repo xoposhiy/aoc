@@ -40,6 +40,22 @@ public static class Extensions
         return freq;
     }
 
+    public static HashSet<V> IntersectAll<T, V>(this IEnumerable<T> items, Func<T, IEnumerable<V>> get)
+    {
+        return items.Select(get).IntersectAll();
+    }
+    
+    public static HashSet<T> IntersectAll<T>(this IEnumerable<IEnumerable<T>> items)
+    {
+        HashSet<T> set = null;
+        foreach (var item in items)
+        {
+            if (set == null) set = item.ToHashSet();
+            else set.IntersectWith(item);
+        }
+        return set ?? new HashSet<T>();
+    }
+    
     public static Dictionary<K, int> CountFrequency<T, K>(this IEnumerable<T> items, Func<T, K> getKey)
     {
         return items.Select(getKey).CountFrequency();

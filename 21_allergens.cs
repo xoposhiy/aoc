@@ -11,36 +11,36 @@ public class Day21
     {
         var recipes = File.ReadAllLines("21.txt")
             .Select(line => line.Split(new[] { " (contains ", ")" }, StringSplitOptions.RemoveEmptyEntries))
-            .Select(line => (ingridients: line[0].Split(" ").ToList(), allergens: line[1].Split(", ")))
+            .Select(line => (ingridients: line[0].Split(" "), allergens: line[1].Split(", ")))
             .ToList();
 
-        var options = recipes
+        var allergenOptions = recipes
             .SelectMany(r => r.allergens.Select(allergen => (allergen, ingredients: r.ingridients)))
             .GroupBy(pair => pair.allergen)
             .Select(allergenGroup => (
                 allergen: allergenGroup.Key,
-                ingredients: allergenGroup.Select(t => t.ingredients).Aggregate((acc, next) => acc.Intersect(next).ToList())
+                ingredients: allergenGroup.IntersectAll(t => t.ingredients)
                 ))
             .ToList();
         
         var used = new HashSet<string>();
-        for (int i = 0; i < options.Count; i++)
+        foreach (var _ in allergenOptions)
         {
-            var option = options.First(o => o.ingredients.Count == 1 && used.Add(o.allergen));
-            var ing = option.ingredients.Single();
-            foreach (var other in options.Where(other => other != option))
-                other.ingredients.Remove(ing);
+            var option = allergenOptions
+                .First(o => o.ingredients.Count == 1 && used.Add(o.allergen));
+            foreach (var (_, ingredients) in allergenOptions.Where(other => other != option))
+                ingredients.Remove(option.ingredients.Single());
         }
 
-        Console.WriteLine(options.StrJoin("\n", pair => $"{pair.allergen}: {pair.ingredients.StrJoin(" ")}"));
+        Console.WriteLine(allergenOptions.StrJoin("\n", pair => $"{pair.allergen}: {pair.ingredients.StrJoin(" ")}"));
         Console.WriteLine();
 
-        var alergensByIng = options.ToDictionary(o => o.ingredients.Single(), o => o.allergen);
-        var ans1 = recipes.Sum(r => r.ingridients.Count(ing => !alergensByIng.ContainsKey(ing)));
+        var allergensByIng = allergenOptions.ToDictionary(o => o.ingredients.Single(), o => o.allergen);
+        var ans1 = recipes.Sum(r => r.ingridients.Count(ing => !allergensByIng.ContainsKey(ing)));
 
         Console.WriteLine($"Part One: {ans1}");
 
-        var ans2 = alergensByIng.OrderBy(kv => kv.Value).Select(kv => kv.Key).StrJoin(",");
+        var ans2 = allergensByIng.OrderBy(kv => kv.Value).Select(kv => kv.Key).StrJoin(",");
         Console.WriteLine($"Part Two: {ans2}");
     }
 }
