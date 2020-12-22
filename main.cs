@@ -15,15 +15,16 @@ var dayNumber = assembly.GetTypes()
     .Select(int.Parse)
     .OrderBy(n => n)
     .Last();
-dynamic res = Activator.CreateInstance(assembly.GetType("Day" + dayNumber));
+dynamic res = Activator.CreateInstance(assembly.GetType("Day" + dayNumber)!);
 Console.WriteLine("Day " + dayNumber);
 res!.Solve();
-Console.WriteLine(sw.Elapsed);
+Console.WriteLine();
+Console.WriteLine("Total time: " + sw.Elapsed);
 
-/*
-T[] ParseMany<T>(string input, string pattern, Func<string, string, T> parse){
-    var res = Regex.Matches(input, pattern);
-    return res.Select(m => parse(m.Groups[1].Value, m.Groups[2].Value)).ToArray();
-}
+///*
+//T[] ParseMany<T>(string input, string pattern, Func<string, string, T> parse){
+//    var res = Regex.Matches(input, pattern);
+//    return res.Select(m => parse(m.Groups[1].Value, m.Groups[2].Value)).ToArray();
+//}
 
-*/
+//*/

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using static System.Linq.Enumerable;
 using static System.Math;
 
@@ -22,7 +23,7 @@ public class Day21
                 ingredients: allergenGroup.IntersectAll(t => t.ingredients)
                 ))
             .ToList();
-        
+
         var used = new HashSet<string>();
         foreach (var _ in allergenOptions)
         {
