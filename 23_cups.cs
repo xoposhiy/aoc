@@ -30,7 +30,7 @@ public class Day23
         }
 
         public Node Next;
-        public int Value;
+        public readonly int Value;
 
         public IEnumerable<int> EnumerateAll()
         {
@@ -47,13 +47,14 @@ public class Day23
     public class Cups
     {
         private Node cups;
-        private readonly Dictionary<int, Node> index = new ();
+        private readonly Node[] index;
         public int Count { get; }
 
         public Cups(IReadOnlyCollection<int> startCups, int count)
         {
             Count = count;
             cups = null;
+            index = new Node[count+1];
             Node firstNode = null;
             var values = startCups.Concat(Range(startCups.Count + 1, count - startCups.Count)).Reverse();
             foreach (var value in values)
@@ -95,7 +96,9 @@ public class Day23
         {
             var pickedUp = circle.ExtractNext3();
             var destination = circle.FindNode(Prev(circle.CurrentValue));
-            while (pickedUp.EnumerateAll().Contains(destination.Value))
+            while (pickedUp.Value == destination.Value 
+                   || pickedUp.Next.Value == destination.Value 
+                   || pickedUp.Next.Next.Value == destination.Value)
                 destination = circle.FindNode(Prev(destination.Value));
             circle.InsertRange3(destination, pickedUp);
             circle.MoveNext();
