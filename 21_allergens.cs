@@ -8,6 +8,9 @@ using static System.Math;
 
 public class Day21
 {
+    
+    
+    
     public void Solve()
     {
         var recipes = File.ReadAllLines("21.txt")
@@ -15,28 +18,18 @@ public class Day21
             .Select(line => (ingridients: line[0].Split(" "), allergens: line[1].Split(", ")))
             .ToList();
 
-        var allergenOptions = recipes
+        var ingByAllergen = recipes
             .SelectMany(r => r.allergens.Select(allergen => (allergen, ingredients: r.ingridients)))
-            .GroupBy(pair => pair.allergen)
+            .GroupBy(pair => pair.allergen, pair => pair.ingredients)
             .Select(allergenGroup => (
                 allergen: allergenGroup.Key,
-                ingredients: allergenGroup.IntersectAll(t => t.ingredients)
-                ))
-            .ToList();
-
-        var used = new HashSet<string>();
-        foreach (var _ in allergenOptions)
-        {
-            var option = allergenOptions
-                .First(o => o.ingredients.Count == 1 && used.Add(o.allergen));
-            foreach (var (_, ingredients) in allergenOptions.Where(other => other != option))
-                ingredients.Remove(option.ingredients.Single());
-        }
-
-        Console.WriteLine(allergenOptions.StrJoin("\n", pair => $"{pair.allergen}: {pair.ingredients.StrJoin(" ")}"));
+                ingredients: allergenGroup.IntersectAll(t => t)
+            )).FindBijection();
+        
+        Console.WriteLine(ingByAllergen.StrJoin("\n", pair => $"{pair.Key}: {pair.Value}"));
         Console.WriteLine();
 
-        var allergensByIng = allergenOptions.ToDictionary(o => o.ingredients.Single(), o => o.allergen);
+        var allergensByIng = ingByAllergen.ToDictionary(o => o.Value, o => o.Key);
         var ans1 = recipes.Sum(r => r.ingridients.Count(ing => !allergensByIng.ContainsKey(ing)));
 
         Console.WriteLine($"Part One: {ans1}");

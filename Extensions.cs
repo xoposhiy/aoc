@@ -10,6 +10,20 @@ public static class Extensions
     public static IEnumerable<int> Indices<T>(this T[] map) =>
         Enumerable.Range(0, map.Length);
 
+    public static Dictionary<K, V> FindBijection<K, V>(this IEnumerable<(K, HashSet<V>)> groups)
+    {
+        var d = groups.ToList();
+        var used = new HashSet<K>();
+        foreach (var _ in d)
+        {
+            var option = d
+                .First(o => o.Item2.Count == 1 && used.Add(o.Item1));
+            foreach (var (_, values) in d.Where(other => !other.Item1.Equals(option.Item1)))
+                values.Remove(option.Item2.Single());
+        }
+        return d.ToDictionary(p => p.Item1, p => p.Item2.Single());
+    }
+
     public static IEnumerable<(T value, int length)> ConstantSegments<T>(this IEnumerable<T> items) where T : IEquatable<T>
     {
         var isFirst = true;

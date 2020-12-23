@@ -26,44 +26,23 @@ public class Day16
             .Select(line => new FieldMeaning(line.n, new ValueRange(line.rs[0], line.rs[1]), new ValueRange(line.rs[2], line.rs[3])))
             .ToList();
         
-        //Console.WriteLine(rules.StrJoin("\n"));
-
         var allTickets = input[2].Split("\r\n").Skip(1).Select(line => line.Split(",").Select(int.Parse).ToList()).ToList();
         var errorRate = allTickets.SelectMany(t => t).Where(v => !fields.Any(f => f.Match(v))).Sum();
         Console.WriteLine($"Part One: {errorRate}");
         
         var tickets = allTickets.Where(t => t.All(v => fields.Any(r => r.Match(v)))).ToList();
-        //Console.WriteLine(tickets.Count);
-
-        var possibleMeaningsPerField = Range(0, fields.Count)
+        
+        var meaningByField = Range(0, fields.Count)
             .Select(fi => 
-                Range(0, fields.Count)
+                (fi, Range(0, fields.Count)
                     .Where(ri => tickets.All(t => fields[ri].Match(t[fi])))
-                    .ToHashSet())
-            .ToList();
-
-        //Console.WriteLine(possibleMeaningsPerField.StrJoin("\n", v => v.StrJoin(",")));
-
-        var used = new HashSet<int>();
-        while(true)
-        {
-            var fieldWithDeterminedMeaning = possibleMeaningsPerField.FirstOrDefault(v => v.Count == 1 && !used.Contains(v.First()));
-            if (fieldWithDeterminedMeaning == null) break;
-            var x = fieldWithDeterminedMeaning.First();
-            used.Add(x);
-            foreach (var possibleMeanings in possibleMeaningsPerField)
-            {
-                if (possibleMeanings.Count > 1)
-                    possibleMeanings.Remove(x);
-            }
-        }
-
-        var fieldIndexes = possibleMeaningsPerField.Select(v => v.First()).ToList();
+                    .ToHashSet()))
+            .FindBijection();
 
         var myTicket = input[1].Split("\r\n")[1].Split(",").Select(int.Parse).ToList();
-        var ans = myTicket.Where((_, i) => fields[fieldIndexes[i]].Name.StartsWith("departure")).Aggregate(1L, (a, b) => a * b);
+        var ans = myTicket.Where((_, i) => fields[meaningByField[i]].Name.StartsWith("departure")).Aggregate(1L, (a, b) => a * b);
 
-        Console.WriteLine(fieldIndexes.StrJoin(","));
+        Console.WriteLine(meaningByField.OrderBy(p => p.Key).Select(p => p.Value).StrJoin(","));
         Console.WriteLine($"Part Two: {ans}");
     }
 }
