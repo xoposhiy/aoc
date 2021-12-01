@@ -94,8 +94,8 @@ sum(diff(input, lag=3) > 0)
 Python забавный парень, и то у него есть и это. Вот и сейчас, добавляешь в него numpy и он тоже математичным становится:
 
 ```
-print(np.sum(np.diff(input) > 0))
-print(np.sum(np.diff(input[:-2] + input[1:-1] + input[2:]) > 0))
+np.sum(np.diff(input) > 0)
+np.sum(np.diff(input[:-2] + input[1:-1] + input[2:]) > 0)
 ```
 
 Гм... А знаете у кого ещё есть слайсы и векторные операции? 
