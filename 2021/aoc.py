@@ -12,11 +12,11 @@ def read_lines():
 
 
 def read():
-    return map(parse_line, read_lines())
+    return list(map(parse_line, read_lines()))
 
 
 def parse_line(line):
-    return map(parse_value, line.split())
+    return list(map(parse_value, line.split()))
 
 
 def parse_value(value):
