@@ -54,8 +54,8 @@ END 	  {print h*a,h*d}
 
 ```python
 forward_sum = data[data[0] == 'forward'][1].astype(int).sum()
-up_sum = 	  data[data[0] == 'up'][1].astype(int).sum()
-down_sum = 	  data[data[0] == 'down'][1].astype(int).sum()
+up_sum      = data[data[0] == 'up'][1].astype(int).sum()
+down_sum    = data[data[0] == 'down'][1].astype(int).sum()
 
 forward_sum * (down_sum-up_sum)
 ```
