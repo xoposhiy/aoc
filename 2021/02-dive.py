@@ -3,9 +3,7 @@ import aoc
 x = 0
 y = 0
 aim = 0
-for line in aoc.read_lines():
-    cmd, arg = line.split()
-    n = int(arg)
+for cmd, n in aoc.read():
     if cmd == "forward":
         x += n
         y += aim * n
