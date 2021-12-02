@@ -79,7 +79,7 @@ int main() {
 }
 ```
 
-Ладно, к чёрту производительность, зря что ли Garbage collector придумали!
+Кого я обманываю, [всем пофиг на производительность](https://tonsky.me/blog/disenchantment/ru/), так что...
 
 Python 10:
 
