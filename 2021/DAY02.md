@@ -79,9 +79,7 @@ int main() {
 }
 ```
 
-Кого я обманываю, [всем пофиг на производительность](https://tonsky.me/blog/disenchantment/ru/), так что...
-
-Python 10:
+Кого я обманываю, [никого не волнует производительность](https://tonsky.me/blog/disenchantment/ru/), а вот паттерн матчинг, и возможность всунуть в решение reduce — бесценно! Python 10:
 
 ```python
 def move(submarine, command):
