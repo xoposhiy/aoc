@@ -34,7 +34,7 @@ for i in range(bits):
     gamma |= gamma_bit << i
 ```
 
-А ещё эпсилон можно вычислить за 4 элементарных операци1 из gamma, применив немного [битовых хаков](https://graphics.stanford.edu/~seander/bithacks.html).
+А ещё эпсилон можно вычислить из gamma всего за 4 элементарных операции, применив немного [битовых хаков](https://graphics.stanford.edu/~seander/bithacks.html).
 
 ```python
 epsilon = ~gamma & ((1 << bits_count) - 1)
