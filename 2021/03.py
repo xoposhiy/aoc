@@ -1,29 +1,29 @@
 import aoc
-from itertools import groupby
-
-inp = aoc.read_lines()
-gamma = epsilon = 0
-power2 = 1
-i = 0
-num_len = len(inp[0])
-for i in range(0, num_len):
-    bits = sorted([int(line[i]) for line in inp])
-    b = sorted([(k, len(list(v))) for k, v in groupby(bits)], key=lambda t: t[1])
-
-    gamma = gamma * 2 + b[-1][0]
-    epsilon = epsilon * 2 + b[0][0]
-print("Part One", gamma, epsilon, gamma*epsilon)
 
 
-def filter_report(lines, index):
+def most_common_bits(nums, bit_index):
+    digits = list(zip(*nums))[bit_index]
+    return ['0', '1'] if digits.count('0') > digits.count('1') else ['1', '0']
+
+
+def from_binary(bits):
+    return int(''.join(bits), 2)
+
+
+def filter_report(lines, most_common):
     for i in range(0, num_len):
-        bits = sorted([int(line[i]) for line in lines])
-        b = sorted([(k, len(list(v))) for k, v in groupby(bits)], key=lambda t: t[1])
-        lines = [line for line in lines if line[i] == str(b[index][0])]
+        bit_value = most_common_bits(lines, i)[0 if most_common else 1]
+        lines = [x for x in lines if x[i] == bit_value]
         if len(lines) == 1:
             return lines[0]
 
 
-ox = int(filter_report(inp, -1), 2)
-co2 = int(filter_report(inp, 0), 2)
-print("Part Two", ox, co2, ox*co2)
+inp = aoc.read_lines()
+num_len = len(inp[0])
+gamma = [most_common_bits(inp, i)[0] for i in range(num_len)]
+epsilon = [most_common_bits(inp, i)[1] for i in range(num_len)]
+print("Part One:", from_binary(gamma) * from_binary(epsilon))
+
+ox = int(filter_report(inp, most_common=True), 2)
+co2 = int(filter_report(inp, most_common=False), 2)
+print("Part Two:", ox * co2)
