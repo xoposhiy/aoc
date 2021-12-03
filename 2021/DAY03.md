@@ -34,10 +34,10 @@ for i in range(bits):
     gamma |= gamma_bit << i
 ```
 
-А ещё эпсилон можно вычислить из gamma всего за 4 элементарных операции, применив немного [битовых хаков](https://graphics.stanford.edu/~seander/bithacks.html).
+А ещё эпсилон можно вычислить из gamma всего за 3 элементарных операции, применив немного [битовых хаков](https://graphics.stanford.edu/~seander/bithacks.html).
 
 ```python
-epsilon = ~gamma & ((1 << bits_count) - 1)
+epsilon = gamma ^ ((1 << bits_count) - 1)
 ```
 
 С битами понятно, а как там поживают наши математизированные языки? Pandas:
