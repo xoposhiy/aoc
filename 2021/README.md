@@ -4,7 +4,7 @@
 
 ## [Day 2. Dive!](DAY02.md)
 
-## Day 3.
+## [Day 3. Binary Diagnostic](DAY03.md)
 
 ## Day 4.
 

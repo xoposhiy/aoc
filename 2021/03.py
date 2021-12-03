@@ -1,17 +1,15 @@
 import aoc
+import numpy as np
+import scipy.stats
 
 
 def most_common_bits(nums, bit_index):
-    digits = list(zip(*nums))[bit_index]
-    return ['0', '1'] if digits.count('0') > digits.count('1') else ['1', '0']
-
-
-def from_binary(bits):
-    return int(''.join(bits), 2)
+    column = list(zip(*nums))[bit_index]
+    return ['0', '1'] if column.count('0') > column.count('1') else ['1', '0']
 
 
 def filter_report(lines, most_common):
-    for i in range(0, num_len):
+    for i in range(0, bits_count):
         bit_value = most_common_bits(lines, i)[0 if most_common else 1]
         lines = [x for x in lines if x[i] == bit_value]
         if len(lines) == 1:
@@ -19,11 +17,22 @@ def filter_report(lines, most_common):
 
 
 inp = aoc.read_lines()
-num_len = len(inp[0])
-gamma = [most_common_bits(inp, i)[0] for i in range(num_len)]
-epsilon = [most_common_bits(inp, i)[1] for i in range(num_len)]
-print("Part One:", from_binary(gamma) * from_binary(epsilon))
+bits_count = len(inp[0])
+gamma = int(''.join([most_common_bits(inp, i)[0] for i in range(bits_count)]), 2)
+epsilon = ~gamma & ((1 << bits_count) - 1)
+print("Part One:", gamma * epsilon)
 
 ox = int(filter_report(inp, most_common=True), 2)
 co2 = int(filter_report(inp, most_common=False), 2)
 print("Part Two:", ox * co2)
+
+
+
+#print(inputs)
+
+# Task 1
+inputs = np.array([list(map(int, line)) for line in inp])
+gamma = scipy.stats.mode(inputs)[0][0]
+epsilon = 1 - gamma
+
+print(int(''.join(map(str, gamma)), 2) * int(''.join(map(str, epsilon)), 2))
