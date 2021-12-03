@@ -28,7 +28,14 @@ print("Part Two:", ox * co2)
 
 
 
-#print(inputs)
+gamma = 0
+data = [int(line, 2) for line in inp]
+
+for i in range(bits_count):
+    gamma_bit = 2*sum((x >> i) & 1 for x in data) >= len(data)
+    gamma |= gamma_bit << i
+
+print(gamma)
 
 # Task 1
 inputs = np.array([list(map(int, line)) for line in inp])

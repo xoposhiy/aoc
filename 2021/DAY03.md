@@ -43,8 +43,8 @@ epsilon = ~gamma & ((1 << bits_count) - 1)
 С битами понятно, а как там поживают наши математизированные языки? Pandas:
 
 ```python
-df = pd.DataFrame(input)
-gamma = int("".join([df[col].value_counts().index[0] for col in df.columns]), 2)
+df = pd.DataFrame(inputs)
+gamma = [df[col].value_counts().index[0] for col in df.columns]
 
 ```
 
