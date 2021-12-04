@@ -1,5 +1,14 @@
 import sys
 import os
+import re
+
+
+def flatten(list2):
+    return [x for sublist in list2 for x in sublist]
+
+
+def transpose(list2):
+    return list(zip(*list2))
 
 
 def last(iterable):
@@ -16,12 +25,12 @@ def read_lines():
         fh.close()
 
 
-def read():
-    return list(map(parse_line, read_lines()))
+def read(sep=None):
+    return [parse_line(line, sep) for line in read_lines()]
 
 
-def read_blocks():
-    lines = list(map(parse_line, read_lines()))
+def read_blocks(sep=None):
+    lines = read(sep)
     blocks = []
     block = []
     for line in lines:
@@ -34,8 +43,9 @@ def read_blocks():
     return blocks
 
 
-def parse_line(line):
-    return list(map(parse_value, line.split()))
+def parse_line(line, sep=None):
+    parts = line.split() if sep is None else re.split(sep, line)
+    return [parse_value(item) for item in parts if item != '']
 
 
 def parse_value(value):

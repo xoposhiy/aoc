@@ -2,15 +2,13 @@ from aoc import *
 
 
 def read_bingo():
-    draw_block, *cards = read_blocks()
-    draw = list(map(int, draw_block[0][0].split(",")))
-    return cards, draw
+    draw_block, *cards = read_blocks(sep="[, ]+")
+    return cards, draw_block[0]
 
 
 def win(card, x, y):
     size = len(card)
-    return sum(1 for xx in range(size) if card[y][xx] is None) == size \
-        or sum(1 for yy in range(size) if card[yy][x] is None) == size
+    return card[y].count(None) == size or transpose(card)[x].count(None) == size
 
 
 def winners(cards, draw):
@@ -23,7 +21,7 @@ def winners(cards, draw):
                         row[x] = None
                         if win(card, x, y) and card not in won_cards:
                             won_cards.append(card)
-                            yield n * sum(c for r in card for c in r if c is not None)
+                            yield n * sum(v for v in flatten(card) if v is not None)
 
 
 print("Part One", next(winners(*read_bingo())))
