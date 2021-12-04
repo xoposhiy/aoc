@@ -15,7 +15,7 @@ def win(card, x, y):
 
 def winners(cards, draw):
     won_cards = []
-    for i, n in enumerate(draw):
+    for n in draw:
         for card in cards:
             for y, row in enumerate(card):
                 for x, _ in enumerate(row):
