@@ -2,9 +2,8 @@ from aoc import *
 
 
 def read_bingo():
-    blocks = read_blocks()
-    draw = list(map(int, blocks[0][0][0].split(",")))
-    cards = blocks[1:]
+    draw_block, *cards = read_blocks()
+    draw = list(map(int, draw_block[0][0].split(",")))
     return cards, draw
 
 
