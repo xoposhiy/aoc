@@ -6,7 +6,7 @@
 
 ## [Day 3. Binary Diagnostic](DAY03.md)
 
-## [Day 4.](DAY04.md)
+## [Day 4. Bingo](DAY04.md)
 
 ## [Day 5.](DAY05.md)
 
