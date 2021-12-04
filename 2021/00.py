@@ -1,6 +1,7 @@
 import aoc
 
-ls = aoc.read_lines()
-print("Part One", ls)
+inp = aoc.read()
 
-print("Part Two", ls)
+print("Part One", inp)
+
+print("Part Two", inp)
