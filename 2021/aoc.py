@@ -2,6 +2,11 @@ import sys
 import os
 
 
+def last(iterable):
+    *_, last_item = iterable
+    return last_item
+
+
 def read_lines():
     fn = os.path.basename(sys.argv[0])[0:2]
     fh = open(fn + ".txt", "r")
@@ -13,6 +18,20 @@ def read_lines():
 
 def read():
     return list(map(parse_line, read_lines()))
+
+
+def read_blocks():
+    lines = list(map(parse_line, read_lines()))
+    blocks = []
+    block = []
+    for line in lines:
+        if len(line) == 0:
+            blocks.append(block)
+            block = []
+        else:
+            block.append(line)
+    blocks.append(block)
+    return blocks
 
 
 def parse_line(line):
