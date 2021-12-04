@@ -9,7 +9,7 @@ def read_bingo():
 
 
 def win(card, x, y):
-    size = 5
+    size = len(card)
     return sum(1 for xx in range(size) if card[y][xx] is None) == size \
         or sum(1 for yy in range(size) if card[yy][x] is None) == size
 
