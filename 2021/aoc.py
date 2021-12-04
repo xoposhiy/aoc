@@ -1,22 +1,29 @@
 import sys
 import os
 import re
+from typing import TypeVar
+from collections.abc import Iterator
+
+InputValue = int | float | str
+InputLine = list[InputValue]
+InputBlock = list[InputLine]
+T = TypeVar('T')
 
 
-def flatten(list2):
+def flatten(list2: list[list[T]]) -> list[T]:
     return [x for sublist in list2 for x in sublist]
 
 
-def transpose(list2):
-    return list(zip(*list2))
+def transpose(list2: list[list[T]]) -> list[list[T]]:
+    return list(map(list, zip(*list2)))
 
 
-def last(iterable):
-    *_, last_item = iterable
+def last(iterator: Iterator[T]) -> T:
+    *_, last_item = iterator
     return last_item
 
 
-def read_lines():
+def read_lines() -> list[str]:
     fn = os.path.basename(sys.argv[0])[0:2]
     fh = open(fn + ".txt", "r")
     try:
@@ -25,14 +32,18 @@ def read_lines():
         fh.close()
 
 
-def read(sep=None):
+def f() -> list[int]:
+    return [None, "sdf", 42]
+
+
+def read(sep: str = None) -> list[InputLine]:
     return [parse_line(line, sep) for line in read_lines()]
 
 
-def read_blocks(sep=None):
+def read_blocks(sep: str = None) -> list[InputBlock]:
     lines = read(sep)
-    blocks = []
-    block = []
+    blocks: list[InputBlock] = []
+    block: InputBlock = []
     for line in lines:
         if len(line) == 0:
             blocks.append(block)
@@ -43,12 +54,12 @@ def read_blocks(sep=None):
     return blocks
 
 
-def parse_line(line, sep=None):
-    parts = line.split() if sep is None else re.split(sep, line)
+def parse_line(line: str, sep: str = None) -> InputLine:
+    parts: list[str] = line.split() if sep is None else re.split(sep, line)
     return [parse_value(item) for item in parts if item != '']
 
 
-def parse_value(value):
+def parse_value(value: str) -> InputValue:
     i = try_parse_int(value)
     if i is not None:
         return i
@@ -58,19 +69,15 @@ def parse_value(value):
     return value
 
 
-def try_parse_int(value):
+def try_parse_int(value: str) -> int | None:
     try:
         return int(value)
     except ValueError:
         return None
 
 
-def try_parse_float(value):
+def try_parse_float(value: str) -> float | None:
     try:
         return float(value)
     except ValueError:
         return None
-
-
-def read_ints():
-    return list(map(int, read_lines()))

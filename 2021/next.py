@@ -5,4 +5,5 @@ from os import listdir
 nextDay = max([int(f[0:2]) for f in listdir(".") if f[0:2].isdigit() and f.endswith(".py")])+1
 copyfile("00.py", f"{nextDay:02d}.py")
 copyfile("00.txt", f"{nextDay:02d}.txt")
+copyfile("DAY0.md", f"DAY{nextDay:02d}.md")
 
