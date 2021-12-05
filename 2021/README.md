@@ -8,7 +8,7 @@
 
 ## [Day 4. Bingo](DAY04.md)
 
-## [Day 5.](DAY05.md)
+## [Day 5. Hydrothermal Vents](DAY05.md)
 
 ## [Day 6.](DAY06.md)
 

@@ -1,6 +1,11 @@
-import aoc
+import re
+from aoc import *
+import numpy as np
+from functools import *
+from itertools import *
 
-inp = aoc.read()
+
+inp = read()
 
 print("Part One", inp)
 

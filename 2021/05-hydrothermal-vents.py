@@ -1,12 +1,13 @@
 from aoc import *
+import numpy as np
 
 inp = read(sep=",| -> ")
 
 
 def points(line, ignore_diagonals=False):
     x0, y0, x1, y1 = line
-    dx = sign(x1 - x0)
-    dy = sign(y1 - y0)
+    dy = np.sign(y1 - y0)
+    dx = np.sign(x1 - x0)
     if ignore_diagonals and dx != 0 and dy != 0:
         return
     yield x0, y0
