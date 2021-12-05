@@ -1,3 +1,4 @@
+import itertools
 import sys
 import os
 import re
@@ -10,11 +11,21 @@ InputBlock = list[InputLine]
 T = TypeVar('T')
 
 
-def flatten(list2: list[list[T]]) -> list[T]:
+def freq(items):
+    return [(len(list(g[1])), g[0]) for g in itertools.groupby(sorted(items))]
+
+
+def sign(x):
+    if x == 0:
+        return 0
+    return -1 if x < 0 else 1
+
+
+def flatten(list2):
     return [x for sublist in list2 for x in sublist]
 
 
-def transpose(list2: list[list[T]]) -> list[list[T]]:
+def transpose(list2):
     return list(map(list, zip(*list2)))
 
 
