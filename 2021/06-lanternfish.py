@@ -28,8 +28,18 @@ def smart_solve(cooldowns, days):
     return sum(counts)
 
 
+def matrix_solve(cooldowns, days):
+    counts = [0] * 9
+    for c in cooldowns:
+        counts[c] += 1
+    matrix = np.roll(np.eye(9, dtype=object), 1, 1)
+    matrix[6][0] = 1
+    return np.dot(np.linalg.matrix_power(matrix, days), np.array(counts)).sum()
+
+
 inp = read(sep=",")[0]
 print("Part One", solve(inp, 80))
 print("Part Two", solve(inp, 256))
 print("Part Two (numpy)", numpy_solve(inp, 256))
 print("Part Two (smart)", smart_solve(inp, 256))
+print("Part Two (matrix)", matrix_solve(inp, 256))
