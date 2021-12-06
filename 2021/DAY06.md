@@ -148,6 +148,9 @@ def precalc_solve(cooldowns, days):
 
 ╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ
 
+![fish](https://preview.redd.it/r2x1n5n6zv381.gif?format=mp4&s=298d005dc316e460563e3bbf52c150d22a501eb2)
+
+
 ---
 
 Автор большинства сниппетов (или идей этих сниппетов) выше не я — они взяты [из реддита](https://www.reddit.com/r/adventofcode/) твиттера или нашего [телеграм чата](https://t.me/konturAoC2021_chat).
