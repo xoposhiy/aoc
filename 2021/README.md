@@ -10,7 +10,7 @@
 
 ## [Day 5. Hydrothermal Vents](DAY05.md)
 
-## [Day 6.](DAY06.md)
+## [Day 6. Lanternfish](DAY06.md)
 
 ## [Day 7.](DAY07.md)
 

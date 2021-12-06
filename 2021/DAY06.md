@@ -148,8 +148,7 @@ def precalc_solve(cooldowns, days):
 
 ╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ
 
-![fish](https://preview.redd.it/r2x1n5n6zv381.gif?format=mp4&s=298d005dc316e460563e3bbf52c150d22a501eb2)
-
+![fish](https://i.redd.it/9wf3quqxpv381.jpg)
 
 ---
 
