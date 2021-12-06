@@ -148,7 +148,6 @@ def precalc_solve(cooldowns, days):
 
 ╰( ͡° ͜ʖ ͡° )つ──☆*:・ﾟ
 
-<iframe id="reddit-embed" src="https://www.redditmedia.com/r/adventofcode/comments/ra2v62/2021_day_6_this_rate_of_breeding_feels_problematic/?ref_source=embed&amp;ref=share&amp;embed=true" sandbox="allow-scripts allow-same-origin allow-popups" style="border: none;" height="528" width="640" scrolling="no"></iframe>
 
 ---
 
