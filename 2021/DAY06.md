@@ -2,7 +2,21 @@
 
 ## Day 6. Lanternfish
 
+```ruby
+(0...days).each do |d|
+    newFish = groups.shift
+    groups[6] += newFish
+    groups.push(newFish)
+end
 
+groups.reduce(:+)
+```
+
+```c#
+for (var t = 0; t < days; t++) {
+    fishCountByInternalTimer[(t + 7) % 9] += fishCountByInternalTimer[t % 9];
+}
+```
 
 ---
 
