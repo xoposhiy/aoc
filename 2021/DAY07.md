@@ -2,12 +2,13 @@
 
 ## Day 7. Crabs! Median! Mean! 
 
-Если использовать сегодняшний вход как программу для intcode-машины, то, она выведет 
+Если использовать сегодняшний вход как программу для [intcode-машины](https://adventofcode.com/2019/day/5), то, она выведет: 
 
 > Ceci n'est pas une intcode program
 
-Все остальное смотрите в [моём видео-разборе](https://youtu.be/6zKZ_L5ynzk). 
+[Что бы это ни значило](https://en.wikipedia.org/wiki/The_Treachery_of_Images), на это сегодня всё.
 
+Остальное смотрите в [моём видео-разборе](https://youtu.be/6zKZ_L5ynzk). 
 
 
 ---
