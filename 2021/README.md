@@ -12,7 +12,7 @@
 
 ## [Day 6. Lanternfish](DAY06.md)
 
-## [Day 7.](DAY07.md)
+## [Day 7. Crabs! Median! Mean!](DAY07.md)
 
 ## [Day 8.](DAY08.md)
 
