@@ -2,6 +2,8 @@
 
 ## Day 8. 7-segment displays
 
+Условие: https://adventofcode.com/2021/day/8
+
 ### itertools.permutations
 
 ![permutations](day8.jpg)
