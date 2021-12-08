@@ -14,7 +14,7 @@
 
 ## [Day 7. Crabs! Median! Mean!](DAY07.md)
 
-## [Day 8.](DAY08.md)
+## [Day 8. 7-segments displays](DAY08.md)
 
 ## [Day 9.](DAY09.md)
 

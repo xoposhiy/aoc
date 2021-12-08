@@ -1,4 +1,5 @@
 import numpy as np
+from intcode import run
 
 inp = np.loadtxt('07.txt', delimiter=',', dtype=int)
 
@@ -29,3 +30,6 @@ for dx in [-1, 0, 1]:
     candidates.append((delta * (delta + 1) // 2).sum())
 
 print('Part Two', min(candidates))
+
+p, output = run(inp, [])
+print(output)
