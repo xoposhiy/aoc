@@ -18,9 +18,9 @@
 
 ## [Day 9. Smoke Basin](DAY09.md)
 
-## [Day 10.](DAY10.md)
+## [Day 10. Syntax Scoring](DAY10.md)
 
-## [Day 11.](DAY11.md)
+## [Day 11. Dumbo octopus](DAY11.md)
 
 ## [Day 12.](DAY12.md)
 
