@@ -16,7 +16,7 @@
 
 ## [Day 8. 7-segments displays](DAY08.md)
 
-## [Day 9.](DAY09.md)
+## [Day 9. Smoke Basin](DAY09.md)
 
 ## [Day 10.](DAY10.md)
 
