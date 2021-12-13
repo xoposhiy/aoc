@@ -1,28 +1,26 @@
 from aoc import *
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def fold(points, instr):
+    _, _, axis, v = instr
+    coord = 1 if axis == 'y' else 0
+    should_fold = points[:, coord] > v
+    points[should_fold, coord] = v - (points[should_fold, coord] - v)
+
 
 inp = read_blocks(sep="[, =]")
-
-
-def fold(p, instr):
-    _, _, axis, v = instr
-    if axis == 'y' and p[1] > v:
-        return p[0], v - (p[1] - v)
-    if axis == 'x' and p[0] > v:
-        return v - (p[0] - v), p[1]
-    return p[0], p[1]
-
-
-ps = inp[0]
+ps = np.array(inp[0])
 ins = inp[1]
 
-ps1 = set(fold(p, ins[0]) for p in ps)
-print("Part One", len(ps1))
+fold(ps, ins[0])
+print("Part One", len(np.unique(ps, axis=0)))
 
-for i in ins:
-    ps = {fold(p, i) for p in ps}
+for i in ins[1:]:
+    fold(ps, i)
 
-print("Part Two")
-for y in range(6):
-    for x in range(80):
-        print("##" if (x, y) in ps else "  ", end='')
-    print()
+f, ax = plt.subplots(figsize=(16, 2))
+ax.scatter(ps[:, 0], -ps[:, 1], s=300)
+ax.set_title("Part Two")
+plt.show()
