@@ -2,7 +2,7 @@ import aoc
 import more_itertools
 
 
-inp = aoc.read_ints()
+inp = aoc.read()[0]
 c1 = sum(a < b for a, b in zip(inp, inp[1:]))
 print("Part One", c1)
 

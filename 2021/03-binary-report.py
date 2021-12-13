@@ -26,13 +26,11 @@ ox = int(filter_report(inp, most_common=True), 2)
 co2 = int(filter_report(inp, most_common=False), 2)
 print("Part Two:", ox * co2)
 
-
-
 gamma = 0
 data = [int(line, 2) for line in inp]
 
 for i in range(bits_count):
-    gamma_bit = 2*sum((x >> i) & 1 for x in data) >= len(data)
+    gamma_bit = 2 * sum((x >> i) & 1 for x in data) >= len(data)
     gamma |= gamma_bit << i
 
 print(gamma)
