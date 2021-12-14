@@ -3,20 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def fold(points, instr):
+def fold(instr):
     axis, v = instr[2:]
     coord = 1 if axis == 'y' else 0
-    should_fold = points[:, coord] > v
-    points[should_fold, coord] = v - (points[should_fold, coord] - v)
+    should_fold = dots[:, coord] > v
+    dots[should_fold, coord] = v - (dots[should_fold, coord] - v)
 
 
 dots, instructions = read_blocks(sep="[, =]")
 dots = np.array(dots)
-fold(dots, instructions[0])
+fold(instructions[0])
 print("Part One", len(np.unique(dots, axis=0)))
 
-for i in instructions[1:]:
-    fold(dots, i)
+last(map(fold, instructions[1:]))
 
 plt.subplots(figsize=(16, 2))
 plt.title("Part Two")
