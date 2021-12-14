@@ -4,23 +4,21 @@ import matplotlib.pyplot as plt
 
 
 def fold(points, instr):
-    _, _, axis, v = instr
+    axis, v = instr[2:]
     coord = 1 if axis == 'y' else 0
     should_fold = points[:, coord] > v
     points[should_fold, coord] = v - (points[should_fold, coord] - v)
 
 
-inp = read_blocks(sep="[, =]")
-ps = np.array(inp[0])
-ins = inp[1]
+dots, instructions = read_blocks(sep="[, =]")
+dots = np.array(dots)
+fold(dots, instructions[0])
+print("Part One", len(np.unique(dots, axis=0)))
 
-fold(ps, ins[0])
-print("Part One", len(np.unique(ps, axis=0)))
+for i in instructions[1:]:
+    fold(dots, i)
 
-for i in ins[1:]:
-    fold(ps, i)
-
-f, ax = plt.subplots(figsize=(16, 2))
-ax.scatter(ps[:, 0], -ps[:, 1], s=300)
-ax.set_title("Part Two")
+plt.subplots(figsize=(16, 2))
+plt.title("Part Two")
+plt.scatter(dots[:, 0], -dots[:, 1], s=300)
 plt.show()
