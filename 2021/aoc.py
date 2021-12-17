@@ -4,6 +4,7 @@ import os
 import re
 from typing import TypeVar
 from collections.abc import Iterator
+import time
 
 InputValue = int | float | str
 InputLine = list[InputValue]
@@ -26,9 +27,16 @@ def neighbours8(x: int, y: int, matrix):
 
 
 def neighbours4(x: int, y: int, matrix):
+    w = len(matrix[0])
+    h = len(matrix)
     for xx, yy in [(x - 1, y), (x + 1, y), (x, y + 1), (x, y - 1)]:
-        if 0 <= yy < len(matrix) and 0 <= xx < len(matrix[0]):
+        if 0 <= yy < h and 0 <= xx < w:
             yield xx, yy, matrix[yy][xx]
+
+
+def measure(name, f):
+    start = time.time()
+    print(name, f(), time.time() - start)
 
 
 def maze_dfs(maze, passable, x, y, used=None):
@@ -40,10 +48,6 @@ def maze_dfs(maze, passable, x, y, used=None):
         if (xx, yy) not in used and passable(value):
             used.add((xx, yy))
             yield from maze_dfs(maze, passable, xx, yy, used)
-
-
-def freq(items):
-    return [(len(list(g[1])), g[0]) for g in itertools.groupby(sorted(items))]
 
 
 def sign(x):
@@ -74,7 +78,8 @@ def read_map() -> list[list[int]]:
 
 
 def read_mapdict() -> dict[(int, int), InputValue]:
-    return [() for c in cells(read_map())]
+    matrix = read_map()
+    return {(x, y): matrix[y][x] for x, y in cells(matrix)}
 
 
 def read_lines() -> list[str]:

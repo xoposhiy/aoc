@@ -21,3 +21,21 @@ plt.subplots(figsize=(16, 2))
 plt.title("Part Two")
 plt.scatter(dots[:, 0], -dots[:, 1], s=300)
 plt.show()
+
+
+def solve_matrix(instructions):
+    paper = np.zeros((2000, 2000))
+    paper[dots] = 1
+    for instr in instructions:
+        axis, v = instr[2:]
+        if axis == 'y':
+            paper[:, :v + 1] += np.flip(paper[:, v:], 1)
+        else:
+            paper[:v + 1, :] += np.flip(paper[v:, :], 0)
+    return paper
+
+
+dots, instructions = read_blocks(sep="[, =]")
+paper = solve_matrix(instructions)
+plt.imshow(paper)
+plt.show()

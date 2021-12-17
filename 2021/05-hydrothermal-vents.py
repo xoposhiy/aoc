@@ -1,5 +1,6 @@
 from aoc import *
 import numpy as np
+from collections import Counter
 
 inp = read(sep=",| -> ")
 
@@ -18,8 +19,8 @@ def points(line, ignore_diagonals=False):
 
 
 def cross_count(ignore_diagonals):
-    counts = freq(flatten(points(line, ignore_diagonals) for line in inp))
-    return sum(1 for group in counts if group[0] > 1)
+    counter = Counter(flatten(points(line, ignore_diagonals) for line in inp))
+    return sum(1 for group in counter.most_common() if group[1] > 1)
 
 
 print("Part One", cross_count(ignore_diagonals=True))
