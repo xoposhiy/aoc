@@ -4,18 +4,26 @@ from aoc import *
 import numpy as np
 from functools import *
 from itertools import *
+import colorama
 
 inp = [eval(line) for line in read_lines()]
+
+colorama.init(autoreset=True)
+
+def log(old, new):
+    pass
+    #print(new)
 
 
 def red(num):
     while True:
+        old = num
         exploded, num, _, _ = explode(num)
         if not exploded:
-            old = num
             num = split(num)
             if num == old:
                 break
+        log(old, num)
     return num
 
 
