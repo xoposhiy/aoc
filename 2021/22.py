@@ -68,6 +68,11 @@ class KdTree:
             res += self.right.count_pixels(right)
         return res
 
+    def count_nodes(self):
+        if self is None:
+            return 0
+        return 1 + (self.left.count_nodes() if self.left else 0) + (self.right.count_nodes() if self.right else 0)
+
 
     def divide(self, container):
         x0 = container[self.axis*2]
@@ -108,3 +113,4 @@ for turn, *cube in read(sep=" |x=|\\.\\.|,y=|,z="):
 
 print("Part One", cubes.count_pixels([-50, 50, -50, 50, -50, 50]))
 print("Part Two", cubes.count_pixels(universe))
+print("Nodes", cubes.count_nodes())
