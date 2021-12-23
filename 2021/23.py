@@ -1,5 +1,5 @@
-import copy
 import heapq as hq
+import time
 
 price = [1, 10, 100, 1000]
 
@@ -20,13 +20,10 @@ class State:
         return self.stacks == other.stacks and self.corridor == other.corridor
 
     def __hash__(self):
-        return hash((str(self.stacks), tuple(self.corridor)))
+        return hash(tuple(self.corridor))
 
     def __lt__(self, other):
-        d = self.spent - other.spent
-        if d != 0:
-            return d < 0
-        return str(self) < str(other)
+        return self.spent - other.spent < 0
 
     def __str__(self):
         res = f'{self.spent, self.full_cost}\n'
@@ -70,17 +67,19 @@ class State:
                 yield 'in', corridor_pos, v
 
     def can_move_in_room(self, corridor_x, stack_index):
+        stack_is_ready = all(v == stack_index for v in self.stacks[stack_index])
+        if not stack_is_ready:
+            return False
         tx = stack_index * 2 + 2
         way_is_free = all(pos == corridor_x or self.corridor[pos] is None for pos in
                           range(min(tx, corridor_x), max(tx, corridor_x) + 1))
-        stack_is_ready = all(v == stack_index for v in self.stacks[stack_index])
-        return way_is_free and stack_is_ready
+        return way_is_free
 
     def apply_move(self, move):
-        stacks = copy.deepcopy(self.stacks)
         corridor = self.corridor.copy()
         match move:
             case 'out', stack_index, pos:
+                stacks = [stack.copy() if i == stack_index else stack for i, stack in enumerate(self.stacks)]
                 stack = stacks[stack_index]
                 v = stack.pop()
                 corridor[pos] = v
@@ -88,6 +87,7 @@ class State:
                 full_cost = (self.stack_size - len(stack) + abs(stack_index * 2 + 2 - pos)) * price[v]
                 return State(stacks, corridor, self.spent + cost, self.full_cost + full_cost, self, self.stack_size)
             case 'in', pos, stack_index:
+                stacks = [stack.copy() if i == stack_index else stack for i, stack in enumerate(self.stacks)]
                 stack = stacks[stack_index]
                 v = corridor[pos]
                 corridor[pos] = None
@@ -108,13 +108,13 @@ def solve_dijkstra(state):
     while q:
         state = hq.heappop(q)
         if state.done():
-            return state
+            return state, visited
         for move in state.moves():
             next_state = state.apply_move(move)
             if next_state not in visited:
                 hq.heappush(q, next_state)
                 visited.add(next_state)
-    return state
+    return state, visited
 
 
 def print_history(state):
@@ -125,11 +125,14 @@ def print_history(state):
 
 s = State([[1, 3], [0, 0], [3, 1], [2, 2]], [None] * 11, 0, 0, None, 2)
 print(s)
-s = solve_dijkstra(s)
-print("Part one", s)
+s, vs = solve_dijkstra(s)
+print("Part one", s, len(vs))
 
+start = time.time()
 s = State([[1, 3, 3, 3], [0, 1, 2, 0], [3, 0, 1, 1], [2, 2, 0, 2]], [None] * 11, 0, 0, None, 4)
+# s = State([[3, 3, 3, 3], [2, 1, 2, 0], [1, 0, 1, 2], [1, 2, 0, 0]], [None] * 11, 0, 0, None, 4)
 print(s)
-s = solve_dijkstra(s)
-print("Part two", s)
+s, vs = solve_dijkstra(s)
+print("Part two", s, len(vs))
+print(time.time() - start)
 # print_history(s)
