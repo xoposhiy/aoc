@@ -85,7 +85,7 @@ public static class ParsingExtensions
             }
             return res.ToArray();
         }
-        var ctor = type.GetConstructors(BindingFlags.Public).MaxBy(c => c.GetParameters().Length)!;
+        var ctor = type.GetConstructors().MaxBy(c => c.GetParameters().Length)!;
         var args = new List<object>();
         foreach (var param in ctor.GetParameters())
         {
