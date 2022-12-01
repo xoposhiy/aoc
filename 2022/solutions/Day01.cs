@@ -9,6 +9,6 @@ public class Day01
     {
         var sums = lines.ParseBlocks<int>().Select(b => b.Sum()).ToList();
         Console.WriteLine($"Part 1: {sums.Max()}");
-        Console.WriteLine($"Part 2: {sums.OrderByDescending(s => s).Take(3).Sum()}");
+        Console.WriteLine($"Part 2: {sums.OrderDescending().Take(3).Sum()}");
     }
 }
