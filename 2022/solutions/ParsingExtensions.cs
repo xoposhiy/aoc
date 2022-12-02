@@ -74,16 +74,17 @@ public static class ParsingExtensions
         if (type == typeof(string))
             return ps[startIndex++];
         if (type == typeof(char))
-            return ps[startIndex++];
+            return ps[startIndex++][0];
         if (type.IsArray)
         {
-            var res = new List<object>();
+            Array array = Array.CreateInstance(type.GetElementType()!, ps.Length - startIndex);
+            int index = 0;
             while (startIndex < ps.Length)
             {
-                res.Add(Parse(type.GetElementType()!, ps, ref startIndex));
-                startIndex++;
+                var value = Parse(type.GetElementType()!, ps, ref startIndex);
+                array.SetValue(value, index++);
             }
-            return res.ToArray();
+            return array;
         }
         var ctor = type.GetConstructors().MaxBy(c => c.GetParameters().Length)!;
         var args = new List<object>();
