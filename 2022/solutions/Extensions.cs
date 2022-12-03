@@ -26,6 +26,25 @@ public static class Extensions
         return d.ToDictionary(p => p.Item1, p => p.Item2.Single());
     }
 
+    public static IEnumerable<IList<T>> GroupBy<T>(this IEnumerable<T> items, int groupSize) where T : notnull
+    {
+        var index = 0;
+        var group = new List<T>();
+        foreach (var item in items)
+        {
+            group.Add(item);
+            index++;
+            if (index == groupSize)
+            {
+                yield return group;
+                group = new List<T>();
+                index = 0;
+            }
+        }
+        if (group.Count > 0)
+            yield return group;
+    }
+
     public static IEnumerable<(T value, int length)> ConstantSegments<T>(this IEnumerable<T> items) where T : IEquatable<T>
     {
         var isFirst = true;

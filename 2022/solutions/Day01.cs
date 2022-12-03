@@ -7,8 +7,21 @@ public class Day01
 {
     public void Solve(string[] lines)
     {
+        /*
+         * Даны группы чисел разделенные пустой строкой.
+         */
         var sums = lines.ParseBlocks<int>().Select(b => b.Sum()).ToList();
+
+        /*
+         * Part 1
+         * Найти группу с максимальной суммой чисел и вывести эту сумму.
+         */
         Console.WriteLine($"Part 1: {sums.Max()}");
+
+        /*
+         * Part 1
+         * Найти три группы с максимальной суммой чисел и вывести эту сумму чисел из этих трех групп.
+         */
         Console.WriteLine($"Part 2: {sums.OrderDescending().Take(3).Sum()}");
     }
 }
