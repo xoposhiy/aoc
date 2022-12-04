@@ -10,7 +10,7 @@ public static class ParsingExtensions
 {
     public static T[] ParseLines<T>(this string[] lines, char[]? fieldSeparators = null)
     {
-        var seps = fieldSeparators ?? new[] { ' ', '\t', ',' };
+        var seps = fieldSeparators ?? new[] { ' ', '\t', ',', '-' };
         return lines
             .Select(line => line.Split(seps, StringSplitOptions.RemoveEmptyEntries))
             .Select(Parse<T>)

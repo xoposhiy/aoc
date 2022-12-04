@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 
@@ -11,7 +10,13 @@ if (!File.Exists(inputFilename))
 {
     var inputUrl = $"https://adventofcode.com/2022/day/{dayNumber}/input";
     var httpMessageHandler = new HttpClientHandler();
-    httpMessageHandler.CookieContainer.Add(new Cookie("session", "53616c7465645f5f6a64de7a67f227afddfaa9ef2a5b6aec33555ede3f1f2c098ce5faf071395d1f4c141b2751f8fee74712ee06c0240cea706dd02465087dbb", "/", "adventofcode.com"));
+    var aocSession = Environment.GetEnvironmentVariable("AOC");
+    if (string.IsNullOrEmpty(aocSession))
+    {
+        Console.WriteLine("AOC environment variable not set");
+        return;
+    }
+    httpMessageHandler.CookieContainer.Add(new Cookie("session", aocSession, "/", "adventofcode.com"));
     var inp = await new HttpClient(httpMessageHandler).GetByteArrayAsync(inputUrl);
     File.WriteAllBytes(inputFilename, inp);
     Console.WriteLine($"Input downloaded to {Path.GetFullPath(inputFilename)}");
