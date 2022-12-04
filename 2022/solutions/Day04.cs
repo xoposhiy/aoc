@@ -10,14 +10,14 @@ public class Day04
         // input:
         // 35-73,35-82
         // ...
-        var pairs = lines.ParseLines<int[]>();
+        var pairs = lines.ParseLines<Seg[]>();
 
         //In how many assignment pairs does one range fully contain the other?
-        var containCount = pairs.Count(p => p[0] <= p[2] && p[1] >= p[3] || p[2] <= p[0] && p[3] >= p[1]);
+        var containCount = pairs.Count(r => r[0].Contains(r[1]) || r[1].Contains(r[0]));
         Console.WriteLine($"Part1: {containCount}");
 
         //In how many assignment pairs do the ranges overlap?
-        var overlapCount = pairs.Count(x => Math.Max(x[0], x[2]) <= Math.Min(x[1], x[3]));
+        var overlapCount = pairs.Count(r => r[0].Overlaps(r[1]));
         Console.WriteLine($"Part2: {overlapCount}");
     }
 }
