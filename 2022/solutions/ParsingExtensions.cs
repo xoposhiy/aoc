@@ -6,27 +6,86 @@ using System.Reflection;
 
 // ReSharper disable once CheckNamespace
 
+public class SeparatorAttribute : Attribute
+{
+    public string SeparatorChars { get; }
+
+    public SeparatorAttribute(string separatorChars)
+    {
+        SeparatorChars = separatorChars;
+    }
+}
 public static class ParsingExtensions
 {
-    public static T[] ParseLines<T>(this string[] lines, char[]? fieldSeparators = null)
+    public static void InvokeWithParsedArgs(this MethodInfo method, object instance, string inputFilename)
     {
-        var seps = fieldSeparators ?? new[] { ' ', '\t', ',', '-' };
+        var parameters = method.GetParameters();
+        if (parameters.Length == 1)
+        {
+            var param = parameters[0];
+            var paramType = param.ParameterType;
+            if (paramType == typeof(string))
+                method.Invoke(instance, new object []{File.ReadAllText(inputFilename)});
+            else if (paramType == typeof(string[]))
+                method.Invoke(instance, new object[] { File.ReadAllLines(inputFilename) });
+            else
+            {
+                var lines = File.ReadAllLines(inputFilename);
+                var paramLines = CreateParamLines(param, lines);
+                method.Invoke(instance, new[] { paramLines });
+            }
+        }
+        else
+        {
+            var lines = File.ReadAllLines(inputFilename);
+            var args = lines.SplitBy(string.IsNullOrEmpty)
+                .Select((block, i) => CreateParamLines(parameters[i], block))
+                .ToArray();
+            method.Invoke(instance, args);
+        }
+    }
+
+    private static object CreateParamLines(ParameterInfo param, string[] lines)
+    {
+        var paramType = param.ParameterType;
+        var fieldSeparators = param.GetCustomAttribute<SeparatorAttribute>()?.SeparatorChars ?? ",; \t";
+        if (paramType.IsArray)
+        {
+            //TODO attribute with field separators
+            var lineType = paramType.GetElementType()!;
+            var paramLines = Array.CreateInstance(lineType, lines.Length);
+            var parsedLines = lines.Select(line => line.ParseLine(lineType, fieldSeparators.ToCharArray()));
+            var i = 0;
+            foreach (var parsedLine in parsedLines)
+                paramLines.SetValue(parsedLine, i++);
+            return paramLines;
+        }
+        else
+        {
+            throw new NotSupportedException(paramType.ToString());
+        }
+    }
+
+
+    public static T[] ParseLines<T>(this string[] lines, params char[] fieldSeparators)
+    {
+        var seps = fieldSeparators.Any() ? fieldSeparators : new[] { ' ', '\t', ',' };
         return lines
             .Select(line => line.Split(seps, StringSplitOptions.RemoveEmptyEntries))
             .Select(Parse<T>)
             .ToArray();
     }
 
-    public static IList<IList<TLine>> ParseBlocks<TLine>(this string[] lines, char[]? fieldSeparators = null)
+    public static TLine[][] ParseBlocks<TLine>(this string[] lines, char[]? fieldSeparators = null)
     {
         var seps = fieldSeparators ?? new[] { ' ', '\t', ',' };
         var block = new List<TLine>();
-        var blocks = new List<IList<TLine>>();
+        var blocks = new List<TLine[]>();
         foreach (var line in lines)
         {
             if (string.IsNullOrWhiteSpace(line))
             {
-                blocks.Add(block);
+                blocks.Add(block.ToArray());
                 block = new List<TLine>();
             }
             else
@@ -35,8 +94,8 @@ public static class ParsingExtensions
             }
         }
         if (block.Any())
-            blocks.Add(block);
-        return blocks;
+            blocks.Add(block.ToArray());
+        return blocks.ToArray();
     }
 
     public static IList<T> ParseBlockOf<T>(this string[] lines, ref int startLine, params char[] fieldSeparators)
@@ -55,13 +114,29 @@ public static class ParsingExtensions
         return Parse<T>(ps);
     }
 
+    public static object ParseLine(this string line, Type resultType, params char[] fieldSeparators)
+    {
+        if (resultType == typeof(string))
+            return line;
+        var ps = line.Split(fieldSeparators, StringSplitOptions.RemoveEmptyEntries);
+        return Parse(ps, resultType);
+    }
+
     public static T Parse<T>(this string[] ps)
     {
         int start = 0;
-        return (T)Parse(typeof(T), ps, ref start);
+        return (T)Parse(ps, typeof(T), ref start);
     }
 
-    private static object Parse(Type type, string[] ps, ref int startIndex)
+    private static object Parse(this string[] ps, Type type)
+    {
+        int start = 0;
+        return Parse(ps, type, ref start);
+
+    }
+
+
+    private static object Parse(this string[] ps, Type type, ref int startIndex)
     {
         if (startIndex >= ps.Length)
             throw new FormatException($"Line {ps.StrJoin(" ")} has not enough parts :(");
@@ -81,7 +156,7 @@ public static class ParsingExtensions
             int index = 0;
             while (startIndex < ps.Length)
             {
-                var value = Parse(type.GetElementType()!, ps, ref startIndex);
+                var value = Parse(ps, type.GetElementType()!, ref startIndex);
                 array.SetValue(value, index++);
             }
             return array;
@@ -90,7 +165,7 @@ public static class ParsingExtensions
         var args = new List<object>();
         foreach (var param in ctor.GetParameters())
         {
-            args.Add(Parse(param.ParameterType, ps, ref startIndex));
+            args.Add(Parse(ps, param.ParameterType, ref startIndex));
         }
         return ctor.Invoke(args.ToArray());
     }

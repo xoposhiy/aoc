@@ -1,6 +1,9 @@
 ﻿public class Day02
 {
-    public void Solve(string[] lines)
+    // input:
+    // A X
+    // ...
+    public void Solve((char opp, char me)[] moves)
     {
         int Score(int opp, int me) =>
             me + ((me - opp + 4) % 3) * 3 + 1;
@@ -8,7 +11,7 @@
         int Score2(int opp, int outcome) =>
             Score(opp, (opp + outcome - 1 + 3) % 3);
 
-        var rounds = lines.ParseLines<char[]>().Select(p => (p[0]-'A', p[1]-'X')).ToList();
+        var rounds = moves.Select(p => (p.opp-'A', p.me-'X')).ToList();
         
         /*
          * Part 1

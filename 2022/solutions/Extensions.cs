@@ -45,6 +45,30 @@ public static class Extensions
             yield return group;
     }
 
+    public static IEnumerable<T[]> SplitBy<T>(this IEnumerable<T> items, Predicate<T> isSeparator)
+        where T : IEquatable<T>
+    {
+        var group = new List<T>();
+        foreach (var item in items)
+        {
+            if (isSeparator(item))
+            {
+                if (group.Count > 0)
+                {
+                    yield return group.ToArray();
+                    group.Clear();
+                }
+            }
+            else
+            {
+                group.Add(item);
+            }
+        }
+        if (group.Count > 0)
+            yield return group.ToArray();
+
+    }
+
     public static IEnumerable<(T value, int length)> ConstantSegments<T>(this IEnumerable<T> items) where T : IEquatable<T>
     {
         var isFirst = true;
@@ -225,7 +249,7 @@ public static class Extensions
         return int.Parse(s);
     }
 
-    public static string StrJoin<T>(this IEnumerable<T>? items, string delimiter)
+    public static string StrJoin<T>(this IEnumerable<T>? items, string delimiter = "")
     {
         return items == null ? "" : string.Join(delimiter, items);
     }

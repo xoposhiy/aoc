@@ -5,6 +5,9 @@ using System.Linq;
 
 public class Day03
 {
+    // input:
+    // ZNNvFWHqLNPZHHqPTHHnTGBhrrpjvmwfMmpfpjBjwpmw
+    // ...
     public void Solve(string[] lines)
     {
         int Priority(char c) =>
