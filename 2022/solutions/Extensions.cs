@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -6,6 +7,33 @@ using System.Linq;
 
 public static class Extensions
 {
+    public static string Format(this object? value)
+    {
+        if (value is null) return "";
+        if (value is string s) return s;
+        if (value is IEnumerable e)
+        {
+            
+            var parts = e.Cast<object>().Select(Format).ToList();
+            if (parts.All(p => p.Length < 10))
+                return "[" + string.Join(",", parts) + "]";
+            return "[\n" + string.Join(",\n", parts) + "\n]";
+
+        }
+        return value.ToString() ?? "";
+    }
+
+    public static void Out(this object? value, string prefix = "")
+    {
+        Console.Write(prefix);
+        Console.WriteLine(value.Format());
+    }
+
+    public static bool IsCompactType(this Type type)
+    {
+        return type.IsPrimitive || type.IsEnum || type == typeof(decimal);
+    }
+
     public static string[] FlipX(this string[] lines) => lines.Select(line => line.Reverse().StrJoin()).ToArray();
     public static IEnumerable<T> Reversed<T>(this IEnumerable<T> source) => source.Reverse();
     public static string[] Columns(this IEnumerable<string> rows)
@@ -25,8 +53,8 @@ public static class Extensions
         return columns.ToArray();
     }
 
-    public static IEnumerable<Vec> Indices<T>(this T[][] map) =>
-        Vec.Rect(map[0].Length, map.Length);
+    public static IEnumerable<V> Indices<T>(this T[][] map) =>
+        V.Rect(map[0].Length, map.Length);
 
     public static IEnumerable<int> Indices<T>(this T[] map) =>
         Enumerable.Range(0, map.Length);
@@ -76,7 +104,7 @@ public static class Extensions
     }
 
     public static IEnumerable<T[]> SplitBy<T>(this IEnumerable<T> items, Predicate<T> isSeparator)
-        where T : IEquatable<T>
+        where T : IEquatable<T>?
     {
         var group = new List<T>();
         foreach (var item in items)
@@ -233,10 +261,10 @@ public static class Extensions
         return v >= minInclusive && v < maxExclusive;
     }
 
-    public static bool EqAt<T>(this T[][] matrix, Vec pos, T expectedValue) where T : IEquatable<T> 
+    public static bool EqAt<T>(this T[][] matrix, V pos, T expectedValue) where T : IEquatable<T> 
         => matrix.ContainsIndices(pos) && matrix[pos.Y][pos.X].Equals(expectedValue);
     
-    public static bool ContainsIndices<T>(this T[][] matrix, Vec v) => matrix.ContainsIndices(v.Y, v.X);
+    public static bool ContainsIndices<T>(this T[][] matrix, V v) => matrix.ContainsIndices(v.Y, v.X);
 
     public static bool ContainsIndices<T>(this T[][] matrix, int i, int j)
     {

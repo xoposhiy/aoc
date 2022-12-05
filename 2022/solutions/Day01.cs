@@ -5,12 +5,12 @@ using System.Linq;
 
 public class Day01
 {
-    public void Solve(string[] lines)
+    /*
+     * Даны группы чисел разделенные пустой строкой.
+     */
+    public void Solve(int[][] blocks)
     {
-        /*
-         * Даны группы чисел разделенные пустой строкой.
-         */
-        var sums = lines.ParseBlocks<int>().Select(b => b.Sum()).ToList();
+        var sums = blocks.Select(b => b.Sum()).ToList();
 
         /*
          * Part 1

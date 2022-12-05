@@ -8,14 +8,14 @@ public class Day04
     // input:
     // 35-73,35-82
     // ...
-    public void Solve([Separator("-,")](Seg a, Seg b)[] pairs)
+    public void Solve((R, R)[] pairs)
     {
         //In how many assignment pairs does one range fully contain the other?
-        var containCount = pairs.Count(r => r.a.Contains(r.b) || r.b.Contains(r.a));
+        var containCount = pairs.Count(pair => pair.Item1.Contains(pair.Item2) || pair.Item2.Contains(pair.Item1));
         Console.WriteLine($"Part1: {containCount}");
 
         //In how many assignment pairs do the ranges overlap?
-        var overlapCount = pairs.Count(r => r.a.Overlaps(r.b));
+        var overlapCount = pairs.Count(pair => pair.Item1.Overlaps(pair.Item2));
         Console.WriteLine($"Part2: {overlapCount}");
     }
 }

@@ -1,9 +1,10 @@
 ﻿public class Day02
 {
+    // Даны раунды в камень ножницы бумага − что показал мой оппонент и ещё что-то второе.
     // input:
     // A X
     // ...
-    public void Solve((char opp, char me)[] moves)
+    public void Solve((char opponent, char something)[] moves)
     {
         int Score(int opp, int me) =>
             me + ((me - opp + 4) % 3) * 3 + 1;
@@ -11,7 +12,7 @@
         int Score2(int opp, int outcome) =>
             Score(opp, (opp + outcome - 1 + 3) % 3);
 
-        var rounds = moves.Select(p => (p.opp-'A', p.me-'X')).ToList();
+        var rounds = moves.Select(p => (p.opponent-'A', p.something-'X')).ToList();
         
         /*
          * Part 1

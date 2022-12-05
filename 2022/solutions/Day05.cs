@@ -1,31 +1,34 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-// ReSharper disable once ClassNeverInstantiated.Global
-
-
-public record Move(string MoveToken, int Count, string FromToken, int From, string ToToken, int To);
+﻿public record Move(string MoveToken, int Count, string FromToken, int From, string ToToken, int To);
 
 public class Day05
 {
+    // Дан список стеков и список перемещений элементов из одного стека в другой.
     public void Solve(string[] stacksView, Move[] moves)
     {
         var stacks = ParseStacks(stacksView);
-        Console.WriteLine("Stacks: ");
-        Console.WriteLine(stacks.StrJoin("\n", s => s.StrJoin(", ")));
+        //stacks.Out();
 
-        ExecutePart1(moves, stacks);
-        Console.WriteLine($"Part1: {stacks.Select(s => s.Peek()).StrJoin()}");
-        
+        // Найти верхушки стеков после применения всех перемещений, если объекты перемещаются по одному
+        ExecuteWithPart1Rules(moves, stacks);
+        stacks.Select(s => s.Peek()).StrJoin().Out("Part1: ");
+
+        // Найти верхушки стеков после применения всех перемещений, если объекты перемещаются целой стопкой
         stacks = ParseStacks(stacksView);
-        ExecutePart2(moves, stacks);
-        Console.WriteLine($"Part2: {stacks.Select(s => s.Peek()).StrJoin()}");
+        ExecuteWithPart2Rules(moves, stacks);
+        stacks.Select(s => s.Peek()).StrJoin().Out("Part2: ");
     }
 
-    private static void ExecutePart1(Move[] moves, Stack<char>[] stacks)
+    private static Stack<char>[] ParseStacks(string[] stacksView)
+    {
+        return stacksView
+            .Reversed()
+            .Columns()
+            .EveryNth(4, startFrom:1)
+            .Select(c => new Stack<char>(c.Skip(1).Except(" ")))
+            .ToArray();
+    }
+
+    private static void ExecuteWithPart1Rules(Move[] moves, Stack<char>[] stacks)
     {
         foreach (var move in moves)
         {
@@ -37,7 +40,7 @@ public class Day05
         }
     }
 
-    private static void ExecutePart2(Move[] moves, Stack<char>[] stacks)
+    private static void ExecuteWithPart2Rules(Move[] moves, Stack<char>[] stacks)
     {
         foreach (var move in moves)
         {
@@ -47,15 +50,5 @@ public class Day05
             for (int i = 0; i < move.Count; i++)
                 stacks[move.To - 1].Push(tmp.Pop());
         }
-    }
-
-    private static Stack<char>[] ParseStacks(string[] stacksView)
-    {
-        return stacksView
-            .Reversed()
-            .Columns()
-            .EveryNth(4, startFrom:1)
-            .Select(c => new Stack<char>(c.Skip(1).Except(" ")))
-            .ToArray();
     }
 }
