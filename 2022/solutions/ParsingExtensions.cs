@@ -51,7 +51,6 @@ public static class ParsingExtensions
         var fieldSeparators = param.GetCustomAttribute<SeparatorAttribute>()?.SeparatorChars ?? ",; \t";
         if (paramType.IsArray)
         {
-            //TODO attribute with field separators
             var lineType = paramType.GetElementType()!;
             var paramLines = Array.CreateInstance(lineType, lines.Length);
             var parsedLines = lines.Select(line => line.ParseLine(lineType, fieldSeparators.ToCharArray()));
@@ -134,7 +133,6 @@ public static class ParsingExtensions
         return Parse(ps, type, ref start);
 
     }
-
 
     private static object Parse(this string[] ps, Type type, ref int startIndex)
     {
