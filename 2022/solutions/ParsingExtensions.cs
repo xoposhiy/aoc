@@ -133,7 +133,7 @@ public static class ParsingExtensions
         return Parse(ps, type, ref start);
 
     }
-
+    
     private static object Parse(this string[] ps, Type type, ref int startIndex)
     {
         if (startIndex >= ps.Length)

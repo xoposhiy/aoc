@@ -1,16 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 // ReSharper disable once CheckNamespace
 
 public static class Extensions
 {
+    public static string[] FlipX(this string[] lines) => lines.Select(line => line.Reverse().StrJoin()).ToArray();
+    public static IEnumerable<T> Reversed<T>(this IEnumerable<T> source) => source.Reverse();
+    public static string[] Columns(this IEnumerable<string> rows)
+    {
+        var columns = new List<string>();
+        var iRow = 0;
+        foreach (var row in rows)
+        {
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (columns.Count <= i)
+                    columns.Add(new string(' ', iRow));
+                columns[i] += row[i];
+            }
+            iRow++;
+        }
+        return columns.ToArray();
+    }
 
     public static IEnumerable<Vec> Indices<T>(this T[][] map) =>
         Vec.Rect(map[0].Length, map.Length);
 
     public static IEnumerable<int> Indices<T>(this T[] map) =>
         Enumerable.Range(0, map.Length);
+
+    public static IEnumerable<T> EveryNth<T>(this IEnumerable<T> items, int n, int startFrom = 0)
+    {
+        var i = 0;
+        foreach (var item in items)
+        {
+            if (i % n == startFrom)
+                yield return item;
+            i++;
+        }
+    }
 
     public static Dictionary<TKey, TValue> FindBijection<TKey, TValue>(this IEnumerable<(TKey, HashSet<TValue>)> groups) where TKey : notnull
     {
