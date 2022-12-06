@@ -5,23 +5,24 @@ public class Day05
     // Дан список стеков и список перемещений элементов из одного стека в другой.
     public void Solve(string[] stacksView, Move[] moves)
     {
-        Stack<char>[] ParseStacks() =>
+        var initialStacks = 
             stacksView
                 .Reversed()
+                .Skip(1)
                 .Columns()
                 .EveryNth(4, startFrom: 1)
-                .Select(c => new Stack<char>(c.Skip(1).Except(" ")))
+                .Select(col => col.Trim())
                 .ToArray();
 
-        var stacks = ParseStacks();
-        //stacks.Out();
+        var stacks = initialStacks.Select(c => c.ToStack()).ToArray();
+        stacks.Out();
 
         // Найти верхушки стеков после применения всех перемещений, если объекты перемещаются по одному
         ExecuteWithPart1Rules(moves, stacks);
         stacks.Select(s => s.Peek()).StrJoin().Out("Part1: ");
 
         // Найти верхушки стеков после применения всех перемещений, если объекты перемещаются целой стопкой
-        stacks = ParseStacks();
+        stacks = initialStacks.Select(c => c.ToStack()).ToArray();
         ExecuteWithPart2Rules(moves, stacks);
         stacks.Select(s => s.Peek()).StrJoin().Out("Part2: ");
     }

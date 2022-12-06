@@ -28,6 +28,14 @@ public static class Extensions
         Console.Write(prefix);
         Console.WriteLine(value.Format());
     }
+    public static Stack<T> ToStack<T>(this IEnumerable<T> source)
+    {
+        return new Stack<T>(source);
+    }
+    public static Queue<T> ToQueue<T>(this IEnumerable<T> source)
+    {
+        return new Queue<T>(source);
+    }
 
     public static bool IsCompactType(this Type type)
     {
