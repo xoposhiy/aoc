@@ -32,8 +32,46 @@ public class Day07
         public long TotalSize { get; set; }
         public IEnumerable<Dir> AllDirs => Dirs.Values.SelectMany(d => d.AllDirs).Prepend(this);
     }
-    
+
     public void Solve(string[][] lines)
+    {
+        IEnumerable<long> DirSizes()
+        {
+            var stack = new Stack<long>();
+            foreach (var line in lines)
+            {
+                if (line[0] == "$" && line[1] == "cd")
+                {
+                    if (line[2] == "..")
+                    {
+                        yield return stack.Peek();
+                        stack.Push(stack.Pop() + stack.Pop());
+                    }
+                    else
+                        stack.Push(0);
+                }
+                else if (long.TryParse(line[0], out var fileSize))
+                    stack.Push(stack.Pop() + fileSize);
+            }
+
+            while (stack.Count > 1)
+            {
+                stack.Push(stack.Pop() + stack.Pop());
+                yield return stack.Peek();
+            }
+        }
+
+        var dirSizes = DirSizes().ToList();
+        dirSizes.Where(size => size <= 100000).Sum()
+            .Out("Part1: ");
+
+        var currentFreeSpace = 70000000 - 30000000;
+        var needFreeSpace = dirSizes.Last() - currentFreeSpace;
+        dirSizes.Where(size => size >= needFreeSpace).Min()
+            .Out("Part2: ");
+    }
+
+    public void Solve2(string[][] lines)
     {
         var root = new Dir();
         var stack = new Stack<Dir>();
