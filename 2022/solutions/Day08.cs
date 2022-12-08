@@ -1,9 +1,7 @@
 ﻿public class Day08
 {
-    public void Solve(string[] lines)
+    public void Solve(char[][] map)
     {
-        var map = lines.Select(line => line.ToCharArray().Select(c => (int)c).ToArray()).ToArray();
-
         var w = map[0].Length;
         var h = map.Length;
 
@@ -27,7 +25,7 @@
 
 
         var maxScore = map.Indices().Max(
-            tree => V.Directions4.Aggregate(1L, (score, d) => score * SightDist(tree, d)));
+            tree => V.Directions4.Product(dir => SightDist(tree, dir)));
         Console.WriteLine($"Part2: {maxScore}");
     }
 }

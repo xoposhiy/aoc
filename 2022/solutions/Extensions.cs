@@ -44,6 +44,9 @@ public static class Extensions
 
     public static string[] FlipX(this string[] lines) => lines.Select(line => line.Reverse().StrJoin()).ToArray();
     public static IEnumerable<T> Reversed<T>(this IEnumerable<T> source) => source.Reverse();
+    public static IEnumerable<T> Column<T>(this T[][] map, int x) =>
+        Enumerable.Range(0, map.Length).Select(y => map[y][x]);
+    public static IEnumerable<T> Row<T>(this T[][] map, int y) => map[y];
     public static string[] Columns(this IEnumerable<string> rows)
     {
         var columns = new List<string>();
@@ -224,6 +227,9 @@ public static class Extensions
         return best;
     }
 
+    public static long Product(this IEnumerable<int> items) => items.Aggregate(1L, (a, b) => a * b);
+    public static long Product(this IEnumerable<long> items) => items.Aggregate(1L, (a, b) => a * b);
+    public static long Product<T>(this IEnumerable<T> items, Func<T, long> map) => items.Aggregate(1L, (a, b) => a * map(b));
     public static T? MaxBy<T>(this IEnumerable<T> items, Func<T, IComparable> getKey)
     {
         var best = default(T);
