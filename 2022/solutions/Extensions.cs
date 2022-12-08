@@ -62,7 +62,7 @@ public static class Extensions
     }
 
     public static IEnumerable<V> Indices<T>(this T[][] map) =>
-        V.Rect(map[0].Length, map.Length);
+        V.AllInRange(map[0].Length, map.Length);
 
     public static IEnumerable<int> Indices<T>(this T[] map) =>
         Enumerable.Range(0, map.Length);

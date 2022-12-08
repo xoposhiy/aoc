@@ -1,102 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-public class Day08
+﻿public class Day08
 {
     public void Solve(string[] lines)
     {
         var map = lines.Select(line => line.ToCharArray().Select(c => (int)c).ToArray()).ToArray();
-        var visible = new HashSet<V>();
-        for (int y = 0; y < map.Length; y++)
-        {
-            var h = 0;
-            for (int x = 0; x < map[0].Length; x++)
-            {
-                if (map[y][x] > h)
-                {
-                    visible.Add(new V(x, y));
-                    h = map[y][x];
-                }
-            }
-            h = 0;
 
-            for (int x = map[0].Length - 1; x >= 0; x--)
-            {
-                if (map[y][x] > h)
-                {
-                    visible.Add(new V(x, y));
-                    h = map[y][x];
-                }
-            }
-        }
-        for (int x = 0; x < map[0].Length; x++)
-        {
-            var h = 0;
-            for (int y = 0; y < map.Length; y++)
-            {
-                if (map[y][x] > h)
-                {
-                    visible.Add(new V(x, y));
-                    h = map[y][x];
-                }
-            }
+        var w = map[0].Length;
+        var h = map.Length;
 
-            h = 0;
-            for (int y = map.Length - 1; y >= 0; y--)
-            {
-                if (map[y][x] > h)
-                {
-                    visible.Add(new V(x, y));
-                    h = map[y][x];
-                }
-            }
+        V EndOfSight(V from, V dir)
+        {
+            var p = from + dir;
+            while (p.InRange(w, h) && map[p.Y][p.X] < map[from.Y][from.X])
+                p += dir;
+            return p;
         }
 
-        var p1 = visible.Count();
-
-        long maxScore = 0;
-        for (int y = 0; y < map.Length; y++)
+        int SightDist(V from, V dir)
         {
-            for (int x = 0; x < map[0].Length; x++)
-            {
-                var score = CalcScore(map, x, y);
-                if (score > maxScore)
-                    maxScore = score;
-            }
+            var p = EndOfSight(from, dir);
+            return p.InRange(w, h) ? p.MDistTo(from) : p.MDistTo(from) - 1;
         }
 
+        var visibleCount = map.Indices().Count(
+            tree => V.Directions4.Any(d => !EndOfSight(tree, d).InRange(w, h)));
+        Console.WriteLine($"Part1: {visibleCount}");
 
 
-        var p2 = maxScore;
-        Console.WriteLine($"Part1: {p1}");
-        Console.WriteLine($"Part2: {p2}");
-    }
-
-    private long CalcScore(int[][] map, int x, int y)
-    {
-        long score = 1;
-        var h = map[y][x];
-        foreach (var d in new[] { new V(0, -1), new V(0, 1), new V(-1, 0), new V(1, 0) })
-        {
-            var p = new V(x, y) + d;
-            var dist = 0;
-            while (p.X < map[0].Length && p.Y < map.Length && p.X >= 0 && p.Y >= 0)
-            {
-                dist++;
-                if (map[p.Y][p.X] >= h) break;
-                p += d;
-            }
-
-            score *= dist;
-
-            //Console.WriteLine(d + " " + dist);
-        }
-        Console.WriteLine(x + " " + y + " " + score);
-
-        return score;
-
-
+        var maxScore = map.Indices().Max(
+            tree => V.Directions4.Aggregate(1L, (score, d) => score * SightDist(tree, d)));
+        Console.WriteLine($"Part2: {maxScore}");
     }
 }
