@@ -26,13 +26,6 @@ dir e
 */
 public class Day07
 {
-    record Dir
-    {
-        public readonly Dictionary<string, Dir> Dirs = new();
-        public long TotalSize { get; set; }
-        public IEnumerable<Dir> AllDirs => Dirs.Values.SelectMany(d => d.AllDirs).Prepend(this);
-    }
-
     public void Solve(string[][] lines)
     {
         IEnumerable<long> DirSizes()
@@ -71,7 +64,14 @@ public class Day07
             .Out("Part2: ");
     }
 
-    public void Solve2(string[][] lines)
+    record Dir
+    {
+        public readonly Dictionary<string, Dir> Dirs = new();
+        public long TotalSize { get; set; }
+        public IEnumerable<Dir> AllDirs => Dirs.Values.SelectMany(d => d.AllDirs).Prepend(this);
+    }
+
+    public void SolveWithTree(string[][] lines)
     {
         var root = new Dir();
         var stack = new Stack<Dir>();
