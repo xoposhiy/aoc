@@ -228,7 +228,7 @@ public class V : IEquatable<V>
         yield return new V(X, Y + 1);
     }
 
-    public V Sign()
+    public V Signum()
     {
         if (X == 0 && Y == 0)
             return this;

@@ -1,12 +1,30 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections;
+
 // ReSharper disable once CheckNamespace
 
 public static class Extensions
 {
+
+    public static string[] CreateMap(this IList<V> points, string point = "#", string empty = ".")
+    {
+        var minX = points.Min(p => p.X);
+        var minY = points.Min(p => p.Y);
+        var maxX = points.Max(p => p.X);
+        var maxY = points.Max(p => p.Y);
+        var map = new string[maxY - minY + 1];
+        for (int y = 0; y < map.Length; y++)
+        {
+            var line = new List<string>();
+            for (int x = 0; x < maxX - minX + 1; x++)
+            {
+                var p = new V(x + minX, y + minY);
+                line.Add(points.Contains(p) ? point : empty);
+            }
+            map[y] = string.Join("", line);
+        }
+        return map;
+    }
+
     public static string Format(this object? value)
     {
         if (value is null) return "";
@@ -35,11 +53,6 @@ public static class Extensions
     public static Queue<T> ToQueue<T>(this IEnumerable<T> source)
     {
         return new Queue<T>(source);
-    }
-
-    public static bool IsCompactType(this Type type)
-    {
-        return type.IsPrimitive || type.IsEnum || type == typeof(decimal);
     }
 
     public static string[] FlipX(this string[] lines) => lines.Select(line => line.Reverse().StrJoin()).ToArray();
@@ -299,8 +312,7 @@ public static class Extensions
 
     public static TV GetValueOrCreate<TK, TV>(this IDictionary<TK, TV> d, TK key, Func<TK, TV> create)
     {
-        TV v;
-        if (d.TryGetValue(key, out v)) return v;
+        if (d.TryGetValue(key, out var v)) return v;
         return d[key] = create(key);
     }
 
