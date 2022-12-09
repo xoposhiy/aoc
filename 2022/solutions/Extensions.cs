@@ -274,7 +274,6 @@ public static class Extensions
     {
         return v >= minInclusive && v < maxExclusive;
     }
-
     public static bool EqAt<T>(this T[][] matrix, V pos, T expectedValue) where T : IEquatable<T> 
         => matrix.ContainsIndices(pos) && matrix[pos.Y][pos.X].Equals(expectedValue);
     

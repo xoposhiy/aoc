@@ -10,6 +10,21 @@ public class V : IEquatable<V>
     public readonly int X;
     public readonly int Y;
 
+    public static V FromCompass(string compass) =>
+        compass switch
+        {
+            "W" or "L" => new V(-1, 0),
+            "E" or "R" => new V(1, 0),
+            "N" or "U" => new V(0, -1),
+            "S" or "D" => new V(0, 1),
+            "NW" => new V(-1, -1),
+            "SE" => new V(-1, 1),
+            "NE" => new V(1, -1),
+            "SW" => new V(1, 1),
+            _ => throw new Exception(compass)
+        };
+    
+
     public static V Parse(string s)
     {
         var parts = s.Split(' ');
@@ -174,7 +189,13 @@ public class V : IEquatable<V>
     {
         return X >= 0 && X < width && Y >= 0 && Y < height;
     }
-    
+
+    public bool InRange<T>(T[][] map)
+    {
+        return InRange(map[0].Length, map.Length);
+    }
+
+
     public IEnumerable<V> Area9()
     {
         for (int dx = -1; dx <= 1; dx++)
@@ -205,5 +226,12 @@ public class V : IEquatable<V>
         yield return new V(X + 1, Y);
         yield return new V(X, Y - 1);
         yield return new V(X, Y + 1);
+    }
+
+    public V Sign()
+    {
+        if (X == 0 && Y == 0)
+            return this;
+        return new V(Math.Sign(X), Math.Sign(Y));
     }
 }
