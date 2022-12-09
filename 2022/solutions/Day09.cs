@@ -29,7 +29,7 @@
         Console.WriteLine($"Part1: {part1.Count}");
 
         var part2 = GetTailPositions(10).Distinct().ToList();
-        part2.CreateMap("##", "  ").Out();
+        //part2.CreateMap("##", "  ").Out();
         Console.WriteLine($"Part2: {part2.Count}");
     }
 }
