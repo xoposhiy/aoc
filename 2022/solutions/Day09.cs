@@ -3,6 +3,7 @@
     // Даны список движений головы верёвки (aka змейки).
     // Следующий узел всегда касается предыдущего узла (в том числе по диагонали и в том числе может занимать ту же клетку)
     // При движении предыдущего узла, следующий подползает за ним.
+    // Найти количество клеток, в которых побывал хвост веревки длины 2 (Part1) и длины 10 (Part2).
     public void Solve((string Dir, int Len)[] moves)
     {
         IEnumerable<V> GetTailPositions(int size)
@@ -23,16 +24,12 @@
             }
         }
 
-        // Part 1
-        // Количество клеток, в которых побывал хвост веревки длины 2.
         var part1 = GetTailPositions(2).Distinct().ToList();
         //part1.CreateMap("##", "  ").Out();
         Console.WriteLine($"Part1: {part1.Count}");
 
-        // Part 2
-        // Количество клеток, в которых побывал хвост веревки длины 10.
         var part2 = GetTailPositions(10).Distinct().ToList();
-        //part2.CreateMap("##", "  ").Out();
+        part2.CreateMap("##", "  ").Out();
         Console.WriteLine($"Part2: {part2.Count}");
     }
 }

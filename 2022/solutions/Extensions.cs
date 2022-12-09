@@ -11,6 +11,7 @@ public static class Extensions
         var minY = points.Min(p => p.Y);
         var maxX = points.Max(p => p.X);
         var maxY = points.Max(p => p.Y);
+        var pointsSet = points.ToHashSet();
         var map = new string[maxY - minY + 1];
         for (int y = 0; y < map.Length; y++)
         {
@@ -18,7 +19,7 @@ public static class Extensions
             for (int x = 0; x < maxX - minX + 1; x++)
             {
                 var p = new V(x + minX, y + minY);
-                line.Add(points.Contains(p) ? point : empty);
+                line.Add(pointsSet.Contains(p) ? point : empty);
             }
             map[y] = string.Join("", line);
         }
