@@ -5,13 +5,13 @@
 public static class Extensions
 {
 
-    public static string[] CreateMap(this IList<V> points, string point = "#", string empty = ".")
+    public static string[] CreateMap(this IEnumerable<V> points, string point = "#", string empty = ".")
     {
-        var minX = points.Min(p => p.X);
-        var minY = points.Min(p => p.Y);
-        var maxX = points.Max(p => p.X);
-        var maxY = points.Max(p => p.Y);
         var pointsSet = points.ToHashSet();
+        var minX = pointsSet.Min(p => p.X);
+        var minY = pointsSet.Min(p => p.Y);
+        var maxX = pointsSet.Max(p => p.X);
+        var maxY = pointsSet.Max(p => p.Y);
         var map = new string[maxY - minY + 1];
         for (int y = 0; y < map.Length; y++)
         {
@@ -42,10 +42,11 @@ public static class Extensions
         return value.ToString() ?? "";
     }
 
-    public static void Out(this object? value, string prefix = "")
+    public static T Out<T>(this T value, string prefix = "")
     {
         Console.Write(prefix);
         Console.WriteLine(value.Format());
+        return value;
     }
     public static Stack<T> ToStack<T>(this IEnumerable<T> source)
     {
@@ -84,12 +85,12 @@ public static class Extensions
     public static IEnumerable<int> Indices<T>(this T[] map) =>
         Enumerable.Range(0, map.Length);
 
-    public static IEnumerable<T> EveryNth<T>(this IEnumerable<T> items, int n, int startFrom = 0)
+    public static IEnumerable<T> EveryNth<T>(this IEnumerable<T> items, int n, int startFromIndex = 0)
     {
         var i = 0;
         foreach (var item in items)
         {
-            if (i % n == startFrom)
+            if (i % n == startFromIndex)
                 yield return item;
             i++;
         }

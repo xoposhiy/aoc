@@ -10,7 +10,7 @@ public class Day05
                 .Reversed()
                 .Skip(1)
                 .Columns()
-                .EveryNth(4, startFrom: 1)
+                .EveryNth(4, startFromIndex: 1)
                 .Select(col => col.Trim())
                 .ToArray();
 

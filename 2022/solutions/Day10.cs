@@ -1,54 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-public class Day10
+﻿public class Day10
 {
-    public void Solve(string[][] lines)
+    // Дана программа из команд двух видов:
+    //  noop - ничего не делает и длится 1 цикл
+    //  addx v - длится 2 цикла, после чего прибавляет v к регистру x
+
+    // Part1:
+    // Посчитать сумму произведений номера цикла на значение регистра x в конце этого цикла
+    // для циклов с номерами 20, 60, 100, 140, 180 и 220, считая, что циклы нумеруются с 1.
+
+    // Part2:
+    // Программа пробегает по экрану 40x6 пикселей, слева на право, сверху вниз, по одному пикселю за цикл.
+    // Очередной пиксель нужно рисовать, если значение регистра x
+    // отличается от X-позиции текущего пикселя не более чем на 1.
+    
+    public void Solve(string[][] commands)
     {
-        var data = lines;
-        var ip = 0;
-        var cycle = 0;
-        var x = 1;
-        var sum = 0L;
-        var pixels = new List<V>();
-
-        void EndCycle()
+        IEnumerable<(int x, int cycle)> Run()
         {
-            cycle++;
-            if ((cycle - 20) % 40 == 0)
+            var cycle = 0;
+            var x = 1;
+            foreach (var command in commands)
             {
-                var v = cycle * x;
-                sum += v;
-            }
-
-            var col = (cycle-1)%40;
-            var row = (cycle-1) / 40;
-            var isLit = Math.Abs(col - x) <= 1;
-
-            if (isLit)
-            {
-                pixels.Add(new V(col, row));
+                yield return (x, cycle++);
+                if (command is ["addx", var v])
+                {
+                    yield return (x, cycle++);
+                    x += v.ToInt();
+                }
             }
         }
-        while (ip < data.Length)
-        {
-            EndCycle();
 
-            var cmd = data[ip];
-             if (cmd[0] == "addx") 
-            {
-                EndCycle();
-                x += cmd[1].ToInt();
-            }
-            ip++;
-        }
-
+        var sum = Run().EveryNth(40, startFromIndex:19)
+            .Sum(turn => turn.x * (turn.cycle+1));
         Console.WriteLine($"Part1: {sum}");
 
-        //pixels.Out();
+        
+        var screen = Run()
+            .GroupBy(40)
+            .Select(g => g.StrJoin("", turn => Math.Abs(turn.x - turn.cycle%40) <= 1 ? "##" : "  "))
+            .ToArray();
+        Console.WriteLine($"Part2:\n{screen.StrJoin("\n")}");
+        Console.WriteLine();
 
-        Console.WriteLine($"Part2:\n{pixels.CreateMap().StrJoin("\n")}");
+        Run()
+            .Where(turn => Math.Abs(turn.x - turn.cycle % 40) <= 1)
+            .Select(turn => new V(turn.cycle % 40, turn.cycle / 40))
+            .CreateMap("##", "  ")
+            .Out();
+
     }
 }
