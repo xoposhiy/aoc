@@ -1,52 +1,63 @@
 ﻿public class Day10
 {
     // Дана программа из команд двух видов:
-    //  noop - ничего не делает и длится 1 цикл
-    //  addx v - длится 2 цикла, после чего прибавляет v к регистру x
+    // * noop - ничего не делает и длится 1 цикл;
+    // * addx V - длится 2 цикла, после чего прибавляет V к регистру X.
 
-    // Part1:
-    // Посчитать сумму произведений номера цикла на значение регистра x в конце этого цикла
-    // для циклов с номерами 20, 60, 100, 140, 180 и 220, считая, что циклы нумеруются с 1.
-
-    // Part2:
-    // Программа пробегает по экрану 40x6 пикселей, слева на право, сверху вниз, по одному пикселю за цикл.
-    // Очередной пиксель нужно рисовать, если значение регистра x
-    // отличается от X-позиции текущего пикселя не более чем на 1.
+    // Part 1:
+    // Для циклов с номерами 20, 60, 100, 140, 180 и 220 (нумерация с 1)
+    // нужно посчитать сумму произведений номера цикла на X в конце этого цикла.
     
-    public void Solve(string[][] commands)
+    public record Command(string OpName, int Arg = 0);
+    public record VmState(int X, int Cycle);
+
+    IEnumerable<VmState> RunVm(Command[] commands)
     {
-        IEnumerable<(int x, int cycle)> Run()
-        {
-            var cycle = 0;
-            var x = 1;
-            foreach (var command in commands)
+        var cycle = 0;
+        var x = 1;
+        foreach (var command in commands)
+            switch (command)
             {
-                yield return (x, cycle++);
-                if (command is ["addx", var v])
-                {
-                    yield return (x, cycle++);
-                    x += v.ToInt();
-                }
+                case ("addx", var v):
+                    yield return new(x, cycle++);
+                    yield return new(x, cycle++);
+                    x += v;
+                    break;
+                case ("noop", _):
+                    yield return new(x, cycle++);
+                    break;
+                default:
+                    throw new NotSupportedException(command.ToString());
             }
-        }
-
-        var sum = Run().EveryNth(40, startFromIndex:19)
-            .Sum(turn => turn.x * (turn.cycle+1));
-        Console.WriteLine($"Part1: {sum}");
-
+    }
+    
+    public void Solve(Command[] commands)
+    {
+        RunVm(commands)
+            .EveryNth(40, startFromIndex:19)
+            .Sum(vm => vm.X * (vm.Cycle+1))
+            .Out("Part 1: ");
         
-        var screen = Run()
+        // Part 2:
+        // Программу управляет лучом, который пробегает по экрану 40x6 пикселей,
+        // построчно слева на право, сверху вниз, по одному пикселю за цикл.
+        // Очередной пиксель нужно рисовать, только если значение регистра x на этом цикле
+        // отличается от X-позиции луча не более чем на 1.
+        
+
+        RunVm(commands)
             .GroupBy(40)
-            .Select(g => g.StrJoin("", turn => Math.Abs(turn.x - turn.cycle%40) <= 1 ? "##" : "  "))
-            .ToArray();
-        Console.WriteLine($"Part2:\n{screen.StrJoin("\n")}");
-        Console.WriteLine();
+            .Select(screenRow =>
+                screenRow.StrJoin("", vm => Math.Abs(vm.X - vm.Cycle % 40) <= 1 ? "##" : "  "))
+            .Out("Part 2:\n");
 
-        Run()
-            .Where(turn => Math.Abs(turn.x - turn.cycle % 40) <= 1)
-            .Select(turn => new V(turn.cycle % 40, turn.cycle / 40))
+        RunVm(commands)
+            .Where(vm => Math.Abs(vm.X - vm.Cycle % 40) <= 1)
+            .Select(vm => new V(vm.Cycle % 40, vm.Cycle / 40))
             .CreateMap("##", "  ")
-            .Out();
-
+            .Out("\nPart 2 (version 2):\n");
     }
 }
+
+// Полное решение ищите тут: https://github.com/xoposhiy/aoc
+
