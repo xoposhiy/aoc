@@ -58,6 +58,3 @@
             .Out("\nPart 2 (version 2):\n");
     }
 }
-
-// Полное решение ищите тут: https://github.com/xoposhiy/aoc
-
