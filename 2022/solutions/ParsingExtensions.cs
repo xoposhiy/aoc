@@ -1,7 +1,19 @@
 ﻿using System.Globalization;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using static System.Reflection.Metadata.BlobBuilder;
 
 // ReSharper disable once CheckNamespace
+
+public class TemplateAttribute : Attribute
+{
+    public string Template { get; }
+
+    public TemplateAttribute(string template)
+    {
+        Template = template;
+    }
+}
 
 public class SeparatorAttribute : Attribute
 {
@@ -15,6 +27,9 @@ public class SeparatorAttribute : Attribute
 
 public static class ParsingExtensions
 {
+    private const string DefaultFieldSeparators = ",; \t";
+    private const string ExtendedFieldSeparators = "|-.";
+
     public static void InvokeWithParsedArgs(this MethodInfo method, object instance, string inputFilename)
     {
         var parameters = method.GetParameters();
@@ -28,24 +43,41 @@ public static class ParsingExtensions
                 return;
             }
 
-            if (param.Name == "blocks")
+            if (param.GetCustomAttribute<ParamArrayAttribute>() != null)
             {
-                if (!param.ParameterType.IsArray && param.ParameterType.GetElementType()!.IsArray)
-                    throw new Exception("Parameter 'blocks' must be an array of line-arrays");
-                var lineType = param.ParameterType.GetElementType()!.GetElementType()!;
-                var fieldSeparators = param.GetCustomAttribute<SeparatorAttribute>()?.SeparatorChars ?? ",; \t";
-                var blocks = File.ReadAllLines(inputFilename)
+                if (!param.ParameterType.IsArray)
+                    throw new("Parameter 'blocks' must be an array");
+                var fieldSeparators = param.GetCustomAttribute<SeparatorAttribute>()?.SeparatorChars ?? DefaultFieldSeparators;
+                var blocksOfLines = File.ReadAllLines(inputFilename)
                     .SplitBy(string.IsNullOrEmpty)
-                    .Select(block => CreateArrayFrom(block, lineType, fieldSeparators))
                     .ToList();
-                var blocksArray = Array.CreateInstance(param.ParameterType.GetElementType()!, blocks.Count);
-                for (var i = 0; i < blocks.Count; i++)
-                    blocksArray.SetValue(blocks[i], i);
-                method.Invoke(instance, new object[] { blocksArray });
-                return;
+                
+                if (param.ParameterType.GetElementType()!.IsArray) // Solve(BlockLine[][] blocks)
+                {
+                    var lineType = param.ParameterType.GetElementType()!.GetElementType()!;
+                    var blocks = blocksOfLines
+                        .Select(block => CreateArrayFrom(block, lineType, fieldSeparators))
+                        .ToList();
+                    var blocksArray = Array.CreateInstance(param.ParameterType.GetElementType()!, blocks.Count);
+                    for (var i = 0; i < blocks.Count; i++)
+                        blocksArray.SetValue(blocks[i], i);
+                    method.Invoke(instance, new object[] { blocksArray });
+                    return;
+                }
+                else // Solve(MySuperType[] blocks)
+                {
+                    var blocks = blocksOfLines
+                        .Select(block => block.ParseObject(param.ParameterType.GetElementType()!))
+                        .ToList();
+                    var blocksArray = Array.CreateInstance(param.ParameterType.GetElementType()!, blocks.Count);
+                    for (var i = 0; i < blocks.Count; i++)
+                        blocksArray.SetValue(blocks[i], i);
+                    method.Invoke(instance, new object[] { blocksArray });
+                    return;
+                }
             }
 
-            if (param.Name == "map")
+            if (param.Name == "map") // Solve(T[][] map)
             {
                 if (!param.ParameterType.IsArray && param.ParameterType.GetElementType()!.IsArray)
                     throw new Exception("Parameter 'map' must be an array of line-arrays");
@@ -60,6 +92,7 @@ public static class ParsingExtensions
                 return;
             }
         }
+        //Solve(Line1[] block1, Line2[] block2, ...)
 
         var lines = File.ReadAllLines(inputFilename);
         var args = lines.SplitBy(string.IsNullOrEmpty)
@@ -67,6 +100,7 @@ public static class ParsingExtensions
             .ToArray();
         method.Invoke(instance, args);
     }
+
     public static Array ToArray<T>(this IEnumerable<T> items, Type elementType)
     {
         var itemsList = items.ToList();
@@ -76,6 +110,7 @@ public static class ParsingExtensions
             array.SetValue(item, i++);
         return array;
     }
+    
 
     private static object ParseMapChar(char c, Type cellType)
     {
@@ -86,7 +121,7 @@ public static class ParsingExtensions
 
     private static object CreateParamLines(ParameterInfo param, string[] lines)
     {
-        var fieldSeparators = param.GetCustomAttribute<SeparatorAttribute>()?.SeparatorChars ?? ",; \t";
+        var fieldSeparators = param.GetCustomAttribute<SeparatorAttribute>()?.SeparatorChars ?? DefaultFieldSeparators;
         var paramType = param.ParameterType;
         if (!paramType.IsArray)
             throw new NotSupportedException(paramType.ToString());
@@ -106,7 +141,21 @@ public static class ParsingExtensions
         }
         catch (FormatException)
         {
-            return CreateArrayFrom(lines, elementType, fieldSeparators + "|-.");
+            if (fieldSeparators.EndsWith(ExtendedFieldSeparators))
+                throw;
+            return CreateArrayFrom(lines, elementType, fieldSeparators + ExtendedFieldSeparators);
+        }
+    }
+
+    public static object ParseLine(this string line, Type resultType)
+    {
+        try
+        {
+            return ParseLine(line, resultType, DefaultFieldSeparators.ToCharArray());
+        }
+        catch
+        {
+            return ParseLine(line, resultType, (DefaultFieldSeparators + ExtendedFieldSeparators).ToCharArray());
         }
     }
 
@@ -114,6 +163,9 @@ public static class ParsingExtensions
     {
         if (resultType == typeof(string))
             return line;
+        var templateAttr = resultType.GetCustomAttribute<TemplateAttribute>();
+        if (templateAttr != null)
+            return new[]{line}.ParseObject(resultType);
         var ps = line.Split(fieldSeparators, StringSplitOptions.RemoveEmptyEntries);
         return Parse(ps, resultType);
     }
@@ -150,14 +202,64 @@ public static class ParsingExtensions
 
             return array;
         }
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+        {
+            var list = type.GetConstructor(Type.EmptyTypes)!.Invoke(Array.Empty<object>());
+            var elementType = type.GetGenericArguments()[0];
+            var addMethod = type.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance, new[] { elementType })!;
+            while (startIndex < ps.Length)
+            {
+                var value = Parse(ps, elementType, ref startIndex);
+                addMethod.Invoke(list, new[] { value });
+            }
+            return list;
+        }
 
-        var ctor = type.GetConstructors().MaxBy(c => c.GetParameters().Length)!;
+        return ParseObject(ps, type, ref startIndex);
+    }
+
+    private static object ParseObject(this string[] parts, Type objectType)
+    {
+        var startIndex = 0;
+        return ParseObject(parts, objectType, ref startIndex);
+    }
+
+    public static object ParseObject(this string[] parts, Type objectType, ref int startIndex)
+    {
+        var ctor = objectType.GetConstructors().MaxBy(c => c.GetParameters().Length)!;
         var args = new List<object>();
-        foreach (var param in ctor.GetParameters())
-            if (startIndex >= ps.Length && param.IsOptional)
-                args.Add(param.DefaultValue!);
-            else
-                args.Add(Parse(ps, param.ParameterType, ref startIndex));
+        var templateAttribute = objectType.GetCustomAttribute<TemplateAttribute>();
+        if (templateAttribute == null)
+        {
+            foreach (var param in ctor.GetParameters())
+                if (startIndex >= parts.Length && param.IsOptional)
+                    args.Add(param.DefaultValue!);
+                else
+                    args.Add(Parse(parts, param.ParameterType, ref startIndex));
+        }
+        else
+        {
+            var templateLines = 
+                templateAttribute.Template.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            var matchesByName = new Dictionary<string, string>();
+            foreach (var templateLine in templateLines)
+            {
+                var regex = new Regex(templateLine);
+                var m = regex.Match(parts[startIndex++]);
+                if (!m.Success)
+                    throw new FormatException($"Line {parts.StrJoin(" ")} does not match template {templateAttribute.Template}");
+                foreach (var name in regex.GetGroupNames())
+                    matchesByName[name] = m.Groups[name].Value;
+            }
+            foreach (var param in ctor.GetParameters())
+            {
+                var value = matchesByName[param.Name!];
+                if (string.IsNullOrEmpty(value) && param.HasDefaultValue)
+                    args.Add(param.DefaultValue!);
+                else
+                    args.Add(value.ParseLine(param.ParameterType));
+            }
+        }
         return ctor.Invoke(args.ToArray());
     }
 }

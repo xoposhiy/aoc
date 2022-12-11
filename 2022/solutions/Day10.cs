@@ -7,7 +7,8 @@
     // Part 1:
     // Для циклов с номерами 20, 60, 100, 140, 180 и 220 (нумерация с 1)
     // нужно посчитать сумму произведений номера цикла на X в конце этого цикла.
-    
+
+    //[Template("""(?<OpName>addx|noop)(\s+(?<Arg>.+))?""")]
     public record Command(string OpName, int Arg = 0);
     public record VmState(int X, int Cycle);
 

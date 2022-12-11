@@ -8,7 +8,7 @@ public class Day01
     /*
      * Даны группы чисел разделенные пустой строкой.
      */
-    public void Solve(int[][] blocks)
+    public void Solve(params int[][] blocks)
     {
         var sums = blocks.Select(b => b.Sum()).ToList();
 

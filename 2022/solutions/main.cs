@@ -7,8 +7,9 @@ Console.WriteLine("# Advent of Code 2022");
 Console.WriteLine();
 
 await SolveDay(DateTime.Now.Day);
-
+//await SolveDay(10);
 //foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
+
 async Task SolveDay(int day)
 {
     Console.WriteLine("## Day " + day);
@@ -18,7 +19,14 @@ async Task SolveDay(int day)
 
     var daySolution = CreateInstanceForDay(day);
     var sw = Stopwatch.StartNew();
-    daySolution.GetType().GetMethod("Solve")!.InvokeWithParsedArgs(daySolution, inputFilename);
+    var singleSolve = daySolution.GetType().GetMethod("Solve");
+    if (singleSolve != null)
+        singleSolve.InvokeWithParsedArgs(daySolution, inputFilename);
+    else
+    {
+        daySolution.GetType().GetMethod("Part1")!.InvokeWithParsedArgs(daySolution, inputFilename);
+        daySolution.GetType().GetMethod("Part2")!.InvokeWithParsedArgs(daySolution, inputFilename);
+    }
     Console.WriteLine("Total time: " + sw.Elapsed);
     Console.WriteLine();
 }
