@@ -15,7 +15,7 @@ public static class Extensions
         return set.IndexOf(item) >= 0;
     }
 
-    public static IEnumerable<PathItem<T>> Bfs<T>(this T[][] map, Func<T, T, bool> isPassable, params V[] starts)
+    public static IEnumerable<PathItem<T>> Bfs<T>(this T[][] map, Func<T, T, bool> canPassFromTo, params V[] starts)
     {
         var visited = starts.ToHashSet();
         var queue = new Queue<PathItem<T>>();
@@ -27,34 +27,43 @@ public static class Extensions
             yield return item;
             foreach (var next in V.Directions4.Select(d => item.Pos + d))
             {
-                if (!next.InRange(map) || !isPassable(map[item.Pos.Y][item.Pos.X], map[next.Y][next.X]) || visited.Contains(next))
+                var from = map[item.Pos.Y][item.Pos.X];
+                var to = map[next.Y][next.X];
+                if (!next.InRange(map) || !canPassFromTo(from, to) || visited.Contains(next))
                     continue;
                 visited.Add(next);
-                queue.Enqueue(new(map[next.Y][next.X], next, item.Pos, item.Distance + 1));
+                queue.Enqueue(new(to, next, item.Pos, item.Distance + 1));
             }
         }
 
     }
 
-    public static IEnumerable<V> GetAll<T>(this T[][] map, Func<T, bool> predicate)
+    public static V[] GetPositions<T>(this T[][] map, T value)
     {
+        return map.GetPositions(v => Equals(v, value));
+    }
+    public static V[] GetPositions<T>(this T[][] map, Func<T, bool> predicate)
+    {
+        var result = new List<V>();
         for (int y = 0; y < map.Length; y++)
-        for (int x = 0; x < map[y].Length; x++)
-        {
-            if (predicate(map[y][x]))
-                yield return new(x, y);
-        }
+            for (int x = 0; x < map[y].Length; x++)
+            {
+                if (predicate(map[y][x]))
+                    result.Add(new(x, y));
+            }
+
+        return result.ToArray();
     }
 
 
 
 
-    public static V GetPos(this char[][] map, char value)
+    public static V GetPosition<T>(this T[][] map, T value)
     {
         for (var y = 0; y < map.Length; y++)
         for (var x = 0; x < map[y].Length; x++)
         {
-            if (map[y][x] == value)
+            if (Equals(map[y][x], value))
                 return new(x, y);
         }
         throw new KeyNotFoundException();

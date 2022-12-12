@@ -2,8 +2,8 @@
 {
     public void Solve(char[][] map)
     {
-        var s = map.GetPos('S').Out("Start: ");
-        var e = map.GetPos('E').Out("End:   ");
+        var s = map.GetPosition('S').Out("Start: ");
+        var e = map.GetPosition('E').Out("End:   ");
         map[s.Y][s.X] = 'a';
         map[e.Y][e.X] = 'z';
 
@@ -12,7 +12,7 @@
             .Distance
             .Out("Part 1: ");
 
-        var starts = map.GetAll(c => c == 'a').ToArray();
+        var starts = map.GetPositions('a');
         map.Bfs((f, t) => t - f <= 1, starts)
             .First(p => p.Pos == e)
             .Distance
