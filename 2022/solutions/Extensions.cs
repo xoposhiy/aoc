@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-public readonly record struct PathItem(V Pos, V? PrevPos, int Distance);
+public readonly record struct PathItem<T>(T Value, V Pos, V? PrevPos, int Distance);
 public static class Extensions
 {
     public static bool HasBit(this int v, int bitIndex) => (v & (1 << bitIndex)) != 0;
@@ -15,22 +15,22 @@ public static class Extensions
         return set.IndexOf(item) >= 0;
     }
 
-    public static IEnumerable<PathItem> Bfs<T>(this T[][] map, V start, Func<T, bool> isPassable, Func<T, bool> isTarget)
+    public static IEnumerable<PathItem<T>> Bfs<T>(this T[][] map, Func<T, T, bool> isPassable, params V[] starts)
     {
-        var visited = new HashSet<V> {start};
-        var queue = new Queue<PathItem>();
-        queue.Enqueue(new(start, null, 0));
+        var visited = starts.ToHashSet();
+        var queue = new Queue<PathItem<T>>();
+        foreach (var start in starts)
+            queue.Enqueue(new(map[start.Y][start.X], start, null, 0));
         while (queue.Count > 0)
         {
             var item = queue.Dequeue();
-            if (isTarget(map[item.Pos.Y][item.Pos.X]))
-                yield return item;
+            yield return item;
             foreach (var next in V.Directions4.Select(d => item.Pos + d))
             {
-                if (!next.InRange(map) || !isPassable(map[next.Y][next.X]) || visited.Contains(next))
+                if (!next.InRange(map) || !isPassable(map[item.Pos.Y][item.Pos.X], map[next.Y][next.X]) || visited.Contains(next))
                     continue;
                 visited.Add(next);
-                queue.Enqueue(new(next, item.Pos, item.Distance + 1));
+                queue.Enqueue(new(map[next.Y][next.X], next, item.Pos, item.Distance + 1));
             }
         }
 
@@ -49,12 +49,12 @@ public static class Extensions
 
 
 
-    public static V GetPos<T>(this T[][] map, T value)
+    public static V GetPos(this char[][] map, char value)
     {
         for (var y = 0; y < map.Length; y++)
         for (var x = 0; x < map[y].Length; x++)
         {
-            if (map[y][x]!.Equals(value))
+            if (map[y][x] == value)
                 return new(x, y);
         }
         throw new KeyNotFoundException();
