@@ -25,17 +25,19 @@ public static class Extensions
         {
             var item = queue.Dequeue();
             yield return item;
+            var from = map.Get(item.Pos);
             foreach (var next in V.Directions4.Select(d => item.Pos + d))
             {
-                var from = map[item.Pos.Y][item.Pos.X];
-                if (!next.InRange(map) || !canPassFromTo(from, map[next.Y][next.X]) || visited.Contains(next))
+                if (!next.InRange(map) || !canPassFromTo(from, map.Get(next)) || visited.Contains(next))
                     continue;
                 visited.Add(next);
-                queue.Enqueue(new(map[next.Y][next.X], next, item.Pos, item.Distance + 1));
+                queue.Enqueue(new(map.Get(next), next, item.Pos, item.Distance + 1));
             }
         }
-
     }
+
+    public static T Get<T>(this T[][] map, V pos) => map[pos.Y][pos.X];
+    public static T Set<T>(this T[][] map, V pos, T value) => map[pos.Y][pos.X] = value;
 
     public static V[] GetPositions<T>(this T[][] map, T value)
     {
