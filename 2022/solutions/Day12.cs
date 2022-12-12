@@ -16,6 +16,11 @@
         map.Bfs((f, t) => t - f <= 1, starts)
             .First(p => p.Pos == e)
             .Distance
-            .Out("Part 2: ");
+            .Out("Part 2 (forward from multiple starts):\n");
+        
+        map.Bfs((f, t) => f - t <= 1, e)
+            .First(p => p.Value == 'a')
+            .Distance
+            .Out("Part 2 (go backwards):\n");
     }
 }

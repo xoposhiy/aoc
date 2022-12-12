@@ -28,11 +28,10 @@ public static class Extensions
             foreach (var next in V.Directions4.Select(d => item.Pos + d))
             {
                 var from = map[item.Pos.Y][item.Pos.X];
-                var to = map[next.Y][next.X];
-                if (!next.InRange(map) || !canPassFromTo(from, to) || visited.Contains(next))
+                if (!next.InRange(map) || !canPassFromTo(from, map[next.Y][next.X]) || visited.Contains(next))
                     continue;
                 visited.Add(next);
-                queue.Enqueue(new(to, next, item.Pos, item.Distance + 1));
+                queue.Enqueue(new(map[next.Y][next.X], next, item.Pos, item.Distance + 1));
             }
         }
 
