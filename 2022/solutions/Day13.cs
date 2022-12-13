@@ -1,10 +1,5 @@
 ﻿using System.Text.Json.Nodes;
 
-record ExprBracket(List<ExprBracket> Items, int? Value = null)
-{
-    public override string ToString() => Value.HasValue ? Value.ToString()! : $"[{string.Join(",", Items)}]";
-}
-
 public class Day13
 {
     /*
