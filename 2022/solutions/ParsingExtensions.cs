@@ -239,19 +239,31 @@ public static class ParsingExtensions
         }
         else
         {
+            var parameters = ctor.GetParameters();
+            var template = templateAttribute.Template;
+            foreach (var p in parameters)
+            {
+                var typeRe = ".+";
+                if (p.ParameterType == typeof(int) || p.ParameterType == typeof(long))
+                    typeRe = "\\d+";
+                else if (p.ParameterType == typeof(char))
+                    typeRe = ".";
+                template = template.Replace($"@{p.Name}", $"(?<{p.Name}>{typeRe})");
+            }
             var templateLines = 
-                templateAttribute.Template.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                template.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
             var matchesByName = new Dictionary<string, string>();
             foreach (var templateLine in templateLines)
             {
                 var regex = new Regex(templateLine);
                 var m = regex.Match(parts[startIndex++]);
                 if (!m.Success)
-                    throw new FormatException($"Line {parts.StrJoin(" ")} does not match template {templateAttribute.Template}");
+                    throw new FormatException($"Line {parts.StrJoin(" ")} does not match template {template}");
                 foreach (var name in regex.GetGroupNames())
                     matchesByName[name] = m.Groups[name].Value;
             }
-            foreach (var param in ctor.GetParameters())
+
+            foreach (var param in parameters)
             {
                 var value = matchesByName[param.Name!];
                 if (string.IsNullOrEmpty(value) && param.HasDefaultValue)

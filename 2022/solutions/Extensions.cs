@@ -1,6 +1,8 @@
 ﻿using System.Collections;
+using System.Drawing;
+using System.Linq;
 
-public readonly record struct PathItem<T>(T Value, V Pos, V? PrevPos, int Distance);
+public record PathItem(V Pos, PathItem? Prev, int Distance);
 public static class Extensions
 {
     public static bool HasBit(this int v, int bitIndex) => (v & (1 << bitIndex)) != 0;
@@ -15,23 +17,45 @@ public static class Extensions
         return set.IndexOf(item) >= 0;
     }
 
-    public static IEnumerable<PathItem<T>> Bfs<T>(this T[][] map, Func<T, T, bool> canPassFromTo, params V[] starts)
+    public static PathItem OutPath(this PathItem pathEnd, char[][]? map = null)
+    {
+        var pathItems = new List<PathItem>();
+        for (var p = pathEnd; p != null; p = p.Prev)
+            pathItems.Add(p);
+
+        string DirChar(V next, V? prev) =>
+            (next - (prev??next)) switch
+            {
+                (0, -1) => "↑",
+                (0, 1) => "↓",
+                (-1, 0) => "<",
+                (1, 0) => "→",
+                _ => "*"
+            };
+
+        pathItems
+            .CreateMap(pi => pi.Pos, v=> map == null ? "." : (map.Get(v)+""), pi => DirChar(pi.Pos, pi.Prev?.Pos))
+            .Out();
+        return pathEnd;
+    }
+
+    public static IEnumerable<PathItem> Bfs<T>(this T[][] map, V[] neighbors, Func<T, T, bool> canPassFromTo, params V[] starts)
     {
         var visited = starts.ToHashSet();
-        var queue = new Queue<PathItem<T>>();
+        var queue = new Queue<PathItem>();
         foreach (var start in starts)
-            queue.Enqueue(new(map[start.Y][start.X], start, null, 0));
+            queue.Enqueue(new(start, null, 0));
         while (queue.Count > 0)
         {
             var item = queue.Dequeue();
             yield return item;
             var from = map.Get(item.Pos);
-            foreach (var next in V.Directions4.Select(d => item.Pos + d))
+            foreach (var next in neighbors.Select(d => item.Pos + d))
             {
                 if (!next.InRange(map) || !canPassFromTo(from, map.Get(next)) || visited.Contains(next))
                     continue;
                 visited.Add(next);
-                queue.Enqueue(new(map.Get(next), next, item.Pos, item.Distance + 1));
+                queue.Enqueue(new(next, item, item.Distance + 1));
             }
         }
     }
@@ -69,14 +93,14 @@ public static class Extensions
         }
         throw new KeyNotFoundException();
     }
-    
-    public static string[] CreateMap(this IEnumerable<V> points, string point = "#", string empty = ".")
+
+    public static string[] CreateMap<T>(this IEnumerable<T> points, Func<T, V> getPoint, Func<V, string> empty, Func<T, string> showPoint)
     {
-        var pointsSet = points.ToHashSet();
-        var minX = pointsSet.Min(p => p.X);
-        var minY = pointsSet.Min(p => p.Y);
-        var maxX = pointsSet.Max(p => p.X);
-        var maxY = pointsSet.Max(p => p.Y);
+        var pointsImage = points.ToDictionary(getPoint, showPoint);
+        var minX = pointsImage.Keys.Min(p => p.X);
+        var minY = pointsImage.Keys.Min(p => p.Y);
+        var maxX = pointsImage.Keys.Max(p => p.X);
+        var maxY = pointsImage.Keys.Max(p => p.Y);
         var map = new string[maxY - minY + 1];
         for (int y = 0; y < map.Length; y++)
         {
@@ -84,12 +108,15 @@ public static class Extensions
             for (int x = 0; x < maxX - minX + 1; x++)
             {
                 var p = new V(x + minX, y + minY);
-                line.Add(pointsSet.Contains(p) ? point : empty);
+                line.Add(pointsImage.TryGetValue(p, out var image) ? image: empty(p));
             }
             map[y] = string.Join("", line);
         }
         return map;
     }
+
+    public static string[] CreateMap(this IEnumerable<V> points, string point = "#", string empty = ".") => 
+        points.CreateMap(v => v, _ => empty, _ => point);
 
     public static string Format(this object? value)
     {

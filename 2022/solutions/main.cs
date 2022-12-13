@@ -7,7 +7,7 @@ Console.WriteLine("# Advent of Code 2022");
 Console.WriteLine();
 
 await SolveDay(DateTime.Now.Day);
-//await SolveDay(10);
+//await SolveDay(12);
 //foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
 
 async Task SolveDay(int day)
@@ -31,10 +31,12 @@ async Task SolveDay(int day)
     Console.WriteLine();
 }
 
-async Task DownloadInputIfNeeded(string s, int i)
+async Task DownloadInputIfNeeded(string filename, int i)
 {
-    if (!File.Exists(s))
+    // if no file filename or it has zero size
+    if (!File.Exists(filename) || new FileInfo(filename).Length == 0)
     {
+        File.WriteAllBytes(filename, Array.Empty<byte>());
         var inputUrl = $"https://adventofcode.com/2022/day/{i}/input";
         var httpMessageHandler = new HttpClientHandler();
         var aocSession = Environment.GetEnvironmentVariable("AOC");
@@ -43,8 +45,8 @@ async Task DownloadInputIfNeeded(string s, int i)
 
         httpMessageHandler.CookieContainer.Add(new Cookie("session", aocSession, "/", "adventofcode.com"));
         var inp = await new HttpClient(httpMessageHandler).GetByteArrayAsync(inputUrl);
-        File.WriteAllBytes(s, inp);
-        Console.WriteLine($"Input downloaded to {Path.GetFullPath(s)}");
+        File.WriteAllBytes(filename, inp);
+        Console.WriteLine($"Input downloaded to {Path.GetFullPath(filename)}");
     }
 }
 

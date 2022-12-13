@@ -1,4 +1,6 @@
-﻿public record Move(string MoveToken, int Count, string FromToken, int From, string ToToken, int To);
+﻿
+[Template("""move @Count from @From to @To""")]
+public record Move(int Count, int From, int To);
 
 public class Day05
 {

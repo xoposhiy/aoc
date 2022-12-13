@@ -6,12 +6,12 @@ using System.Linq;
 public class Day11
 {
     [Template("""
-    Monkey (?<Index>\d+):
-      Starting items: (?<Items>.+)
-      Operation: new = old (?<Operation>.) (?<Argument>.+)
-      Test: divisible by (?<Divisor>\d+)
-        If true: throw to monkey (?<TrueDestination>\d+)
-        If false: throw to monkey (?<FalseDestination>\d+)
+    Monkey @Index:
+      Starting items: @Items
+      Operation: new = old @Operation @Argument
+      Test: divisible by @Divisor
+        If true: throw to monkey @TrueDestination
+        If false: throw to monkey @FalseDestination
     """)]
     public record Monkey(
         int Index,
