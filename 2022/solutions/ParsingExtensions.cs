@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -190,6 +191,8 @@ public static class ParsingExtensions
             return ps[startIndex++];
         if (type == typeof(char))
             return ps[startIndex++][0];
+        if (type.IsOneOf(typeof(JsonNode), typeof(JsonArray), typeof(JsonValue), typeof(JsonObject)))
+            return JsonNode.Parse(ps[startIndex++])!;
         if (type.IsArray)
         {
             var array = Array.CreateInstance(type.GetElementType()!, ps.Length - startIndex);

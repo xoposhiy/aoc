@@ -1,4 +1,6 @@
-﻿record ExprBracket(List<ExprBracket> Items, int? Value = null)
+﻿using System.Text.Json.Nodes;
+
+record ExprBracket(List<ExprBracket> Items, int? Value = null)
 {
     public override string ToString() => Value.HasValue ? Value.ToString()! : $"[{string.Join(",", Items)}]";
 }
@@ -21,93 +23,34 @@ public class Day13
     и найти произведение индексов разделителей в отсортированном массиве выражений.   
      */
 
-    public void Solve(params (string a, string b)[] pairs)
+    public void Solve(params (JsonNode a, JsonNode b)[] pairs)
     {
-        var rightIndicesSum = 0;
-        var divider1 = ParseSquareBracketsExpr("[[2]]");
-        var divider2 = ParseSquareBracketsExpr("[[6]]");
-        var all = new List<ExprBracket>() { divider1, divider2 };
-        for (int i = 0; i < pairs.Length; i++)
-        {
-            var pair = pairs[i];
-            var a = ParseSquareBracketsExpr(pair.a);
-            var b = ParseSquareBracketsExpr(pair.b);
-            all.Add(a);
-            all.Add(b);
-            if (Compare(a, b) <= 0)
-                rightIndicesSum += i+1;
-        }
-        rightIndicesSum.Out("Part 1: ");
-
+        pairs.Indices()
+            .Where(i => Compare(pairs[i].a, pairs[i].b) <= 0)
+            .Sum(i => i + 1)
+            .Out("Part1: ");
+        var divider1 = JsonNode.Parse("[[2]]")!;
+        var divider2 = JsonNode.Parse("[[6]]")!;
+        var all = pairs
+            .SelectMany(p => new[] { p.a, p.b })
+            .Concat(new []{divider1, divider2})
+            .ToList();
         all.Sort(Compare);
-        var index1 = (all.IndexOf(divider1) + 1);
-        var index2 = all.IndexOf(divider2) + 1;
-        (index1 * index2).Out("Part 2: ");
+        ((all.IndexOf(divider1) + 1) * (all.IndexOf(divider2) + 1))
+            .Out("Part 2: ");
     }
 
-    private int Compare(ExprBracket a, ExprBracket b)
+    private int Compare(JsonNode a, JsonNode b)
     {
-        if (a.Value.HasValue && b.Value.HasValue)
-            return a.Value.Value.CompareTo(b.Value.Value);
-        if (a.Value.HasValue)
-            return Compare(new(new() { a }), b);
-        if (b.Value.HasValue)
-            return Compare(a, new(new() { b }));
-        var res = a.Items.Zip(b.Items, Compare).FirstOrDefault(o => o != 0);
-        return res != 0 ? res : a.Items.Count.CompareTo(b.Items.Count);
-    }
-
-    private ExprBracket ParseSquareBracketsExpr(string expr)
-    {
-        var i = 0;
-        return ParseSquareBracketsExpr(expr, ref i);
-    }
-
-    // Partially credits to copilot
-    private ExprBracket ParseSquareBracketsExpr(string expr, ref int startIndex)
-    {
-        if (expr[startIndex] != '[')
-            return new(new(), ParseInt(expr, ref startIndex));
-        startIndex++;
-        var items = new List<ExprBracket>();
-        while (startIndex < expr.Length)
-        {
-            var c = expr[startIndex];
-            switch (c)
-            {
-                case '[':
-                    items.Add(ParseSquareBracketsExpr(expr, ref startIndex));
-                    break;
-                case ']':
-                    startIndex++;
-                    return new(items);
-                case ',':
-                    startIndex++;
-                    break;
-                default:
-                    items.Add(new(new(), ParseInt(expr, ref startIndex)));
-                    break;
-            }
-        }
-        throw new("Invalid expression " + expr);
-
-    }
-
-    // Credits to copilot
-    private int ParseInt(string expr, ref int startIndex)
-    {
-        var value = 0;
-        while (startIndex < expr.Length)
-        {
-            var c = expr[startIndex];
-            if (c is >= '0' and <= '9')
-            {
-                value = value * 10 + (c - '0');
-                startIndex++;
-            }
-            else
-                break;
-        }
-        return value;
+        if (a is JsonValue && b is JsonValue)
+            return a.GetValue<int>().CompareTo(b.GetValue<int>());
+        if (a is JsonValue)
+            a = new JsonArray(a.GetValue<int>());
+        if (b is JsonValue)
+            b = new JsonArray(b.GetValue<int>());
+        var aa = a.AsArray();
+        var bb = b.AsArray();
+        var res = aa.Zip(bb, Compare!).FirstOrDefault(o => o != 0);
+        return res != 0 ? res : aa.Count.CompareTo(bb.Count);
     }
 }
