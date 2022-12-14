@@ -2,86 +2,54 @@
 {
     public void Solve([Separator(" ->,")]V[][] paths)
     {
-        var floor = paths.SelectMany(p => p).Max(p => p.Y).Out() + 2;
-        var map = new char[500][];
-        for (int y = 0; y < map.Length; y++)
-        {
-            map[y] = new char[1000];
-            for (int x = 0; x < map[y].Length; x++)
-                map[y][x] = '.';
-        }
+        var walls = paths.SelectMany(path => 
+            path.Zip(path.Skip(1), (a, b) => a.SequenceTo(b)).SelectMany(p=>p))
+            .ToHashSet();
+        var floor = walls.Max(p => p.Y).Out("MaxY: ") + 2;
+        var source = new V(500, 0);
 
-        foreach (var item in paths)
+        bool DropSandUnit(bool hasFloor)
         {
-            var first = item[0];
-            foreach (var second in item.Skip(1))
-            {
-                
-                var step = second - first;
-                var d = Math.Max(Math.Abs(step.X), Math.Abs(step.Y));
-                for (int i = 0; i <= d; i++)
-                {
-                    var next = first + step.Signum() * i;
-                    map.Set(next, '#');
-                }
-                first = second;
-            }
-        }
-
-        bool DropSandUnit(char[][] map, bool hasFloor)
-        {
-            var p = new V(500, 0);
+            var sandUnit = source;
             while (true)
             {
-                p += V.Down;
-                if (p.Y >= floor)
+                if (sandUnit.Y >= floor-1)
                 {
-                    if (hasFloor)
-                    {
-                        p += V.Up;
-                        map.Set(p, 'O');
-                        return false;
-                    }
-                    else return true;
-                }
-                if (map[p.Y][p.X] != '.') p += V.Left;
-                if (!p.X.InRange(0, map[0].Length)) return true;
-                if (map[p.Y][p.X] != '.') p += V.Right*2;
-                if (!p.X.InRange(0, map[0].Length)) return true;
-                if (map[p.Y][p.X] != '.')
-                {
-                    p += V.Up+V.Left;
-                    map.Set(p, 'O');
+                    if (!hasFloor) return true;
+                    walls.Add(sandUnit);
                     return false;
                 }
+
+                var possibleNext = new[] { sandUnit+V.Down, sandUnit+V.Down + V.Left, sandUnit+V.Down + V.Right };
+                var next = possibleNext.FirstOrDefault(n => !walls.Contains(n));
+                if (next is null)
+                {
+                    walls.Add(sandUnit);
+                    return false;
+                }
+                sandUnit = next;
             }
             
         }
+        var originalMap = walls.ToHashSet();
         int count = 0;
-        var original = map.Select(a => a.ToArray()).ToArray();
-        count = 0;
-        while (map[0][500] == '.')
+        while (true)
         {
-            var outside = DropSandUnit(map, false);
+            var outside = DropSandUnit(false);
             if (outside) break;
             count++;
+ 
         }
+        //walls.CreateMap().Out();
         count.Out("Part 1: ");
 
-        map = original;
+        walls = originalMap;
         count = 0;
-        while (map[0][500] == '.')
+        while (!walls.Contains(source))
         {
-            var outside = DropSandUnit(map, true);
-            if (outside) break;
+            DropSandUnit(true);
             count++;
         }
-        //for (int i = 0; i < floor; i++)
-        //{
-        //    for (int x = 490; x < 560; x++)
-        //        Console.Write(map[i][x]);
-        //    Console.WriteLine();
-        //}
         count.Out("Part 2: ");
 
     }

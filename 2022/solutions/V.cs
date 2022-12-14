@@ -232,4 +232,18 @@ public class V : IEquatable<V>
             return this;
         return new V(Math.Sign(X), Math.Sign(Y));
     }
+
+    public V[] SequenceTo(V other)
+    {
+        var delta = (other - this);
+        if (delta.X == 0 || delta.Y == 0 || delta.X == delta.Y)
+        {
+            var stepsCount = delta.CLen;
+            var res = new List<V>();
+            for (int i = 0; i <= stepsCount; i++)
+                res.Add(this + delta.Signum() * i);
+            return res.ToArray();
+        }
+        throw new NotSupportedException("Only diagonals, horizontals or verticals are supported");
+    }
 }
