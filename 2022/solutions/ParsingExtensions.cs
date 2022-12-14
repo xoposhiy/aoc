@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -195,14 +196,15 @@ public static class ParsingExtensions
             return JsonNode.Parse(ps[startIndex++])!;
         if (type.IsArray)
         {
-            var array = Array.CreateInstance(type.GetElementType()!, ps.Length - startIndex);
-            var index = 0;
+            var items = new List<object>();
             while (startIndex < ps.Length)
             {
                 var value = Parse(ps, type.GetElementType()!, ref startIndex);
-                array.SetValue(value, index++);
+                items.Add(value);
             }
-
+            var array = Array.CreateInstance(type.GetElementType()!, items.Count);
+            for (int i = 0; i < items.Count; i++)
+                array.SetValue(items[i], i);
             return array;
         }
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
