@@ -1,6 +1,6 @@
 ﻿public class Day14
 {
-    public void Solve([Separator(" ->,")]V[][] paths)
+    public void Solve(V[][] paths)
     {
         var walls = paths.SelectMany(path => 
             path.Zip(path.Skip(1), (a, b) => a.SequenceTo(b)).SelectMany(p=>p))
