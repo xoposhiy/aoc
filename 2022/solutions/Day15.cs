@@ -1,8 +1,6 @@
 [Template(@"Sensor at @Sensor: closest beacon is at @Beacon")]
-public record SensorData([Separator("yx=, ")]V Sensor, [Separator("yx=, ")] V Beacon)
-{
-    public int Distance => Sensor.MDistTo(Beacon);
-};
+public record SensorData([Separator("yx=, ")] V Sensor, [Separator("yx=, ")] V Beacon);
+
 public class Day15
 {
     public void Solve(SensorData[] sensors)
@@ -22,7 +20,7 @@ public class Day15
     public List<R> GetCoverageSegments(SensorData[] sensors, int y)
     {
         var ranges = sensors
-            .Select(s => (x: s.Sensor.X, r: s.Distance - Math.Abs(s.Sensor.Y - y)))
+            .Select(s => (x: s.Sensor.X, r: s.Sensor.MDistTo(s.Beacon) - Math.Abs(s.Sensor.Y - y)))
             .Where(s => s.r >= 0)
             .Select(xr => new R(xr.x - xr.r, xr.x + xr.r));
         var mergedSegments = ranges
