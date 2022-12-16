@@ -5,6 +5,8 @@ using System.Linq;
 public record PathItem(V Pos, PathItem? Prev, int Distance);
 public static class Extensions
 {
+    public static bool HasBit(this long v, int bitIndex) => (v & (1L << bitIndex)) != 0;
+    public static long SetBit(this long v, int bitIndex) => v | (1L << bitIndex);
     public static bool HasBit(this int v, int bitIndex) => (v & (1 << bitIndex)) != 0;
     public static bool HasBit(this int v, char letter) => v.HasBit(char.ToLower(letter) - 'a');
     public static int SetBit(this int v, int bitIndex) => v | (1 << bitIndex);
@@ -259,19 +261,11 @@ public static class Extensions
             yield return (value!, length);
     }
 
-    public static Dictionary<T, int> CountFrequency<T>(this IEnumerable<T> items) where T : notnull
-    {
-        var freq = new Dictionary<T, int>();
-        foreach (var item in items)
-            freq[item] = freq.GetValueOrDefault(item) + 1;
-        return freq;
-    }
-
     public static HashSet<TValue> IntersectAll<TKey, TValue>(this IEnumerable<TKey> items, Func<TKey, IEnumerable<TValue>> get)
     {
         return items.Select(get).IntersectAll();
     }
-    
+
     public static HashSet<T> IntersectAll<T>(this IEnumerable<IEnumerable<T>> items)
     {
         HashSet<T>? set = null;
@@ -282,12 +276,20 @@ public static class Extensions
         }
         return set ?? new HashSet<T>();
     }
-    
+
     public static Dictionary<K, int> CountFrequency<T, K>(this IEnumerable<T> items, Func<T, K> getKey) where K : notnull
     {
         return items.Select(getKey).CountFrequency();
     }
-    
+
+    public static Dictionary<T, int> CountFrequency<T>(this IEnumerable<T> items) where T : notnull
+    {
+        var freq = new Dictionary<T, int>();
+        foreach (var item in items)
+            freq[item] = freq.GetValueOrDefault(item) + 1;
+        return freq;
+    }
+
     public static int IndexOf<T>(this IEnumerable<T> items, Func<T, bool> predicate)
     {
         var i = 0;
@@ -401,6 +403,14 @@ public static class Extensions
         if (d.TryGetValue(key, out var v)) return v;
         return d[key] = create(key);
     }
+
+    public static int UpdateMax<TK>(this IDictionary<TK, int> d, TK key, int newValue)
+    {
+        if (d.TryGetValue(key, out var current) && current >= newValue)
+            return current;
+        return d[key] = newValue;
+    }
+
 
     public static int ElementwiseHashcode<T>(this IEnumerable<T> items)
     {
