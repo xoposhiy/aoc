@@ -43,12 +43,11 @@ public class Day15
     }
 
     // Решение в одно выражение
+
     public IEnumerable<V> GetSomeBeaconPositions(Sensor[] sensors)
     {
-        var visibleAreaCorners = new[]
-        {
-            new V(0, 0), new V(4_000_000, 0), new V(0, 4_000_000), new V(4_000_000, 4_000_000)
-        };
+        var visibleAreaCorners = new[] {
+            new V(0, 0), new V(4_000_000, 0), new V(0, 4_000_000), new V(4_000_000, 4_000_000) };
         var beaconCandidatePositions = 
             from sensor1 in sensors
             from sensor2 in sensors
@@ -63,13 +62,12 @@ public class Day15
                 - mainDiagonalLeftTop.Y
             from dx in new[] { 0, 1 }
             from dy in new[] { 0, 1 }
-            let intersectionX = (doubledX + dx) / 2
-            let intersectionY = intersectionX - mainDiagonalLeftTop.X + mainDiagonalLeftTop.Y
+            let intersectionX = doubledX / 2 + dx
+            let intersectionY = intersectionX - mainDiagonalLeftTop.X + mainDiagonalLeftTop.Y + dy
             let intersectionPoint = new V(intersectionX, intersectionY)
             where intersectionPoint.InRange(4_000_001, 4_000_001)
             select intersectionPoint;
-        return beaconCandidatePositions
-            .Concat(visibleAreaCorners)
+        return beaconCandidatePositions.Concat(visibleAreaCorners)
             .Where(p => sensors.All(sensor => sensor.Pos.MDistTo(p) > sensor.Distance));
     }
 
