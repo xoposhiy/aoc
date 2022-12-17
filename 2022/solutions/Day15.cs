@@ -1,4 +1,5 @@
-﻿using System.Security.AccessControl;
+﻿
+using System.Security.AccessControl;
 
 [Template(@"Sensor at @Pos: closest beacon is at @Beacon")]
 public record Sensor([Separator("yx=, ")] V Pos, [Separator("yx=, ")] V Beacon)
@@ -6,6 +7,18 @@ public record Sensor([Separator("yx=, ")] V Pos, [Separator("yx=, ")] V Beacon)
     public int Distance => Pos.MDistTo(Beacon);
 }
 
+/*
+ * На плоскости есть несколько маячков и несколько сенсоров.
+ * Каждый сенсор нашел позицию ближайшего к нему маячка.
+ * Гарантируется, что у каждого сенсора есть только один ближайший маячок.
+ *
+ * Part 1:
+ * Для строки с Y-координатой 2_000_000 найти количество точек, в которых не может быть ни одного маячка.
+ *
+ * Part 2:
+ * В квадрате (0,0) - (4_000_000, 4_000_000) найти позицию ещё неизвестного маячка.
+ * Гарантируется, что такая точка ровно одна.
+ */
 public class Day15
 {
     public void Solve(Sensor[] sensors)

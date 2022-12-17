@@ -1,5 +1,15 @@
-using System.Text;
+﻿using System.Text;
 using static System.String;
+
+// Дан граф: узлы − вентели, рёбра − тунели между ними. У вентелей есть FlowRate (у некоторых он нулевой).
+// Вентель можно открыть за 1 минуту и после этого он начинает генерировать FlowRate единиц в минуту.
+// Переход по туннелю  занимает 1 минуту.
+//
+// Part 1:
+// Найти, сколько единиц можно собрать за 30 минут, если начать из вентеля AA?
+//
+// Part 2:
+// Найти, сколько единиц можно собрать за 26 минут, вдвоем, если оба начинают из вентеля AA?
 
 [Template("Valve @Id has flow rate=@FlowRate; tunnels? leads? to valves? @Neighbors")]
 public record InputValve(string Id, int FlowRate, string[] Neighbors);

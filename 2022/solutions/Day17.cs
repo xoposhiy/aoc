@@ -1,12 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.IO;
-using System.Linq;
-
-public class Day17
+﻿public class Day17
 {
-    private string ps = $$"""
+    // Есть 5 фиксированных фигурок тетриса, которые появляются по очереди циклически.
+    // И стакан для тетриса, шириной в 7 клеток и бесконечной высотой.
+    // Дана последовательность движений фигурок влево и вправо.
+    //
+    // Part 1:
+    // Найти высоту башни, которая получится после того, как зафиксируется 2022 фигурки.
+    //
+    // Part 2:
+    // Найти высоту башни, после того, как зафиксируется 1_000_000_000_000 фигурок.
+
+    private const string Pieces = $$"""
         ####
 
         .#.
@@ -24,15 +28,15 @@ public class Day17
 
         ##
         ##
-        """;
+        """ ;
+
     public void Solve(string movements)
     {
-        var lines = ps.Split("\r\n");
-        V[][] pieces = lines.SplitBy(string.IsNullOrEmpty)
+        var lines = Pieces.Split("\r\n");
+        var pieces = lines.SplitBy(string.IsNullOrEmpty)
             .Select(ParsePiece)
             .ToArray();
-        var field = new HashSet<V>();
-        var seq = Simulate(movements, pieces, field).Take(5000).ToList();
+        var seq = Simulate(movements, pieces).Take(5000).ToList();
         seq[2021].Out("Part 1: ");
 
         
@@ -63,12 +67,13 @@ public class Day17
         (prefixSum, periodsCount, rest, restSum, sum).Out("Part 2: ");
     }
 
-    private IEnumerable<int> Simulate(string movements, V[][] pieces, HashSet<V> field)
+    private IEnumerable<int> Simulate(string movements, V[][] pieces)
     {
+        var field = new HashSet<V>();
         var width = 7;
-        var rocksStopped = 0;
+        var fixedPiecesCount = 0;
 
-        V PlacePiece(int pieceIndex)
+        V GetNewPiecePosition()
         {
             var top = field.MinBy(p => p.Y)?.Y ?? 1;
             return new V(2, top - 4);
@@ -91,45 +96,31 @@ public class Day17
         }
 
         var movementIndex = 0;
-        var piecePos = PlacePiece(0);
+        var piecePos = GetNewPiecePosition();
         var piece = pieces[0];
         PrintField(field, piece, piecePos);
         while (true)
         {
             var movement = movements[movementIndex % movements.Length];
-            //Console.WriteLine(movement + " " + movementIndex);
-            var movedPos = MovePiece(piece, piecePos, movement);
-            //if (movedPos != piecePos)
-            {
-                movementIndex++;
-                piecePos = movedPos;
-            }
+            piecePos = MovePiece(piece, piecePos, movement);
+            movementIndex++;
 
             var newPos = DropPiece(piece, piecePos);
             if (newPos == piecePos)
             {
                 foreach (var p in piece)
                     field.Add(p + piecePos);
-                rocksStopped++;
-                piecePos = PlacePiece(rocksStopped % pieces.Length);
-                piece = pieces[rocksStopped % pieces.Length];
-                var height = Math.Abs(field.Min(p => p.Y - 1));
-                yield return height;
-                //if (seq.Count %100 == 0)
-                //seq.Out("Part 1: ");
+                fixedPiecesCount++;
+                piecePos = GetNewPiecePosition();
+                piece = pieces[fixedPiecesCount % pieces.Length];
+                yield return Math.Abs(field.Min(p => p.Y - 1));
             }
             else
             {
                 piecePos = newPos;
             }
         }
-    }
-
-    private (int cycleStart, int period) FindSequencePeriod(List<int> sequence)
-    {
-        var a = 0;
-        var b = 0;
-        return (a, b);
+        // ReSharper disable once IteratorNeverReturns
     }
 
     private void PrintField(HashSet<V> field, V[] piece, V piecePos)
