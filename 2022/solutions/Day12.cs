@@ -9,7 +9,7 @@
 
         map.Bfs(V.Directions4, (f, t) => t - f <= 1, startPos)
             .First(p => p.Pos == endPos)
-            .OutPath()
+            .Out()
             .Distance
             .Out("Part 1: ");
 

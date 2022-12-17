@@ -47,7 +47,7 @@
         
 
         RunVm(commands)
-            .GroupBy(40)
+            .Chunk(40)
             .Select(screenRow =>
                 screenRow.StrJoin("", vm => Math.Abs(vm.X - vm.Cycle % 40) <= 1 ? "##" : "  "))
             .Out("Part 2:\n");

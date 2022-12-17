@@ -17,8 +17,34 @@ public record Valve(int FlowRate, int[] NeighborIndices);
 
 public class Day16
 {
+    public readonly record struct SearchNode(long OpenMask, int Valve, int DropPressure);
+    
+    public Dictionary<long, int> GetPressureDropForEachValvesMask(Valve[] valves, int startValve, int maxTime)
+    {
+        IEnumerable<SearchNode> GetNextStates(PathItem<SearchNode> path)
+        {
+            var (openMask, valve, dropPressure) = path.State;
+            var valveObject = valves[valve];
+            var withOpenValve = openMask.SetBit(valve);
+            if (openMask != withOpenValve && valveObject.FlowRate > 0)
+            {
+                var newDropPressure = dropPressure + (maxTime-path.Distance-1)*valveObject.FlowRate;
+                yield return new SearchNode(withOpenValve, valve, newDropPressure);
+            }
+            var neighbors = valveObject.NeighborIndices;
+            foreach (var neighbor in neighbors)
+                yield return new SearchNode(openMask, neighbor, dropPressure);
+        }
 
-    public Dictionary<long, int> GetPressureDropForEachValvesMask(Valve[] valves, int startIndex, int maxTime)
+        var paths = GraphSearch.Bfs(GetNextStates, maxTime, new SearchNode(0, startValve, 0));
+        paths.Count.Out("paths.Count: ");
+        return paths
+            .Where(path => path.Distance == maxTime)
+            .GroupBy(x => x.State.OpenMask)
+            .ToDictionary(g => g.Key, g => g.Max(p => p.State.DropPressure));
+    }
+
+    public Dictionary<long, int> GetPressureDropForEachValvesMask2(Valve[] valves, int startIndex, int maxTime)
     {
         var front = new Dictionary<(long openMask, int valveIndex), int>
         {

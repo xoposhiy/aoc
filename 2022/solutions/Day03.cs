@@ -27,7 +27,7 @@
          * Для каждой тройки строк найти единственный символ, который есть во всех трех строках.
          * Найти сумму приоритетов таких символов.
          */
-        var badgesPrioritySum = lines.GroupBy(3)
+        var badgesPrioritySum = lines.Chunk(3)
             .Select(group => group.IntersectAll().Single())
             .Sum(Priority);
         Console.WriteLine($"Part2: {badgesPrioritySum}");
