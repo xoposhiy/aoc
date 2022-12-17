@@ -39,32 +39,22 @@
         var seq = Simulate(movements, pieces).Take(5000).ToList();
         seq[2021].Out("Part 1: ");
 
-        
-        //PrintField(field, piece, piecePos);
         var diffs = seq.Zip(seq.Skip(1), (a, b) => b - a).Prepend(0).ToList();
         var s = diffs.StrJoin();
-        
-        s.Out();
-        s.Length.Out("len: ");
         var patternStart = s.Length - 30;
-        var pattern = s[patternStart..^1]
-            //.Out("pattern")
-            ;
-        
+        var pattern = s[patternStart..^1];
         var start = s.IndexOf(pattern, 100);
         var nextStart = s.IndexOf(pattern, start+pattern.Length);
         var period = nextStart - start;
-        (start, period).Out("Loop: ");
-        diffs.Skip(start).Zip(diffs.Skip(start + period)).IndexOf(t => t.First != t.Second).Out("diffIndex ");
-        
-        var cycleSum = diffs.Skip(start).Take(period).Sum().Out("cycle sum: ");
+        (start, period).Out("loop_start, loop_period: ");
+        var cycleSum = diffs.Skip(start).Take(period).Sum();
         var prefixSum = seq[start-1];
-        var query = 1000000000000;
-        long periodsCount = (query - start) / period;
-        long rest = (query - start) % period;
+        var finalIndex = 1_000_000_000_000;
+        long periodsCount = (finalIndex - start) / period;
+        long rest = (finalIndex - start) % period;
         int restSum = diffs.Skip(start).Take((int)rest).Sum();
         var sum = prefixSum + periodsCount * cycleSum + restSum;
-        (prefixSum, periodsCount, rest, restSum, sum).Out("Part 2: ");
+        sum.Out("Part 2: ");
     }
 
     private IEnumerable<int> Simulate(string movements, V[][] pieces)
