@@ -13,16 +13,19 @@ public class Day18
         var set = ps.ToHashSet();
         ps.Sum(p => p.Area6().Count(n => !set.Contains(n)))
             .Out("Part 1: ");
-        var outerPixel = new V3(ps.Max(p => p.X) + 1, ps.Max(p => p.Y) + 1, ps.Max(p => p.Z) + 1);
+        var maxVoxel = new V3(ps.Max(p => p.X) + 1, ps.Max(p => p.Y) + 1, ps.Max(p => p.Z) + 1);
         var diameterUpperBound =
             ps.Max(p => p.X) - ps.Min(p => p.X)
             + ps.Max(p => p.Y) - ps.Min(p => p.Y)
             + ps.Max(p => p.Z) - ps.Min(p => p.Z);
         diameterUpperBound.Out("Diameter: ");
         var outerBorder = GraphSearch.Bfs(
-                p => p.State.Area6().Where(n => !set.Contains(n)), 
+                p => p.State.Area6()
+                    .Where(n => 
+                        !set.Contains(n) && 
+                        n.X <= maxVoxel.X && n.Y <= maxVoxel.Y && n.Z <= maxVoxel.Z), // Только для ускорения
                 diameterUpperBound+3, 
-                starts:outerPixel)
+                starts:maxVoxel)
             .Select(p => p.State).ToHashSet();
         ps.Sum(p => p.Area6().Count(n => outerBorder.Contains(n)))
             .Out("Part 2: ");
