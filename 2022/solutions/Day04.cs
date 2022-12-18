@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,11 +12,11 @@ public class Day04
     public void Solve((R, R)[] pairs)
     {
         //In how many assignment pairs does one range fully contain the other?
-        var containCount = pairs.Count(pair => pair.Item1.Contains(pair.Item2) || pair.Item2.Contains(pair.Item1));
-        Console.WriteLine($"Part1: {containCount}");
+        pairs.Count(pair => pair.Item1.Contains(pair.Item2) || pair.Item2.Contains(pair.Item1))
+            .Out("Part 1: ").ShouldBe(507);
 
         //In how many assignment pairs do the ranges overlap?
-        var overlapCount = pairs.Count(pair => pair.Item1.Overlaps(pair.Item2));
-        Console.WriteLine($"Part2: {overlapCount}");
+        pairs.Count(pair => pair.Item1.Overlaps(pair.Item2))
+            .Out("Part 2: ").ShouldBe(897);
     }
 }

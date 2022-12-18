@@ -1,4 +1,6 @@
-﻿public class Day08
+﻿using Shouldly;
+
+public class Day08
 {
     public void Solve(char[][] map)
     {
@@ -14,9 +16,9 @@
             return p;
         }
 
-        var visibleCount = map.Indices().Count(
-            tree => V.Directions4.Any(d => !EndOfSight(tree, d).InRange(map)));
-        Console.WriteLine($"Part1: {visibleCount}");
+        map.Indices()
+            .Count(tree => V.Directions4.Any(d => !EndOfSight(tree, d).InRange(map)))
+            .Out("Part 1: ").ShouldBe(1698);
 
         // Part 2
         // Найти клетку с максимальным sightScore. SightScore равен произведению дальности видимости по четырем направлениям.
@@ -27,8 +29,8 @@
             return p.InRange(map) ? p.MDistTo(from) : p.MDistTo(from) - 1;
         }
 
-        var maxScore = map.Indices().Max(
-            tree => V.Directions4.Product(dir => SightDist(tree, dir)));
-        Console.WriteLine($"Part2: {maxScore}");
+        map.Indices()
+            .Max(tree => V.Directions4.Product(dir => SightDist(tree, dir)))
+            .Out("Part 2: ").ShouldBe(672280);
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using Shouldly;
 
 public class Day11
 {
@@ -30,7 +27,7 @@ public class Day11
         RunMonkeys(monkeys, w => w / 3).ElementAt(19)
             .OrderByDescending(m => m.Activity)
             .Take(2).Product(x => x.Activity)
-            .Out("Part 1: ");
+            .Out("Part 1: ").ShouldBe(56350);
     }
 
     public void Part2(params Monkey[] monkeys)
@@ -39,7 +36,7 @@ public class Day11
         RunMonkeys(monkeys, w => w % modulo).ElementAt(9999)
             .OrderByDescending(m => m.Activity)
             .Take(2).Product(x => x.Activity)
-            .Out("Part 2: ");
+            .Out("Part 2: ").ShouldBe(13954061248);
     }
 
     private IEnumerable<Monkey[]> RunMonkeys(Monkey[] monkeys, Func<long, long> limitWorryLevel)
@@ -65,5 +62,6 @@ public class Day11
             }
             yield return monkeys;
         }
+        // ReSharper disable once IteratorNeverReturns
     }
 }

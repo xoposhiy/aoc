@@ -1,5 +1,6 @@
 ﻿
 using System.Security.AccessControl;
+using Shouldly;
 
 [Template(@"Sensor at @Pos: closest beacon is at @Beacon")]
 public record Sensor([Separator("yx=, ")] V Pos, [Separator("yx=, ")] V Beacon)
@@ -28,12 +29,12 @@ public class Day15
         var rs = GetCoverageSegments(sensors, y).Out();
         var impossiblePositionsCount = rs.Sum(r => r.Len);
         var beaconsCount = beacons.Count(b => b.Y == y);
-        (impossiblePositionsCount-beaconsCount).Out("Part 1: ");
+        (impossiblePositionsCount-beaconsCount)
+            .Out("Part 1: ").ShouldBe(4665948);
 
         var pos = GetSomeBeaconPositions(sensors).Distinct().OrderBy(p => p.X).Out().First().Out("Beacon: ");
-        long res = pos.X * 4000000L + pos.Y;
-        res.Out("Part 2 (Fast): ");
-        return;
+        var res = pos.X * 4000000L + pos.Y;
+        res.Out("Part 2 (Fast): ").ShouldBe(13543690671045);
     }
 
     public List<R> GetCoverageSegments(Sensor[] sensors, int y)

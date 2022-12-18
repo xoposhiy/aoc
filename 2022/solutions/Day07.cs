@@ -24,6 +24,9 @@ dir e
 
 Найти самую маленькую директорию, после освобождения которой останется как минимум 30000000 свободного места (из 70000000 общего)
 */
+
+using Shouldly;
+
 public class Day07
 {
     public void Solve(string[][] lines)
@@ -56,12 +59,12 @@ public class Day07
 
         var dirSizes = DirSizes().ToList();
         dirSizes.Where(size => size <= 100000).Sum()
-            .Out("Part1: ");
+            .Out("Part 1: ").ShouldBe(1667443);
 
         var currentFreeSpace = 70000000 - 30000000;
         var needFreeSpace = dirSizes.Last() - currentFreeSpace;
         dirSizes.Where(size => size >= needFreeSpace).Min()
-            .Out("Part2: ");
+            .Out("Part 2: ").ShouldBe(8998590);
     }
 
     record Dir

@@ -1,4 +1,6 @@
-﻿public class Day03
+﻿using Shouldly;
+
+public class Day03
 {
     // input:
     // ZNNvFWHqLNPZHHqPTHHnTGBhrrpjvmwfMmpfpjBjwpmw
@@ -17,19 +19,19 @@
          * Для каждой строки найти единственный символ, который есть и в левой половине строки и в правой.
          * Найти сумму приоритетов таких символов.
          */
-        var commonItemsPrioritySum = lines
+        lines
             .Select(line => line[..(line.Length / 2)].Intersect(line[(line.Length / 2)..]).Single())
-            .Sum(Priority);
-        Console.WriteLine($"Part1: {commonItemsPrioritySum}");
+            .Sum(Priority)
+            .Out("Part 1: ").ShouldBe(7878);
 
         /*
          * Part2
          * Для каждой тройки строк найти единственный символ, который есть во всех трех строках.
          * Найти сумму приоритетов таких символов.
          */
-        var badgesPrioritySum = lines.Chunk(3)
+        lines.Chunk(3)
             .Select(group => group.IntersectAll().Single())
-            .Sum(Priority);
-        Console.WriteLine($"Part2: {badgesPrioritySum}");
+            .Sum(Priority)
+            .Out("Part 2: ").ShouldBe(2760);
     }
 }

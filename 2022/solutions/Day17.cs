@@ -1,4 +1,6 @@
-﻿public class Day17
+﻿using Shouldly;
+
+public class Day17
 {
     // Есть 5 фиксированных фигурок тетриса, которые появляются по очереди циклически.
     // И стакан для тетриса, шириной в 7 клеток и бесконечной высотой.
@@ -36,8 +38,9 @@
         var pieces = lines.SplitBy(string.IsNullOrEmpty)
             .Select(ParsePiece)
             .ToArray();
-        var seq = Simulate(movements, pieces).Take(5000).ToList();
-        seq[2021].Out("Part 1: ");
+        var seq = Simulate(movements, pieces).Take(3000).ToList();
+        seq[2021]
+            .Out("Part 1: ").ShouldBe(3153);
 
         var diffs = seq.Zip(seq.Skip(1), (a, b) => b - a).Prepend(0).ToList();
         var s = diffs.StrJoin();
@@ -54,7 +57,7 @@
         long rest = (finalIndex - start) % period;
         int restSum = diffs.Skip(start).Take((int)rest).Sum();
         var sum = prefixSum + periodsCount * cycleSum + restSum;
-        sum.Out("Part 2: ");
+        sum.Out("Part 2: ").ShouldBe(1553665689155);
     }
 
     private IEnumerable<int> Simulate(string movements, V[][] pieces)
@@ -88,7 +91,7 @@
         var movementIndex = 0;
         var piecePos = GetNewPiecePosition();
         var piece = pieces[0];
-        PrintField(field, piece, piecePos);
+        //PrintField(field, piece, piecePos);
         while (true)
         {
             var movement = movements[movementIndex % movements.Length];

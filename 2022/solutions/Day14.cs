@@ -1,4 +1,6 @@
-﻿public class Day14
+﻿using Shouldly;
+
+public class Day14
 {
     /*
      * Дан массив ломанных, у которых сегменты чередуются горизонтальными и вертикальными.
@@ -56,7 +58,7 @@
  
         }
         //walls.CreateMap().Out();
-        count.Out("Part 1: ");
+        count.Out("Part 1: ").ShouldBe(665);
 
         walls = originalMap;
         count = 0;
@@ -65,7 +67,7 @@
             DropSandUnit(true);
             count++;
         }
-        count.Out("Part 2: ");
+        count.Out("Part 2: ").ShouldBe(25434);
 
     }
 

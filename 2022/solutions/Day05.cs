@@ -1,4 +1,6 @@
 ﻿
+using Shouldly;
+
 [Template("""move @Count from @From to @To""")]
 public record Move(int Count, int From, int To);
 
@@ -21,12 +23,14 @@ public class Day05
 
         // Найти верхушки стеков после применения всех перемещений, если объекты перемещаются по одному
         ExecuteWithPart1Rules(moves, stacks);
-        stacks.Select(s => s.Peek()).StrJoin().Out("Part1: ");
+        stacks.Select(s => s.Peek()).StrJoin()
+            .Out("Part1: ").ShouldBe("MQTPGLLDN");
 
         // Найти верхушки стеков после применения всех перемещений, если объекты перемещаются целой стопкой
         stacks = initialStacks.Select(c => c.ToStack()).ToArray();
         ExecuteWithPart2Rules(moves, stacks);
-        stacks.Select(s => s.Peek()).StrJoin().Out("Part2: ");
+        stacks.Select(s => s.Peek()).StrJoin()
+            .Out("Part2: ").ShouldBe("LVZPSTTCZ");
     }
 
     private static void ExecuteWithPart1Rules(Move[] moves, Stack<char>[] stacks)

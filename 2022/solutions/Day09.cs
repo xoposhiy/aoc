@@ -1,4 +1,6 @@
-﻿public class Day09
+﻿using Shouldly;
+
+public class Day09
 {
     // Даны список движений головы верёвки (aka змейки).
     // Следующий узел всегда касается предыдущего узла (в том числе по диагонали и в том числе может занимать ту же клетку)
@@ -26,10 +28,12 @@
 
         var part1 = GetTailPositions(2).Distinct().ToList();
         //part1.CreateMap("##", "  ").Out();
-        Console.WriteLine($"Part1: {part1.Count}");
+        part1.Count
+            .Out("Part 1: ").ShouldBe(6384);
 
         var part2 = GetTailPositions(10).Distinct().ToList();
         //part2.CreateMap("##", "  ").Out();
-        Console.WriteLine($"Part2: {part2.Count}");
+        part2.Count
+            .Out("Part 2: ").ShouldBe(2734);
     }
 }

@@ -1,4 +1,6 @@
-﻿public class Day10
+﻿using Shouldly;
+
+public class Day10
 {
     // Дана программа из команд двух видов:
     // * noop - ничего не делает и длится 1 цикл;
@@ -37,7 +39,7 @@
         RunVm(commands)
             .EveryNth(40, startFromIndex:19)
             .Sum(vm => vm.X * (vm.Cycle+1))
-            .Out("Part 1: ");
+            .Out("Part 1: ").ShouldBe(15220);
         
         // Part 2:
         // Программу управляет лучом, который пробегает по экрану 40x6 пикселей,

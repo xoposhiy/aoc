@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Shouldly;
 
 public class Day01
 {
@@ -16,12 +17,14 @@ public class Day01
          * Part 1
          * Найти группу с максимальной суммой чисел и вывести эту сумму.
          */
-        Console.WriteLine($"Part 1: {sums.Max()}");
+        sums.Max()
+            .Out("Part 1: ").ShouldBe(69912);
 
         /*
          * Part 1
          * Найти три группы с максимальной суммой чисел и вывести эту сумму чисел из этих трех групп.
          */
-        Console.WriteLine($"Part 2: {sums.OrderDescending().Take(3).Sum()}");
+        sums.OrderDescending().Take(3).Sum()
+            .Out("Part 2: ").ShouldBe(208180);
     }
 }

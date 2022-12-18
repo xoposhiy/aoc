@@ -8,7 +8,7 @@ Console.WriteLine();
 
 await SolveDay(DateTime.Now.Day);
 //await SolveDay(8);
-//foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day-1)) await SolveDay(dayNumber);
+//foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
 
 async Task SolveDay(int day)
 {

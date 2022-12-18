@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Nodes;
+using Shouldly;
 
 public class Day13
 {
@@ -20,7 +21,7 @@ public class Day13
         pairs.Indices()
             .Where(i => Compare(pairs[i].a, pairs[i].b) <= 0)
             .Sum(i => i + 1)
-            .Out("Part1: ");
+            .Out("Part1: ").ShouldBe(5013);
         var divider1 = JsonNode.Parse("[[2]]")!;
         var divider2 = JsonNode.Parse("[[6]]")!;
         
@@ -35,7 +36,7 @@ public class Day13
             .ToList();
         all.Sort(Compare);
         ((all.IndexOf(divider1) + 1) * (all.IndexOf(divider2) + 1))
-            .Out("Part 2: ");
+            .Out("Part 2: ").ShouldBe(25038);
     }
 
     private int Compare(JsonNode a, JsonNode b)

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Shouldly;
 using static System.String;
 
 // Дан граф: узлы − вентели, рёбра − тунели между ними. У вентелей есть FlowRate (у некоторых он нулевой).
@@ -44,7 +45,7 @@ public class Day16
             .ToDictionary(g => g.Key, g => g.Max(p => p.State.DropPressure));
     }
 
-    public Dictionary<long, int> GetPressureDropForEachValvesMask2(Valve[] valves, int startIndex, int maxTime)
+    public Dictionary<long, int> GetPressureDropForEachValvesMask_DP_Fast(Valve[] valves, int startIndex, int maxTime)
     {
         var front = new Dictionary<(long openMask, int valveIndex), int>
         {
@@ -84,10 +85,11 @@ public class Day16
         var valves = vs.Select(v => new Valve(v.FlowRate, v.Neighbors.Select(n => valveIndices[n]).ToArray())).ToArray();
         valves.Length.Out();
         var startValveIndex = valveIndices["AA"].Out("StartValve: ");
-        GetPressureDropForEachValvesMask(valves, startValveIndex, 30)
-            .Values.Max().Out("Part1: ");
+        GetPressureDropForEachValvesMask_DP_Fast(valves, startValveIndex, 30)
+            .Values.Max()
+            .Out("Part1: ").ShouldBe(1728);
         
-        var dp = GetPressureDropForEachValvesMask(valves, startValveIndex, 26);
+        var dp = GetPressureDropForEachValvesMask_DP_Fast(valves, startValveIndex, 26);
         dp.Count.Out("Count: ");
         var index = valves.Indices().First(i => valves[i].FlowRate > 0);
         var groups = dp.GroupBy(kv => kv.Key & (1L << index)).ToList();
@@ -96,7 +98,8 @@ public class Day16
             from kv2 in groups[1]
             where (kv1.Key & kv2.Key) == 0
             select kv1.Value + kv2.Value;
-        drops.Max().Out("Part 2: ");
+        drops.Max()
+            .Out("Part 2: ").ShouldBe(2304);
     }
 
     private static void CreateGraphVizFile(InputValve[] vs)

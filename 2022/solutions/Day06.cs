@@ -1,4 +1,5 @@
-﻿using static System.Linq.Enumerable;
+﻿using Shouldly;
+using static System.Linq.Enumerable;
 
 public class Day06
 {
@@ -10,7 +11,9 @@ public class Day06
                 .TakeWhile(i => inp[i..(i + markerSize)].Distinct().Count() < markerSize)
                 .Count() + markerSize;
 
-        Console.WriteLine($"Part1: {FindMarker(4)}");
-        Console.WriteLine($"Part2: {FindMarker(14)}");
+        FindMarker(4)
+            .Out("Part 1: ").ShouldBe(1480);
+        FindMarker(14)
+            .Out("Part 2: ").ShouldBe(2746);
     }
 }

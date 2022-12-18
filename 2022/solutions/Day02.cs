@@ -1,4 +1,6 @@
-﻿public class Day02
+﻿using Shouldly;
+
+public class Day02
 {
     // Даны раунды в камень ножницы бумага − что показал мой оппонент и ещё что-то второе.
     // input:
@@ -20,13 +22,15 @@
          * Найти сколько я заработал очков.
          * Очки зависят от исхода раунда и от того, что я показал.
          */
-        Console.WriteLine("Part1: " + rounds.Sum(r => Score(r.Item1, r.Item2)));
+        rounds.Sum(r => Score(r.Item1, r.Item2))
+            .Out("Part 1: ").ShouldBe(10816);
         
         /*
          * Part 2
          * Даны раунды в камень ножницы бумага − что показал мой оппонент и какой был исход раунда.
          * Найти сколько я заработал очков.
          */
-        Console.WriteLine("Part2: " + rounds.Sum(r => Score2(r.Item1, r.Item2)));
+        rounds.Sum(r => Score2(r.Item1, r.Item2))
+            .Out("Part 2: ").ShouldBe(11657);
     }
 }
