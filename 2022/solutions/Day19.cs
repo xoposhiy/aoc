@@ -137,32 +137,27 @@ public class Day19
         (blueprint.Index, pathItems.Count, geode).Out("blueprintIndex, QueueSize, GeodesCount: ");
         return geode;
     }
-
-    private IEnumerable<SearchState> GetNextStates(Blueprint bp, SearchState state)
-    {
-        return GetNextStates2(bp, state).Select(s => s.TrimResources(bp));
-    }
     
-    private IEnumerable<SearchState> GetNextStates2(Blueprint bp, SearchState state)
+    private IEnumerable<SearchState> GetNextStates(Blueprint bp, SearchState state)
     {
         var minutesLeft = state.MinutesLeft;
         if (minutesLeft <= 0) yield break;
         var next1 = state.BuildGeodeRobot(bp);
-        if (next1 != null) yield return next1.Value;
+        if (next1 != null) yield return next1.Value.TrimResources(bp);
         var next2 = state.BuildObsidianRobot(bp);
-        if (next2 != null) yield return next2.Value;
+        if (next2 != null) yield return next2.Value.TrimResources(bp);
         var next3 = state.BuildClayRobot(bp);
-        if (next3 != null) yield return next3.Value;
+        if (next3 != null) yield return next3.Value.TrimResources(bp);
         var next4 = state.BuildOreRobot(bp);
-        if (next4 != null) yield return next4.Value;
+        if (next4 != null) yield return next4.Value.TrimResources(bp);
         if ((next1 ?? next2 ?? next3 ?? next4) == null)
-            yield return state with
+            yield return (state with
             {
                 Ore = state.Ore + minutesLeft * state.OreRobots,
                 Clay = state.Clay + minutesLeft * state.ClayRobots,
                 Obsidian = state.Obsidian + minutesLeft * state.ObsidianRobots,
                 Geode = state.Geode + minutesLeft * state.GeodeRobots,
                 MinutesLeft = 0
-            };
+            }).TrimResources(bp);
     }
 }
