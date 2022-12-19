@@ -1,4 +1,4 @@
-using Shouldly;
+﻿using Shouldly;
 
 [Template("Blueprint @Index: Each ore robot costs @OreRobotOre ore. " +
           "Each clay robot costs @ClayRobotOre ore. " +
@@ -55,6 +55,9 @@ public readonly record struct SearchState(
         };
     }
 
+    // Optimization: не надо ресурсов больше, чем мы сможем потратить до конца времени.
+    // если вот так уменьшить избыточные ресурсы, то все состояния с превышением ресурсов станут равны и Bfs
+    // их отсечет сам как посещенные и не будет перебирать их детей.
     public SearchState TrimResources(Blueprint bp, int minutesLeft) =>
         this with
         {
@@ -87,13 +90,15 @@ public class Day19
     private IEnumerable<SearchState> GetNextStates(Blueprint bp, PathItem<SearchState> pathItem, int maxMinutes)
     {
         var minutesLeft = maxMinutes - pathItem.Distance;
-        var (ore, clay, obsidian, geode, oreRobots, clayRobots, obsidianRobots, geodeRobots) = pathItem.State;
+        var (ore, clay, obsidian, _, oreRobots, clayRobots, obsidianRobots, _) = pathItem.State;
         var newState = pathItem.State.RobotsDoJob();
         if (ore >= bp.GeodeRobotOre && obsidian >= bp.GeodeRobotObsidian)
         {
+            // Optimization: если можем строить геод-робота, то альтернатив можно не рассматривать
             yield return newState.BuildGeodeRobot(bp).TrimResources(bp, minutesLeft);
             yield break;
         }
+        // Optimization: не надо строить роботов, если они уже производят максимум возможного потребления
         if (ore >= bp.OreRobotOre && oreRobots < bp.MaxOre)
             yield return newState.BuildOreRobot(bp).TrimResources(bp, minutesLeft);
         if (ore >= bp.ClayRobotOre && clayRobots < bp.ObsidianRobotClay)
