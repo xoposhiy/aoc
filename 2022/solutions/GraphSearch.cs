@@ -1,8 +1,47 @@
 ﻿public record MapPathItem(V Pos, MapPathItem? Prev, int Distance);
-public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Distance);
+
+public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Distance)
+{
+    public PathItem<TState> Out()
+    {
+        var cur = this;
+        while (cur != null)
+        {
+            cur.State.Out();
+            cur = cur.Prev;
+        }
+        return this;
+    }
+}
 
 public static class GraphSearch
 {
+    public static IEnumerable<PathItem<TState>> Dijkstra<TState>(
+        Func<TState, IEnumerable<TState>> getNextStates,
+        Func<TState, IComparable> getPriority,
+        TState start)
+    {
+        var q = new PriorityQueue<PathItem<TState>, IComparable>();
+        var visited = new HashSet<TState>();
+        var startPathItem = new PathItem<TState>(start, null, 0);
+        q.Enqueue(startPathItem, getPriority(start));
+        visited.Add(start);
+        yield return startPathItem;
+        while (q.Count > 0)
+        {
+            var pathItem = q.Dequeue();
+            foreach (var state in getNextStates(pathItem.State))
+            {
+                if (visited.Add(state)) 
+                {
+                    var nextPathItem = new PathItem<TState>(state, pathItem, pathItem.Distance + 1);
+                    q.Enqueue(nextPathItem, getPriority(state));
+                    yield return nextPathItem;
+                }
+            }
+        }
+    }
+
     public static List<PathItem<TState>> Bfs<TState>(
         Func<PathItem<TState>, IEnumerable<TState>> getNextStates, 
         int maxDistance,

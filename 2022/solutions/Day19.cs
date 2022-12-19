@@ -1,9 +1,9 @@
 ﻿using Shouldly;
 
-[Template("Blueprint @Index: Each ore robot costs @OreRobotOre ore. " +
-          "Each clay robot costs @ClayRobotOre ore. " +
-          "Each obsidian robot costs @ObsidianRobotOre ore and @ObsidianRobotClay clay. " +
-          "Each geode robot costs @GeodeRobotOre ore and @GeodeRobotObsidian obsidian.")]
+[Template(@"Blueprint @Index:\s+Each ore robot costs @OreRobotOre ore.\s+" +
+          @"Each clay robot costs @ClayRobotOre ore.\s+" +
+          @"Each obsidian robot costs @ObsidianRobotOre ore and @ObsidianRobotClay clay.\s+" +
+          @"Each geode robot costs @GeodeRobotOre ore and @GeodeRobotObsidian obsidian.")]
 
 public record Blueprint(int Index, 
     int OreRobotOre, 
@@ -16,54 +16,99 @@ public record Blueprint(int Index,
 
 public readonly record struct SearchState(
     int Ore, int Clay, int Obsidian, int Geode,
-    int OreRobots, int ClayRobots, int ObsidianRobots, int GeodeRobots)
+    int OreRobots, int ClayRobots, int ObsidianRobots, int GeodeRobots, int MinutesLeft)
 {
-    public SearchState BuildOreRobot(Blueprint bp) => this with
+    public override string ToString()
     {
-        Ore = Ore - bp.OreRobotOre, 
-        OreRobots = OreRobots+1
-    };
-    
-    public SearchState BuildClayRobot(Blueprint bp) => this with
-    {
-        Ore = Ore - bp.ClayRobotOre, 
-        ClayRobots = ClayRobots+1
-    };
-    
-    public SearchState BuildObsidianRobot(Blueprint bp) => this with
-    {
-        Ore = Ore - bp.ObsidianRobotOre, 
-        Clay = Clay - bp.ObsidianRobotClay, 
-        ObsidianRobots = ObsidianRobots+1
-    };
-    
-    public SearchState BuildGeodeRobot(Blueprint bp) => this with
-    {
-        Ore = Ore - bp.GeodeRobotOre, 
-        Obsidian = Obsidian - bp.GeodeRobotObsidian, 
-        GeodeRobots = GeodeRobots+1
-    };
+        return $"Ore={Ore} Clay={Clay} Ob={Obsidian} G={Geode} \t OreR={OreRobots} ClayR={ClayRobots} ObR={ObsidianRobots} GR={GeodeRobots} \t Time={MinutesLeft}";
+    }
 
-    public SearchState RobotsDoJob()
+    public int GeodeEstimate => Geode + MinutesLeft * GeodeRobots;
+    public SearchState? BuildOreRobot(Blueprint bp)
     {
+        if (OreRobots == 0 || OreRobots >= bp.MaxOre) return null;
+        var wait = TimeToGet(bp.OreRobotOre - Ore, OreRobots) + 1;
+        if (wait > MinutesLeft) return null;
         return this with
         {
-            Ore = Ore + OreRobots,
-            Clay = Clay + ClayRobots,
-            Obsidian = Obsidian + ObsidianRobots,
-            Geode = Geode + GeodeRobots
+            Ore = Ore + wait * OreRobots - bp.OreRobotOre,
+            Clay = Clay + wait * ClayRobots,
+            Obsidian = Obsidian + wait * ObsidianRobots,
+            Geode = Geode + wait * GeodeRobots,
+            OreRobots = OreRobots + 1,
+            MinutesLeft = MinutesLeft - wait
         };
+    }
+    
+    public SearchState? BuildClayRobot(Blueprint bp)
+    {
+        if (OreRobots == 0 || ClayRobots >= bp.ObsidianRobotClay) return null;
+        var wait = TimeToGet(bp.ClayRobotOre - Ore, OreRobots) + 1;
+        if (wait > MinutesLeft) return null;
+        return this with
+        {
+            Ore = Ore + wait * OreRobots - bp.ClayRobotOre,
+            Clay = Clay + wait * ClayRobots,
+            Obsidian = Obsidian + wait * ObsidianRobots,
+            Geode = Geode + wait * GeodeRobots,
+            ClayRobots = ClayRobots + 1,
+            MinutesLeft = MinutesLeft - wait
+        };
+
+    }
+    
+    public SearchState? BuildObsidianRobot(Blueprint bp)
+    {
+        if (OreRobots == 0 || ClayRobots == 0 || ObsidianRobots >= bp.GeodeRobotObsidian) return null;
+        var waitOre = TimeToGet(bp.ObsidianRobotOre - Ore, OreRobots);
+        var waitClay = TimeToGet(bp.ObsidianRobotClay - Clay, ClayRobots);
+        var wait = Math.Max(waitOre, waitClay) + 1;
+        if (wait > MinutesLeft) return null;
+        return this with
+        {
+            Ore = Ore + wait * OreRobots - bp.ObsidianRobotOre,
+            Clay = Clay + wait * ClayRobots - bp.ObsidianRobotClay,
+            Obsidian = Obsidian + wait * ObsidianRobots,
+            Geode = Geode + wait * GeodeRobots,
+            ObsidianRobots = ObsidianRobots + 1,
+            MinutesLeft = MinutesLeft - wait
+        };
+
+    }
+
+    public SearchState? BuildGeodeRobot(Blueprint bp)
+    {
+        if (OreRobots == 0 || ObsidianRobots == 0) return null;
+        var waitOre = TimeToGet(bp.GeodeRobotOre - Ore, OreRobots);
+        var waitObsidian = TimeToGet(bp.GeodeRobotObsidian - Obsidian, ObsidianRobots);
+        var wait = Math.Max(waitOre, waitObsidian) + 1;
+        if (wait > MinutesLeft) return null;
+        return this with
+        {
+            Ore = Ore + wait * OreRobots - bp.GeodeRobotOre,
+            Clay = Clay + wait * ClayRobots,
+            Obsidian = Obsidian + wait * ObsidianRobots - bp.GeodeRobotObsidian,
+            Geode = Geode + wait * GeodeRobots,
+            GeodeRobots = GeodeRobots + 1,
+            MinutesLeft = MinutesLeft - wait
+        };
+    }
+
+    private int TimeToGet(int amount, int amountPerTick)
+    {
+        if (amount <= 0) return 0;
+        return amount / amountPerTick + (amount % amountPerTick != 0 ? 1 : 0);
     }
 
     // Optimization: не надо ресурсов больше, чем мы сможем потратить до конца времени.
     // если вот так уменьшить избыточные ресурсы, то все состояния с превышением ресурсов станут равны и Bfs
     // их отсечет сам как посещенные и не будет перебирать их детей.
-    public SearchState TrimResources(Blueprint bp, int minutesLeft) =>
+    public SearchState TrimResources(Blueprint bp) =>
         this with
         {
-            Ore = Math.Min(Ore, minutesLeft * bp.MaxOre - OreRobots * (minutesLeft - 1)),
-            Clay = Math.Min(Clay, minutesLeft * bp.ObsidianRobotClay - ClayRobots * (minutesLeft - 1)),
-            Obsidian = Math.Min(Obsidian, minutesLeft * bp.GeodeRobotObsidian - ObsidianRobots * (minutesLeft - 1))
+            Ore = Math.Min(Ore, MinutesLeft * bp.MaxOre - OreRobots * (MinutesLeft - 1)),
+            Clay = Math.Min(Clay, MinutesLeft * bp.ObsidianRobotClay - ClayRobots * (MinutesLeft - 1)),
+            Obsidian = Math.Min(Obsidian, MinutesLeft * bp.GeodeRobotObsidian - ObsidianRobots * (MinutesLeft - 1))
         };
 }
 
@@ -72,40 +117,52 @@ public class Day19
     public void Solve(Blueprint[] blueprints)
     {
         blueprints.Sum(b => b.Index * GetMaxGeodesCount(b, 24))
-            .Out("Part 1: ").ShouldBe(2160);
+            .Out("Part 1: ");//.ShouldBe(2160);
         blueprints.Take(3).Product(b => GetMaxGeodesCount(b, 32))
-            .Out("Part 2: ").ShouldBe(13340);
+            .Out("Part 2: ");//.ShouldBe(13340);
     }
 
     private int GetMaxGeodesCount(Blueprint blueprint, int minutesCount)
     {
-        var pathItems = GraphSearch.Bfs(
-            s => GetNextStates(blueprint, s, minutesCount), minutesCount,
-            new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0));
+        //var pathItems = GraphSearch.Bfs(
+        //    s => GetNextStates(blueprint, s, minutesCount), minutesCount,
+        //    new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0));
+        var pathItems = GraphSearch.Dijkstra(
+                s => GetNextStates(blueprint, s),
+                s => -s.MinutesLeft,
+                new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0, minutesCount))
+            .ToList();
         var geode = pathItems.Max(p => p.State.Geode);
+        
         (blueprint.Index, pathItems.Count, geode).Out("blueprintIndex, QueueSize, GeodesCount: ");
         return geode;
     }
 
-    private IEnumerable<SearchState> GetNextStates(Blueprint bp, PathItem<SearchState> pathItem, int maxMinutes)
+    private IEnumerable<SearchState> GetNextStates(Blueprint bp, SearchState state)
     {
-        var minutesLeft = maxMinutes - pathItem.Distance;
-        var (ore, clay, obsidian, _, oreRobots, clayRobots, obsidianRobots, _) = pathItem.State;
-        var newState = pathItem.State.RobotsDoJob();
-        if (ore >= bp.GeodeRobotOre && obsidian >= bp.GeodeRobotObsidian)
-        {
-            // Optimization: если можем строить геод-робота, то альтернатив можно не рассматривать
-            yield return newState.BuildGeodeRobot(bp).TrimResources(bp, minutesLeft);
-            yield break;
-        }
-        // Optimization: не надо строить роботов, если они уже производят максимум возможного потребления
-        if (ore >= bp.OreRobotOre && oreRobots < bp.MaxOre)
-            yield return newState.BuildOreRobot(bp).TrimResources(bp, minutesLeft);
-        if (ore >= bp.ClayRobotOre && clayRobots < bp.ObsidianRobotClay)
-            yield return newState.BuildClayRobot(bp).TrimResources(bp, minutesLeft);
-        if (ore >= bp.ObsidianRobotOre && clay >= bp.ObsidianRobotClay && obsidianRobots < bp.GeodeRobotObsidian)
-            yield return newState.BuildObsidianRobot(bp).TrimResources(bp, minutesLeft);
-        if (ore < bp.MaxOre || clay < bp.ObsidianRobotClay || obsidian < bp.GeodeRobotObsidian)
-            yield return newState;
+        return GetNextStates2(bp, state).Select(s => s.TrimResources(bp));
+    }
+    
+    private IEnumerable<SearchState> GetNextStates2(Blueprint bp, SearchState state)
+    {
+        var minutesLeft = state.MinutesLeft;
+        if (minutesLeft <= 0) yield break;
+        var next1 = state.BuildGeodeRobot(bp);
+        if (next1 != null) yield return next1.Value;
+        var next2 = state.BuildObsidianRobot(bp);
+        if (next2 != null) yield return next2.Value;
+        var next3 = state.BuildClayRobot(bp);
+        if (next3 != null) yield return next3.Value;
+        var next4 = state.BuildOreRobot(bp);
+        if (next4 != null) yield return next4.Value;
+        if ((next1 ?? next2 ?? next3 ?? next4) == null)
+            yield return state with
+            {
+                Ore = state.Ore + minutesLeft * state.OreRobots,
+                Clay = state.Clay + minutesLeft * state.ClayRobots,
+                Obsidian = state.Obsidian + minutesLeft * state.ObsidianRobots,
+                Geode = state.Geode + minutesLeft * state.GeodeRobots,
+                MinutesLeft = 0
+            };
     }
 }
