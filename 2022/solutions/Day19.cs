@@ -1,16 +1,26 @@
 using Shouldly;
 
-public record RobotCost(int Ore, int Clay, int Obsidian);
-public record Blueprint(int Index, RobotCost OreRobot, RobotCost ClayRobot, RobotCost ObsidianRobot, RobotCost GeodeRobot);
+[Template("Blueprint @Index: Each ore robot costs @OreRobotOre ore. " +
+          "Each clay robot costs @ClayRobotOre ore. " +
+          "Each obsidian robot costs @ObsidianRobotOre ore and @ObsidianRobotClay clay. " +
+          "Each geode robot costs @GeodeRobotOre ore and @GeodeRobotObsidian obsidian.")]
+
+public record Blueprint(int Index, 
+    int OreRobotOre, int ClayRobotOre, 
+    int ObsidianRobotOre, int ObsidianRobotClay, 
+    int GeodeRobotOre, int GeodeRobotObsidian)
+{
+    public int MaxOre { get; } = Math.Max(Math.Max(OreRobotOre, ClayRobotOre), Math.Max(ObsidianRobotOre, GeodeRobotOre));
+}
+
 public record SearchState(
     int Ore, int Clay, int Obsidian, int Geode, 
     int OreRobots, int ClayRobots, int ObsidianRobots, int GeodeRobots);
 
 public class Day19
 {
-    public void Solve(string[] lines)
+    public void Solve(Blueprint[] blueprints)
     {
-        var blueprints = lines.Select(ParseBlueprint).ToList();
         blueprints.Sum(b => b.Index * GetMaxGeodesCount(b, 24))
             .Out("Part 1: ").ShouldBe(2160);
         blueprints.Take(3).Product(b => GetMaxGeodesCount(b, 32))
@@ -19,75 +29,65 @@ public class Day19
 
     private int GetMaxGeodesCount(Blueprint blueprint, int minutesCount)
     {
-        //Console.WriteLine($"### Blueprint {blueprint.Index}:");
         var pathItems = GraphSearch.Bfs(
-            s => GetNextStates(blueprint, s), minutesCount,
+            s => GetNextStates(blueprint, s, minutesCount), minutesCount,
             new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0));
-        //var pi = pathItems.MaxBy(p => p.State.Geode);
-        //while (pi != null)
-        //{
-        //    Console.WriteLine(pi.State);
-        //    pi = pi.Prev;
-        //}
         var geode = pathItems
             .Max(p => p.State.Geode);
         (blueprint.Index, pathItems.Count, geode).Out("blueprintIndex, QueueSize, GeodesCount: ");
         return geode;
     }
 
-    private IEnumerable<SearchState> GetNextStates(Blueprint bp, PathItem<SearchState> pathItem)
+    private IEnumerable<SearchState> GetNextStates(Blueprint bp, PathItem<SearchState> pathItem, int maxMinutes)
     {
-        var (ore, clay, obsidian, geode, oreRobots, clayRobots, obsidianRobots, geodeRobots) = pathItem.State;
-        var newOre = ore + oreRobots;
-        var newClay = clay + clayRobots;
-        var newObsidian = obsidian + obsidianRobots;
-        var newGeode = geode + geodeRobots;
-        var build = false;
-        var buildG = false;
-        if (ore >= bp.GeodeRobot.Ore && obsidian >= bp.GeodeRobot.Obsidian)
-        {
-            yield return new SearchState(newOre - bp.GeodeRobot.Ore, newClay, newObsidian - bp.GeodeRobot.Obsidian, newGeode, oreRobots, clayRobots, obsidianRobots, geodeRobots + 1);
-            build = buildG = true;
-        }
-        if (!buildG && ore >= bp.OreRobot.Ore && ore < 6)
-        {
-            yield return new SearchState(newOre - bp.OreRobot.Ore, newClay, newObsidian, newGeode, oreRobots + 1, clayRobots, obsidianRobots, geodeRobots);
-            build = true;
-        }
+        var minutesLeft = maxMinutes - pathItem.Distance;
 
-        if (!buildG && ore >= bp.ClayRobot.Ore && clay <= 20)
+        SearchState TrimState(
+            int ore, int clay, int obsidian, int geode, 
+            int oreRobots, int clayRobots, int obsidianRobots, int geodeRobots)
         {
-            yield return new SearchState(newOre - bp.ClayRobot.Ore, newClay, newObsidian, newGeode, oreRobots, clayRobots + 1, obsidianRobots, geodeRobots);
-            build = true;
-
+            return new SearchState(
+                Math.Min(ore, minutesLeft * bp.MaxOre - oreRobots * (minutesLeft - 1)),
+                Math.Min(clay, minutesLeft * bp.ObsidianRobotClay - clayRobots * (minutesLeft - 1)),
+                Math.Min(obsidian, minutesLeft * bp.GeodeRobotObsidian - obsidianRobots * (minutesLeft - 1)),
+                geode,
+                Math.Min(oreRobots, bp.MaxOre),
+                Math.Min(clayRobots, bp.ObsidianRobotClay),
+                Math.Min(obsidianRobots, bp.GeodeRobotObsidian),
+                geodeRobots
+            );
         }
 
-        if (!buildG && ore >= bp.ObsidianRobot.Ore && clay >= bp.ObsidianRobot.Clay && obsidian <= 20)
         {
-            yield return new SearchState(newOre - bp.ObsidianRobot.Ore, newClay-bp.ObsidianRobot.Clay, newObsidian, 
-                newGeode, oreRobots, clayRobots, obsidianRobots + 1, geodeRobots);
-            build = true;
+            var state = pathItem.State;
+            var (ore, clay, obsidian, geode, oreRobots, clayRobots, obsidianRobots, geodeRobots) = state;
+            var newOre = ore + oreRobots;
+            var newClay = clay + clayRobots;
+            var newObsidian = obsidian + obsidianRobots;
+            var newGeode = geode + geodeRobots;
+            if (ore >= bp.GeodeRobotOre && obsidian >= bp.GeodeRobotObsidian)
+            {
+                yield return TrimState(
+                    newOre - bp.GeodeRobotOre, newClay, newObsidian - bp.GeodeRobotObsidian, newGeode,
+                    oreRobots, clayRobots, obsidianRobots, geodeRobots + 1);
+                yield break;
+            }
 
+            if (ore >= bp.OreRobotOre)
+                yield return TrimState(
+                    newOre - bp.OreRobotOre, newClay, newObsidian, newGeode,
+                    oreRobots + 1, clayRobots, obsidianRobots, geodeRobots);
+            if (ore >= bp.ClayRobotOre)
+                yield return TrimState(
+                    newOre - bp.ClayRobotOre, newClay, newObsidian, newGeode,
+                    oreRobots, clayRobots + 1, obsidianRobots, geodeRobots);
+            if (ore >= bp.ObsidianRobotOre && clay >= bp.ObsidianRobotClay)
+                yield return TrimState(
+                    newOre - bp.ObsidianRobotOre, newClay - bp.ObsidianRobotClay, newObsidian, newGeode,
+                    oreRobots, clayRobots, obsidianRobots + 1, geodeRobots);
+            yield return TrimState(
+                newOre, newClay, newObsidian, newGeode,
+                oreRobots, clayRobots, obsidianRobots, geodeRobots);
         }
-
-        if (!build)
-            yield return new SearchState(newOre, newClay, newObsidian, newGeode, oreRobots, clayRobots, obsidianRobots, geodeRobots);
-        else
-            if (ore < Math.Max(Math.Max(bp.OreRobot.Ore , bp.ClayRobot.Ore)+2, Math.Max(bp.ObsidianRobot.Ore , bp.GeodeRobot.Ore)+2)
-                && clay < bp.ObsidianRobot.Clay+20
-                && obsidian < bp.GeodeRobot.Obsidian+2)
-            yield return new SearchState(newOre, newClay, newObsidian, newGeode, oreRobots, clayRobots, obsidianRobots, geodeRobots);
-    }
-
-    private Blueprint ParseBlueprint(string arg)
-    {
-        var ps = arg.Split(' ', ':').Where(p => int.TryParse(p, out var _)).Select(int.Parse).ToList();
-        var i = 0;
-        var index = ps[i++];
-        var ore = new RobotCost(ps[i++], 0, 0);
-        var clay = new RobotCost(ps[i++], 0, 0);
-        var obsidian = new RobotCost(ps[i++], ps[i++], 0);
-        var geode = new RobotCost(ps[i++], 0, ps[i++]);
-        return new Blueprint(index, ore, clay, obsidian, geode);
     }
 }
