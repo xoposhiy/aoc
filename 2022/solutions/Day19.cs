@@ -1,3 +1,5 @@
+using Shouldly;
+
 public record RobotCost(int Ore, int Clay, int Obsidian);
 public record Blueprint(int Index, RobotCost OreRobot, RobotCost ClayRobot, RobotCost ObsidianRobot, RobotCost GeodeRobot);
 public record SearchState(
@@ -10,9 +12,9 @@ public class Day19
     {
         var blueprints = lines.Select(ParseBlueprint).ToList();
         blueprints.Sum(b => b.Index * GetMaxGeodesCount(b, 24))
-            .Out("Part 1: ");
+            .Out("Part 1: ").ShouldBe(2160);
         blueprints.Take(3).Product(b => GetMaxGeodesCount(b, 32))
-            .Out("Part 2: ");
+            .Out("Part 2: ").ShouldBe(13340);
     }
 
     private int GetMaxGeodesCount(Blueprint blueprint, int minutesCount)
