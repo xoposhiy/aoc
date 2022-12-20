@@ -5,6 +5,7 @@ using System.Linq;
 using static System.Linq.Enumerable;
 using static System.Math;
 
+// LinkToDayN
 public class DayN
 {
     public void Solve(string[] lines)

@@ -3,16 +3,18 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 
-Console.WriteLine("# Advent of Code 2022");
+var year = 2022;
 
+Console.WriteLine($"# Advent of Code {year}");
 Console.WriteLine();
 
-await SolveDay(DateTime.Now.Day);
-//await SolveDay(8);
+await SolveDay();
 //foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
 
-async Task SolveDay(int day)
+async Task SolveDay(int? optionalDay = null)
 {
+    var day = optionalDay ?? DateTime.Now.Day;
+    if (DateTime.Now.TimeOfDay.Hours < 3) day--;
     Console.WriteLine("## Day " + day);
     var daySolution = CreateInstanceForDay(day);
 
@@ -38,7 +40,7 @@ async Task DownloadInputIfNeeded(string filename, int i)
     if (!File.Exists(filename) || new FileInfo(filename).Length == 0)
     {
         File.WriteAllBytes(filename, Array.Empty<byte>());
-        var inputUrl = $"https://adventofcode.com/2022/day/{i}/input";
+        var inputUrl = $"https://adventofcode.com/{year}/day/{i}/input";
         var httpMessageHandler = new HttpClientHandler();
         var aocSession = Environment.GetEnvironmentVariable("AOC");
         if (string.IsNullOrEmpty(aocSession))
@@ -58,7 +60,9 @@ object CreateInstanceForDay(int dayNumber)
     if (dayType == null)
     {
         var dayN = FileHelper.PatchFilename("DayN.cs");
-        var content = File.ReadAllText(dayN).Replace("class DayN", $"class Day{dayNumber:D2}");
+        var content = File.ReadAllText(dayN)
+            .Replace("class DayN", $"class Day{dayNumber:D2}")
+            .Replace("LinkToDayN", $"https://adventofcode.com/{year}/day/{dayNumber}");
         var daySourceFile = Path.Combine(Path.GetDirectoryName(dayN)!, $"Day{dayNumber:D2}.cs");
         File.WriteAllText(daySourceFile, content, Encoding.UTF8);
         throw new NotImplementedException("No Day" + dayNumber + " class found. Created!");
