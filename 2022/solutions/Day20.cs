@@ -23,29 +23,33 @@ public class Day20
         var next = Enumerable.Range(0, ns.Length).Skip(1).Append(0).ToArray();
         var prev = Enumerable.Range(0, ns.Length - 1).Prepend(ns.Length - 1).ToArray();
 
-        void MoveForward(int x)
+        void MoveItem(int x, int shift)
         {
-            // from: a -> x -> b -> c
-            // to:   a -> b -> x -> c
+            // a → x → b
+            // Remove x
             var a = prev[x];
             var b = next[x];
-            var c = next[b];
             next[a] = b;
-            next[b] = x;
-            next[x] = c;
             prev[b] = a;
-            prev[x] = b;
-            prev[c] = x;
+            
+            //Find new a and b
+            for (int i = 0; i < shift; i++)
+                a = next[a];
+            b = next[a];
+            
+            // Insert x between new a and b
+            next[a] = x;
+            prev[x] = a;
+            next[x] = b;
+            prev[b] = x;
         }
 
         for (int i = 0; i < times; i++)
         {
             var id = i % ns.Length;
             var period = ns.Length - 1;
-            var shift = (ns[id] % period + period) % period;
-
-            for (int j = 0; j < shift; j++)
-                MoveForward(id);
+            var shift = (int)((ns[id] % period + period) % period);
+            MoveItem(id, shift);
         }
         var decryptedRing = GetRingContentFromZeroValue(ns, next);
         var x1 = decryptedRing[1000 % ns.Length];
