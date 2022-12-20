@@ -4,7 +4,6 @@
           @"Each clay robot costs @ClayRobotOre ore.\s+" +
           @"Each obsidian robot costs @ObsidianRobotOre ore and @ObsidianRobotClay clay.\s+" +
           @"Each geode robot costs @GeodeRobotOre ore and @GeodeRobotObsidian obsidian.")]
-
 public record Blueprint(int Index, 
     int OreRobotOre, 
     int ClayRobotOre, 
@@ -12,6 +11,62 @@ public record Blueprint(int Index,
     int GeodeRobotOre, int GeodeRobotObsidian)
 {
     public int MaxOre { get; } = Math.Max(Math.Max(OreRobotOre, ClayRobotOre), Math.Max(ObsidianRobotOre, GeodeRobotOre));
+}
+
+public class Day19
+{
+    // Даны схемы (blueprint) производства роботов 4 типов: Ore, Clay, Obsidian, Geode.
+    // В схеме для каждого типа робота указано количество ресурсов, которое необходимо потратить, чтобы его построить.
+    // Каждую минуту можно построить одного какого-то робота, если хватает ресурсов.
+    // Каждую минуту каждый робот производит одну единицу своего ресурса.
+    public void Solve(Blueprint[] blueprints)
+    {
+        // Для каждой схемы найти максимальное возможное количество добытых жеодов за 24 минуты,
+        // умножить на номер схемы и вернуть сумму таких слагаемых для всех схем.
+        blueprints.Sum(b => b.Index * GetMaxGeodesCount(b, 24))
+            .Out("Part 1: ").ShouldBe(2160);
+
+        // Для трёх первых схем посчитать максимально возможное количество добытых жеодов за 32 минуты
+        // и вернуть их произведение.
+        blueprints.Take(3).Product(b => GetMaxGeodesCount(b, 32))
+            .Out("Part 2: ").ShouldBe(13340);
+    }
+
+    private int GetMaxGeodesCount(Blueprint blueprint, int minutesCount)
+    {
+        var pathItems = GraphSearch.Dijkstra(
+                s => GetNextStates(blueprint, s),
+                s => -s.MinutesLeft,
+                new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0, minutesCount))
+            .ToList();
+        var geode = pathItems.Max(p => p.State.Geode);
+        
+        (blueprint.Index, pathItems.Count, geode).Out("blueprintIndex, QueueSize, GeodesCount: ");
+        return geode;
+    }
+    
+    private IEnumerable<SearchState> GetNextStates(Blueprint bp, SearchState state)
+    {
+        var minutesLeft = state.MinutesLeft;
+        if (minutesLeft <= 0) yield break;
+        var next1 = state.BuildGeodeRobot(bp);
+        if (next1 != null) yield return next1.Value.TrimResources(bp);
+        var next2 = state.BuildObsidianRobot(bp);
+        if (next2 != null) yield return next2.Value.TrimResources(bp);
+        var next3 = state.BuildClayRobot(bp);
+        if (next3 != null) yield return next3.Value.TrimResources(bp);
+        var next4 = state.BuildOreRobot(bp);
+        if (next4 != null) yield return next4.Value.TrimResources(bp);
+        if ((next1 ?? next2 ?? next3 ?? next4) == null)
+            yield return (state with
+            {
+                Ore = state.Ore + minutesLeft * state.OreRobots,
+                Clay = state.Clay + minutesLeft * state.ClayRobots,
+                Obsidian = state.Obsidian + minutesLeft * state.ObsidianRobots,
+                Geode = state.Geode + minutesLeft * state.GeodeRobots,
+                MinutesLeft = 0
+            }).TrimResources(bp);
+    }
 }
 
 public readonly record struct SearchState(
@@ -110,54 +165,4 @@ public readonly record struct SearchState(
             Clay = Math.Min(Clay, MinutesLeft * bp.ObsidianRobotClay - ClayRobots * (MinutesLeft - 1)),
             Obsidian = Math.Min(Obsidian, MinutesLeft * bp.GeodeRobotObsidian - ObsidianRobots * (MinutesLeft - 1))
         };
-}
-
-public class Day19
-{
-    public void Solve(Blueprint[] blueprints)
-    {
-        blueprints.Sum(b => b.Index * GetMaxGeodesCount(b, 24))
-            .Out("Part 1: ");//.ShouldBe(2160);
-        blueprints.Take(3).Product(b => GetMaxGeodesCount(b, 32))
-            .Out("Part 2: ");//.ShouldBe(13340);
-    }
-
-    private int GetMaxGeodesCount(Blueprint blueprint, int minutesCount)
-    {
-        //var pathItems = GraphSearch.Bfs(
-        //    s => GetNextStates(blueprint, s, minutesCount), minutesCount,
-        //    new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0));
-        var pathItems = GraphSearch.Dijkstra(
-                s => GetNextStates(blueprint, s),
-                s => -s.MinutesLeft,
-                new SearchState(0, 0, 0, 0, OreRobots: 1, 0, 0, 0, minutesCount))
-            .ToList();
-        var geode = pathItems.Max(p => p.State.Geode);
-        
-        (blueprint.Index, pathItems.Count, geode).Out("blueprintIndex, QueueSize, GeodesCount: ");
-        return geode;
-    }
-    
-    private IEnumerable<SearchState> GetNextStates(Blueprint bp, SearchState state)
-    {
-        var minutesLeft = state.MinutesLeft;
-        if (minutesLeft <= 0) yield break;
-        var next1 = state.BuildGeodeRobot(bp);
-        if (next1 != null) yield return next1.Value.TrimResources(bp);
-        var next2 = state.BuildObsidianRobot(bp);
-        if (next2 != null) yield return next2.Value.TrimResources(bp);
-        var next3 = state.BuildClayRobot(bp);
-        if (next3 != null) yield return next3.Value.TrimResources(bp);
-        var next4 = state.BuildOreRobot(bp);
-        if (next4 != null) yield return next4.Value.TrimResources(bp);
-        if ((next1 ?? next2 ?? next3 ?? next4) == null)
-            yield return (state with
-            {
-                Ore = state.Ore + minutesLeft * state.OreRobots,
-                Clay = state.Clay + minutesLeft * state.ClayRobots,
-                Obsidian = state.Obsidian + minutesLeft * state.ObsidianRobots,
-                Geode = state.Geode + minutesLeft * state.GeodeRobots,
-                MinutesLeft = 0
-            }).TrimResources(bp);
-    }
 }

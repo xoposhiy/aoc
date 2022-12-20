@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
+using System.Text;
 
 Console.WriteLine("# Advent of Code 2022");
 
@@ -59,7 +60,7 @@ object CreateInstanceForDay(int dayNumber)
         var dayN = FileHelper.PatchFilename("DayN.cs");
         var content = File.ReadAllText(dayN).Replace("class DayN", $"class Day{dayNumber:D2}");
         var daySourceFile = Path.Combine(Path.GetDirectoryName(dayN)!, $"Day{dayNumber:D2}.cs");
-        File.WriteAllText(daySourceFile, content);
+        File.WriteAllText(daySourceFile, content, Encoding.UTF8);
         throw new NotImplementedException("No Day" + dayNumber + " class found. Created!");
     }
     return Activator.CreateInstance(dayType) ?? throw new Exception("oops");
