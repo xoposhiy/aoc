@@ -23,8 +23,8 @@ public class Day20
     private static long Decrypt(long[] ns, int times)
     {
         var n = ns.Length;
-        var next = Enumerable.Range(0, n).Skip(1).Append(0).ToArray();
-        var prev = Enumerable.Range(0, n - 1).Prepend(n - 1).ToArray();
+        var next = Enumerable.Range(0, n).Select(i => (i + 1) % n).ToArray();
+        var prev = Enumerable.Range(0, n).Select(i => (i - 1).ModPositive(n)).ToArray();
 
         const int farStep = 25;
         var farNext = Enumerable.Range(0, n).Select(i => i % farStep == 0 ? (i + farStep) % n : -1).ToArray();
@@ -112,8 +112,7 @@ public class Day20
         for (int i = 0; i < times; i++)
         {
             var id = i % ns.Length;
-            var period = ns.Length - 1;
-            var shift = (int)((ns[id] % period + period) % period);
+            var shift = (int)ns[id].ModPositive(ns.Length - 1);
             //MoveItemNoOptimization(id, shift);
             MoveItem(id, shift);
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Numerics;
 
 public static class BitsExtensions
 {
@@ -78,6 +79,9 @@ public static class MapExtensions
 
 public static class Extensions
 {
+    public static T ModPositive<T>(this T dividend, T divisor) where T : IAdditionOperators<T, T, T>, IModulusOperators<T, T, T> =>
+        (dividend % divisor + divisor) % divisor;
+    
     public static bool IsOneOf<T>(this T item, params T[] set)
     {
         return set.IndexOf(item) >= 0;
