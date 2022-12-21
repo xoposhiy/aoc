@@ -10,9 +10,7 @@ public class DayN
 {
     public void Solve(string[] lines)
     {
-        1
-            .Out("Part 1: ");
-        2
-            .Out("Part 2: ");
+        0.Part1();
+        0.Part2();
     }
 }

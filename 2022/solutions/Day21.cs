@@ -27,7 +27,7 @@ public class Day21
 
         var humanValue1 = (freeB - freeA) / (humanFactorA - humanFactorB);
         humanValue1.Denominator.ShouldBe(1);
-        humanValue1.Numerator.Out("Part 2 (expression): ").ShouldBe(3219579395609);
+        humanValue1.Numerator.Part2("linear equation solution").ShouldBe(3219579395609);
 
         // Alternative solution. Binary search correct answer
         monkeys["root"] = root with { Op = "-" };
@@ -44,7 +44,7 @@ public class Day21
         }
         hmnValue++;
         hmnValue
-            .Out("Part 2 (bin search): ").ShouldBe(3219579395609);
+            .Part2("answer bin search").ShouldBe(3219579395609);
     }
 
     private void PrintGraphViz(Monkey[] ms)

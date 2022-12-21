@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Shouldly;
+﻿using Shouldly;
 
 // ## Grove Positioning System
 public class Day20
@@ -90,8 +89,8 @@ public class Day20
         {
             // a → x → b
             // Remove x
-            var a = prev[x];
-            var b = next[x];
+            var a = prev![x];
+            var b = next![x];
             next[a] = b;
             prev[b] = a;
 
