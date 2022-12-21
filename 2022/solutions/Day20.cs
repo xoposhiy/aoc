@@ -26,7 +26,7 @@ public class Day20
         var next = Enumerable.Range(0, n).Skip(1).Append(0).ToArray();
         var prev = Enumerable.Range(0, n - 1).Prepend(n - 1).ToArray();
 
-        var farStep = 25;
+        const int farStep = 25;
         var farNext = Enumerable.Range(0, n).Select(i => i % farStep == 0 ? (i + farStep) % n : -1).ToArray();
         var farNextLen = Enumerable.Repeat(farStep, n).Skip(1).Append(0).ToArray();
 
@@ -85,6 +85,7 @@ public class Day20
             farNextLen[p]++;
         }
 
+        #pragma warning disable CS8321
         void MoveItemNoOptimization(int x, int shift)
         {
             // a → x → b
@@ -105,6 +106,7 @@ public class Day20
             next[x] = b;
             prev[b] = x;
         }
+        #pragma warning restore CS8321
 
 
         for (int i = 0; i < times; i++)

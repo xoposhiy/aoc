@@ -13,34 +13,29 @@ public class Day21
         // Part1
         // Вычислить значение обезьяны по имени root
         var monkeys = ms.ToDictionary(m => m.Name);
-        ComputeValue("root", monkeys)
+        var root = monkeys["root"];
+        ComputeValue(root.Name, monkeys)
             .Out("Part 1: ").ShouldBe(291425799367130);
 
 
         // Part1
         // Обезьяна root теперь сравнивает два своих аргумента на равенство.
         // А обезьяна humn − это вы. Какое значение должно быть у вас, чтобы у root получилось равенство?
-        var root = monkeys["root"];
-        var res = new Dictionary<string, long>();
-        ComputeValue(root.A, monkeys, res);
-        var freeBranch = res.ContainsKey("humn") ? root.B! : root.A;
-        var humanBranch = root.A == freeBranch ? root.B! : root.A;
-        var freeBranchValue = ComputeValue(freeBranch, monkeys, res).Out("v: ");
-
+        monkeys["root"] = root with { Op = "-" };
         // Binary search correct answer
+
         var hmnValue = 0L;
         var step = 1000000000000000;
         while (step > 0)
         {
-            var actualHumanBranchValue = ComputeValue(humanBranch, monkeys, new Dictionary<string, long> { { "humn", hmnValue }, });
-            if (actualHumanBranchValue > freeBranchValue)
+            var rootValue = ComputeValue(root.Name, monkeys, new Dictionary<string, long> { { "humn", hmnValue }, });
+            if (rootValue > 0)
                 hmnValue += step;
             else
                 hmnValue -= step;
             step /= 2;
         }
         hmnValue++;
-
         hmnValue
             .Out("Part 2: ").ShouldBe(3219579395609);
     }
@@ -48,8 +43,8 @@ public class Day21
     private void PrintGraphViz(Monkey[] ms)
     {
         var res = new StringBuilder("digraph Day21 {\n");
-        res.AppendLine($" root[shape=box, color=red, style=filled];");
-        res.AppendLine($" humn[shape=box, color=red, style=filled];");
+        res.AppendLine(" root[shape=box, color=red, style=filled];");
+        res.AppendLine(" humn[shape=box, color=red, style=filled];");
         foreach (var monkey in ms.Where(m => m.Op != null))
         {
             res.AppendLine($"  {monkey.Name} -> {monkey.A};");
