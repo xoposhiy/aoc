@@ -105,6 +105,7 @@ public class V : IEquatable<V>
     public static V operator *(V a, int k) => new V(k * a.X, k * a.Y);
     public static V operator *(int k, V a) => new V(k * a.X, k * a.Y);
     public static V operator /(V a, int k) => new V(a.X / k, a.Y / k);
+    public static V operator %(V a, int k) => new V(a.X % k, a.Y % k);
     public long ScalarProd(V b) => X * b.X + Y * b.Y;
     public long VectorProd(V b) => X * b.Y - Y * b.X;
 
@@ -246,4 +247,7 @@ public class V : IEquatable<V>
         }
         throw new NotSupportedException("Only diagonals, horizontals or verticals are supported");
     }
+
+    public V RotateCW() => new(-Y, X); // Right → Down
+    public V RotateCCW() => new(Y, -X);
 }
