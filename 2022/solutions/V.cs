@@ -24,6 +24,20 @@ public class V : IEquatable<V>
             _ => throw new Exception(compass)
         };
     
+    public string ToCompass() =>
+        this switch
+        {
+            (0, 1) => "S",
+            (0, -1) => "N",
+            (1, 0) => "E",
+            (-1, 0) => "W",
+            (-1, 1) => "SW",
+            (-1, -1) => "NW",
+            (1, 1) => "SE",
+            (1, -1) => "NE",
+            _ => throw new Exception(ToString())
+        };
+    
 
     public static V Parse(string s)
     {
