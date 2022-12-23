@@ -53,17 +53,14 @@ public class Day23
         };
         while (true)
         {
-            var elfsGroupedByDestination = elfs
-                .Select(elf => (elf, dest: GetProposedTarget(elf, elfs, orderedDirections)))
-                .GroupBy(t => t.dest, t => t.elf).ToList();
             var endRound = new HashSet<V>();
-            foreach (var elfsWithSameDestination in elfsGroupedByDestination)
+            foreach (var elfsWithSameDest in elfs.GroupBy(elf => GetProposedTarget(elf, elfs, orderedDirections)))
             {
-                if (elfsWithSameDestination.Count() == 1)
-                    endRound.Add(elfsWithSameDestination.Key);
+                if (elfsWithSameDest.Count() == 1)
+                    endRound.Add(elfsWithSameDest.Key);
                 else
                 {
-                    foreach (var elf in elfsWithSameDestination)
+                    foreach (var elf in elfsWithSameDest)
                         endRound.Add(elf);
                 }
             }
