@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 
-public class V : IEquatable<V>
+public sealed class V : IEquatable<V>
 {
     public static readonly V Zero = new V(0, 0);
 
@@ -50,39 +50,23 @@ public class V : IEquatable<V>
         X = x;
         Y = y;
     }
+
     public V(double x, double y)
         :this((int)Math.Round(x), (int)Math.Round(y))
     {
     }
 
-
     public bool Equals(V? other)
     {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return X.Equals(other.X) && Y.Equals(other.Y);
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return X == other.X && Y == other.Y;
     }
 
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != GetType())
-            return false;
-        return Equals((V)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            return (X.GetHashCode() * 397) ^ Y.GetHashCode();
-        }
-    }
+    public override bool Equals(object? obj) => 
+        ReferenceEquals(this, obj) || obj is V v && Equals(v);
+    
+    public override int GetHashCode() => unchecked((X * 397) ^ Y);
 
     public static bool operator ==(V left, V right) => Equals(left, right);
     public static bool operator !=(V left, V right) => !Equals(left, right);
@@ -211,17 +195,28 @@ public class V : IEquatable<V>
 
     public IEnumerable<V> Area9()
     {
-        for (int dx = -1; dx <= 1; dx++)
-        for (int dy = -1; dy <= 1; dy++)
-            yield return new V(X + dx, Y + dy);
+        yield return this;
+        yield return new V(X - 1, Y - 1);
+        yield return new V(X - 1, Y);
+        yield return new V(X - 1, Y + 1);
+        yield return new V(X, Y - 1);
+        yield return new V(X, Y + 1);
+        yield return new V(X + 1, Y - 1);
+        yield return new V(X + 1, Y);
+        yield return new V(X + 1, Y + 1);
     }
 
+    //public static readonly V[] Directions8 = { E, SE, S, SW, W, NW, N, NE };
     public IEnumerable<V> Area8()
     {
-        for (int dx = -1; dx <= 1; dx++)
-        for (int dy = -1; dy <= 1; dy++)
-            if (dx != 0 || dy != 0)
-                yield return new V(X + dx, Y + dy);
+        yield return new V(X + 1, Y);
+        yield return new V(X + 1, Y + 1);
+        yield return new V(X, Y + 1);
+        yield return new V(X - 1, Y + 1);
+        yield return new V(X - 1, Y);
+        yield return new V(X - 1, Y - 1);
+        yield return new V(X, Y - 1);
+        yield return new V(X + 1, Y - 1);
     }
 
     public IEnumerable<V> Area4()

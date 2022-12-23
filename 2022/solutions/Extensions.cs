@@ -87,6 +87,12 @@ public static class Extensions
         return set.IndexOf(item) >= 0;
     }
 
+    public static IEnumerable<T> CycleShiftLeft<T>(this IList<T> items, int count)
+    {
+        count = count.ModPositive(items.Count);
+        return items.Skip(count).Concat(items.Take(count));
+    }
+
     public static string[] CreateMap<T>(this IEnumerable<T> points, Func<T, V> getPoint, Func<V, string> empty, Func<T, string> showPoint)
     {
         var pointsImage = points.ToDictionary(getPoint, showPoint);
@@ -125,7 +131,7 @@ public static class Extensions
         {
             
             var parts = e.Cast<object>().Select(Format).ToList();
-            if (parts.All(p => p.Length < 10))
+            if (parts.All(p => p.Length < 5))
                 return "[" + string.Join(",", parts) + "]";
             return "[\n" + string.Join(",\n", parts) + "\n]";
 

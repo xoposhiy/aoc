@@ -25,37 +25,53 @@ public class Day23
         rounds.Part2().ShouldBe(908);
     }
 
-    private IEnumerable<HashSet<V>> Simulate(HashSet<V> points)
+    private V GetProposedTarget(V elf, HashSet<V> points, (V, int)[] dirs)
     {
-        var dirs = new[]
+        var mask = 0;
+        foreach (var neighbor in elf.Area8())
         {
-            new[] { V.N, V.NE, V.NW },
-            new[] { V.S, V.SE, V.SW },
-            new[] { V.W, V.NW, V.SW },
-            new[] { V.E, V.NE, V.SE },
+            mask <<= 1;
+            if (points.Contains(neighbor)) 
+                mask++;
+        }
+        if (mask == 0) return elf;
+        foreach (var (dir, dirMask) in dirs)
+        {
+            if ((mask & dirMask) == 0)
+                return elf + dir;
+        }
+        return elf;
+    }
+
+    private IEnumerable<HashSet<V>> Simulate(HashSet<V> elfs)
+    {
+        var orderedDirections = new[]{
+            (V.N, 0b00000111),
+            (V.S, 0b01110000),
+            (V.W, 0b00011100),
+            (V.E, 0b11000001),
         };
         while (true)
         {
-            var targets = points
-                .Where(p => p.Area8().Any(points.Contains))
-                .Select(p => (p, ds: dirs.FirstOrDefault(ds => ds.All(d => !points.Contains(d + p)))))
-                .Where(t => t.ds != null)
-                .Select(t => (t.p, dest: t.p + t.ds![0]))
-                .GroupBy(t => t.dest).ToList()
-                .Where(g => g.Count() == 1)
-                .ToDictionary(g => g.Single().p, g => g.Key);
+            var elfsGroupedByDestination = elfs
+                .Select(elf => (elf, dest: GetProposedTarget(elf, elfs, orderedDirections)))
+                .GroupBy(t => t.dest, t => t.elf).ToList();
             var endRound = new HashSet<V>();
-            foreach (var point in points)
+            foreach (var elfsWithSameDestination in elfsGroupedByDestination)
             {
-                if (point.Area8().Any(points.Contains))
-                    endRound.Add(targets.TryGetValue(point, out var dest) ? dest : point);
+                if (elfsWithSameDestination.Count() == 1)
+                    endRound.Add(elfsWithSameDestination.Key);
                 else
-                    endRound.Add(point);
+                {
+                    foreach (var elf in elfsWithSameDestination)
+                        endRound.Add(elf);
+                }
             }
+            //endRound.CreateMap().Out();
             yield return endRound;
-            if (points.All(endRound.Contains)) yield break;
-            points = endRound;
-            dirs = dirs[1..].Append(dirs[0]).ToArray();
+            if (elfs.All(endRound.Contains)) yield break;
+            elfs = endRound;
+            orderedDirections = orderedDirections[1..].Append(orderedDirections[0]).ToArray();
         }
     }
 }
