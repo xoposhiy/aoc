@@ -13,8 +13,7 @@ public class Day23
     
     public void Solve(string[] lines)
     {
-        var points = lines.SelectMany((line, y) => line.Select((_, x) => new V(x, y)).Where(v => lines[v.Y][v.X] == '#'))
-            .ToHashSet();
+        var points = lines.ToPoints('#').ToHashSet();
         
         // Part 1: Найти, количество клеток без эльфов, в boundingBox эльфов после 10 раундов.
         var end = Simulate(points).Take(10).Last();

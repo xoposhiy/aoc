@@ -111,6 +111,12 @@ public static class Extensions
     public static string[] CreateMap(this IEnumerable<V> points, string point = "#", string empty = ".") => 
         points.CreateMap(v => v, _ => empty, _ => point);
 
+    public static IEnumerable<V> ToPoints(this string[] lines, Func<V, char, bool> isPoint) => 
+        lines.SelectMany((line, y) => line.Select((_, x) => new V(x, y)).Where(v => isPoint(v, lines[v.Y][v.X])));
+    
+    public static IEnumerable<V> ToPoints(this string[] lines, char pointSymbol) =>
+        lines.ToPoints((_, c) => c == pointSymbol);
+
     public static string Format(this object? value)
     {
         if (value is null) return "";
