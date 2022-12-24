@@ -91,19 +91,25 @@ public static class GraphSearch
         this PathItem<TState> path,
         Func<TState, V> getPosition, Func<TState, string>? getDescription = null)
     {
+        void ShowDescription(int i, TState state)
+        {
+            Console.SetCursorPosition(1, 0);
+            var line = "PathLen: " + i + " " + getDescription?.Invoke(state);
+            Console.Write(line.PadRight(Console.WindowWidth - 1));
+        }
+
         var stepByStep = true;
         Console.Clear();
-        var maxY = 0;
         var first = true;
-        var d = 0;
+        var len = 0;
         foreach (var step in path.StepsForward())
         {
-            d++;
+            len++;
             var from = getPosition(step.from);
             var to = getPosition(step.to);
-            maxY = Math.Max(maxY, Math.Max(to.Y, from.Y+1));
             if (first)
             {
+                ShowDescription(0, step.from);
                 Console.SetCursorPosition(from.X, from.Y+1);
                 Console.Write('*');
                 first = false;
@@ -114,14 +120,11 @@ public static class GraphSearch
             {
                 var key = Console.ReadKey(intercept: true);
                 if (key.Key == ConsoleKey.Escape) stepByStep = false;
-                Console.SetCursorPosition(1, 0);
-                var line = "Distance: " + d + " " + getDescription?.Invoke(step.to);
-                Console.Write(line.PadRight(Console.WindowWidth-1));
+                var state = step.to;
+                ShowDescription(len, state);
             }
         }
-        Console.SetCursorPosition(0, 0);
-        var line2 = "Distance: " + path.Len + " " + getDescription?.Invoke(path.State);
-        Console.Write(line2.PadRight(Console.WindowWidth-1));
+        ShowDescription(path.Len, path.State);
         Console.ReadLine();
         return path;
     }
