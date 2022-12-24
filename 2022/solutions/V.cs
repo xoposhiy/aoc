@@ -45,6 +45,7 @@ public sealed class V : IEquatable<V>
             (0, -1) => '^',
             (1, 0) => '>',
             (-1, 0) => '<',
+            (0, 0) => '*',
             _ => throw new Exception(ToString())
         };
     

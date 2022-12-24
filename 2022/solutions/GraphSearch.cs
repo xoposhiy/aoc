@@ -2,6 +2,21 @@
 
 public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Distance)
 {
+    public IEnumerable<(TState from, TState to)> StepsForward()
+    {
+        return StepsBackward().Reverse();
+    }
+
+    public IEnumerable<(TState from, TState to)> StepsBackward()
+    {
+        var cur = this;
+        while (cur.Prev != null)
+        {
+            yield return (cur.Prev.State, cur.State);
+            cur = cur.Prev;
+        }
+    }
+
     public PathItem<TState> Out()
     {
         var cur = this;
@@ -99,7 +114,90 @@ public static class GraphSearch
             }
         }
     }
-    
+
+    public static PathItem<TState> Visualize<TState>(
+        this PathItem<TState> path,
+        Func<TState, V> getPosition, Func<TState, string> getDescription = null)
+    {
+        var stepByStep = true;
+        Console.Clear();
+        var maxY = 0;
+        var first = true;
+        var d = 0;
+        foreach (var step in path.StepsForward())
+        {
+            d++;
+            var from = getPosition(step.from);
+            var to = getPosition(step.to);
+            maxY = Math.Max(maxY, Math.Max(to.Y, from.Y+1));
+            if (first)
+            {
+                Console.SetCursorPosition(from.X, from.Y+1);
+                Console.Write('*');
+                first = false;
+            }
+            Console.SetCursorPosition(to.X, to.Y+1);
+            Console.Write((to-from).ToArrow());
+            if (stepByStep)
+            {
+                var key = Console.ReadKey(intercept: true);
+                if (key.Key == ConsoleKey.Escape) stepByStep = false;
+                Console.SetCursorPosition(1, 0);
+                var line = "Distance: " + d + " " + getDescription?.Invoke(step.to);
+                Console.Write(line.PadRight(Console.WindowWidth-1));
+            }
+        }
+        Console.SetCursorPosition(0, 0);
+        var line2 = "Distance: " + path.Distance + " " + getDescription?.Invoke(path.State);
+        Console.Write(line2.PadRight(Console.WindowWidth-1));
+        Console.ReadLine();
+        return path;
+    }
+
+    public static IEnumerable<PathItem<TState>> Visualize<TState>(
+        this IEnumerable<PathItem<TState>> paths, int width, int height,
+        Func<TState, V> getPosition)
+    {
+        Console.Clear();
+        var visualize = true;
+        var toClear = new HashSet<V>();
+        foreach (var pathItem in paths)
+        {
+            yield return pathItem;
+            if (!visualize) continue;
+            var nextToClear = new HashSet<V>();
+            var curItem = pathItem;
+            while (curItem != null)
+            {
+                var pos = getPosition(curItem.State);
+                Console.SetCursorPosition(pos.X, pos.Y);
+                nextToClear.Add(pos);
+                toClear.Remove(pos);
+                if (curItem.Prev == null)
+                    Console.Write('*');
+                else
+                {
+                    var prevPos = getPosition(curItem.Prev.State);
+                    Console.Write((pos - prevPos).ToArrow());
+                }
+                curItem = curItem.Prev;
+            }
+
+            foreach (var v in toClear)
+            {
+                Console.SetCursorPosition(v.X, v.Y);
+                Console.Write(' ');
+            }
+            toClear = nextToClear;
+            var end = getPosition(pathItem.State);
+            Console.SetCursorPosition(end.X, end.Y);
+
+            var key = Console.ReadKey();
+            if (key.Key == ConsoleKey.Escape) visualize = false;
+        }
+    }
+
+
     public static MapPathItem OutPath(this MapPathItem mapPathEnd, char[][]? map = null)
     {
         var pathItems = new List<MapPathItem>();

@@ -17,10 +17,9 @@ public class Day24
         var map = lines.Select(row => row.ToCharArray()).ToArray();
         var goThere = SearchPath(map, (entrance, 0), exit).State;
         goThere.time.Part1();
-        
+
         // Part 2. Найди длину кратчайшего пути вход → выход → вход → выход
         var goBack = SearchPath(map, goThere, entrance).State;
-        goBack.time.Out("back: ");
         var goThereWithSnacks = SearchPath(map, goBack, exit).State;
         goThereWithSnacks.time.Part2();
     }
@@ -28,7 +27,9 @@ public class Day24
     private PathItem<(V pos, int time)> SearchPath(char[][] map, (V pos, int time) start, V endPos) =>
         GraphSearch.BfsLazy(
                 p => GetMoves(map, p.State), start)
-            .First(p => p.State.pos == endPos);
+            .First(p => p.State.pos == endPos)
+            //.Visualize(s => s.pos, s=>$"Time: {s.time} Pos: {s.pos}")
+            ;
 
     private IEnumerable<(V pos, int time)> GetMoves(char[][] map, (V pos, int time) cur) =>
         cur.pos.Area5()
