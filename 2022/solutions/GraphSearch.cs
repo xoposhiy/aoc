@@ -53,7 +53,6 @@ public static class GraphSearch
         while (outQ < queue.Count)
         {
             var path = queue[outQ++];
-            //yield return path;
             if (path.Distance < maxDistance)
                 queue.AddRange(getNextStates(path)
                     .Where(visited.Add)
@@ -61,9 +60,9 @@ public static class GraphSearch
         }
         return queue;
     }
+    
     public static IEnumerable<PathItem<TState>> BfsLazy<TState>(
         Func<PathItem<TState>, IEnumerable<TState>> getNextStates, 
-        Func<TState, bool> shouldFinish,
         params TState[] starts)
     {
         var visited = starts.ToHashSet();
@@ -72,14 +71,12 @@ public static class GraphSearch
         {
             var path = queue.Dequeue();
             yield return path;
-            if (shouldFinish(path.State)) yield break;
             var pathItems = getNextStates(path)
                 .Where(visited.Add)
                 .Select(nextState => new PathItem<TState>(nextState, path, path.Distance + 1));
             foreach (var pathItem in pathItems)
                 queue.Enqueue(pathItem);
         }
-        //return queue;
     }
 
     public static IEnumerable<MapPathItem> Bfs<T>(this T[][] map, V[] neighbors, Func<T, T, bool> canPassFromTo, params V[] starts)

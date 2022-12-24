@@ -38,13 +38,13 @@ public sealed class V : IEquatable<V>
             _ => throw new Exception(ToString())
         };
 
-    public string ToArrow() =>
+    public char ToArrow() =>
         this switch
         {
-            (0, 1) => "v",
-            (0, -1) => "^",
-            (1, 0) => ">",
-            (-1, 0) => "<",
+            (0, 1) => 'v',
+            (0, -1) => '^',
+            (1, 0) => '>',
+            (-1, 0) => '<',
             _ => throw new Exception(ToString())
         };
     
