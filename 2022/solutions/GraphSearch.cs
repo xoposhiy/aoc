@@ -1,34 +1,5 @@
 ﻿public record MapPathItem(V Pos, MapPathItem? Prev, int Distance);
 
-public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Distance)
-{
-    public IEnumerable<(TState from, TState to)> StepsForward()
-    {
-        return StepsBackward().Reverse();
-    }
-
-    public IEnumerable<(TState from, TState to)> StepsBackward()
-    {
-        var cur = this;
-        while (cur.Prev != null)
-        {
-            yield return (cur.Prev.State, cur.State);
-            cur = cur.Prev;
-        }
-    }
-
-    public PathItem<TState> Out()
-    {
-        var cur = this;
-        while (cur != null)
-        {
-            cur.State.Out();
-            cur = cur.Prev;
-        }
-        return this;
-    }
-}
-
 public static class GraphSearch
 {
     public static IEnumerable<PathItem<TState>> Dijkstra<TState>(
@@ -49,7 +20,7 @@ public static class GraphSearch
             {
                 if (visited.Add(state)) 
                 {
-                    var nextPathItem = new PathItem<TState>(state, pathItem, pathItem.Distance + 1);
+                    var nextPathItem = new PathItem<TState>(state, pathItem, pathItem.Len + 1);
                     q.Enqueue(nextPathItem, getPriority(state));
                     yield return nextPathItem;
                 }
@@ -68,14 +39,15 @@ public static class GraphSearch
         while (outQ < queue.Count)
         {
             var path = queue[outQ++];
-            if (path.Distance < maxDistance)
+            if (path.Len < maxDistance)
                 queue.AddRange(getNextStates(path)
                     .Where(visited.Add)
-                    .Select(nextState => new PathItem<TState>(nextState, path, path.Distance + 1)));
+                    .Select(nextState => new PathItem<TState>(nextState, path, path.Len + 1)));
         }
         return queue;
     }
-    
+
+    // record PathItem<TState>(TState State, PathItem<TState>? Prev, int Len)
     public static IEnumerable<PathItem<TState>> BfsLazy<TState>(
         Func<PathItem<TState>, IEnumerable<TState>> getNextStates, 
         params TState[] starts)
@@ -88,7 +60,7 @@ public static class GraphSearch
             yield return path;
             var pathItems = getNextStates(path)
                 .Where(visited.Add)
-                .Select(nextState => new PathItem<TState>(nextState, path, path.Distance + 1));
+                .Select(nextState => new PathItem<TState>(nextState, path, path.Len + 1));
             foreach (var pathItem in pathItems)
                 queue.Enqueue(pathItem);
         }
@@ -117,7 +89,7 @@ public static class GraphSearch
 
     public static PathItem<TState> Visualize<TState>(
         this PathItem<TState> path,
-        Func<TState, V> getPosition, Func<TState, string> getDescription = null)
+        Func<TState, V> getPosition, Func<TState, string>? getDescription = null)
     {
         var stepByStep = true;
         Console.Clear();
@@ -148,7 +120,7 @@ public static class GraphSearch
             }
         }
         Console.SetCursorPosition(0, 0);
-        var line2 = "Distance: " + path.Distance + " " + getDescription?.Invoke(path.State);
+        var line2 = "Distance: " + path.Len + " " + getDescription?.Invoke(path.State);
         Console.Write(line2.PadRight(Console.WindowWidth-1));
         Console.ReadLine();
         return path;
@@ -220,4 +192,33 @@ public static class GraphSearch
         return mapPathEnd;
     }
 
+}
+
+public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Len)
+{
+    public IEnumerable<(TState from, TState to)> StepsForward()
+    {
+        return StepsBackward().Reverse();
+    }
+
+    public IEnumerable<(TState from, TState to)> StepsBackward()
+    {
+        var cur = this;
+        while (cur.Prev != null)
+        {
+            yield return (cur.Prev.State, cur.State);
+            cur = cur.Prev;
+        }
+    }
+
+    public PathItem<TState> Out()
+    {
+        var cur = this;
+        while (cur != null)
+        {
+            cur.State.Out();
+            cur = cur.Prev;
+        }
+        return this;
+    }
 }

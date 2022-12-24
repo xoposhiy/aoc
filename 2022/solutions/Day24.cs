@@ -25,11 +25,9 @@ public class Day24
     }
 
     private PathItem<(V pos, int time)> SearchPath(char[][] map, (V pos, int time) start, V endPos) =>
-        GraphSearch.BfsLazy(
-                p => GetMoves(map, p.State), start)
+        GraphSearch.BfsLazy(p => GetMoves(map, p.State), start)
             .First(p => p.State.pos == endPos)
-            //.Visualize(s => s.pos, s=>$"Time: {s.time} Pos: {s.pos}")
-            ;
+            .Visualize(s => s.pos, s=>$"Time: {s.time} Pos: {s.pos}");
 
     private IEnumerable<(V pos, int time)> GetMoves(char[][] map, (V pos, int time) cur) =>
         cur.pos.Area5()

@@ -29,7 +29,7 @@ public class Day16
             var withOpenValve = openMask.SetBit(valve);
             if (openMask != withOpenValve && valveObject.FlowRate > 0)
             {
-                var newDropPressure = dropPressure + (maxTime-path.Distance-1)*valveObject.FlowRate;
+                var newDropPressure = dropPressure + (maxTime-path.Len-1)*valveObject.FlowRate;
                 yield return new SearchNode(withOpenValve, valve, newDropPressure);
             }
             var neighbors = valveObject.NeighborIndices;
@@ -40,7 +40,7 @@ public class Day16
         var paths = GraphSearch.Bfs(GetNextStates, maxTime, new SearchNode(0, startValve, 0));
         paths.Count.Out("paths.Count: ");
         return paths
-            .Where(path => path.Distance == maxTime)
+            .Where(path => path.Len == maxTime)
             .GroupBy(x => x.State.OpenMask)
             .ToDictionary(g => g.Key, g => g.Max(p => p.State.DropPressure));
     }
