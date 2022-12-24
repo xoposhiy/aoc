@@ -93,11 +93,12 @@ public static class Extensions
         return items.Skip(count).Concat(items.Take(count));
     }
 
-    public static string[] CreateMap<T>(this IEnumerable<T> points, Func<T, V> getPoint, Func<V, string> empty, Func<T, string> showPoint)
+    public static string[] CreateMap<T>(this IEnumerable<T> points, Func<T, V> getPoint, Func<V, string> empty, Func<T, string> showPoint, V? min = null)
     {
+        min ??= new V(int.MaxValue, int.MaxValue);
         var pointsImage = points.ToDictionary(getPoint, showPoint);
-        var minX = pointsImage.Keys.Min(p => p.X);
-        var minY = pointsImage.Keys.Min(p => p.Y);
+        var minX = Math.Min(min.X, pointsImage.Keys.Min(p => p.X));
+        var minY = Math.Min(min.Y, pointsImage.Keys.Min(p => p.Y));
         var maxX = pointsImage.Keys.Max(p => p.X);
         var maxY = pointsImage.Keys.Max(p => p.Y);
         var map = new string[maxY - minY + 1];

@@ -13,8 +13,7 @@ await SolveDay();
 
 async Task SolveDay(int? optionalDay = null)
 {
-    var day = optionalDay ?? DateTime.Now.Day;
-    if (DateTime.Now.TimeOfDay.Hours < 3) day--;
+    var day = optionalDay ?? (DateTime.Now.TimeOfDay.Hours < 3 ? DateTime.Now.Day-1 : DateTime.Now.Day);
     Console.WriteLine("## Day " + day);
     var daySolution = CreateInstanceForDay(day);
 

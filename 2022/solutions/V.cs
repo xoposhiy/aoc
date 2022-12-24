@@ -37,6 +37,16 @@ public sealed class V : IEquatable<V>
             (1, -1) => "NE",
             _ => throw new Exception(ToString())
         };
+
+    public string ToArrow() =>
+        this switch
+        {
+            (0, 1) => "v",
+            (0, -1) => "^",
+            (1, 0) => ">",
+            (-1, 0) => "<",
+            _ => throw new Exception(ToString())
+        };
     
 
     public static V Parse(string s)
@@ -259,4 +269,9 @@ public sealed class V : IEquatable<V>
 
     public V RotateCW() => new(-Y, X); // Right → Down
     public V RotateCCW() => new(Y, -X);
+
+    public V Mod(int periodX, int periodY)
+    {
+        return new V(X.ModPositive(periodX), Y.ModPositive(periodY));
+    }
 }
