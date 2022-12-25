@@ -25,27 +25,16 @@ public class Day25
             var carry = digit > 2 ? 1 : 0;
             sum = sum / 5 + carry;
         }
-
         return snufu;
-
     }
 
-    private long Parse(string arg)
-    {
-        long v = 0;
-        foreach (var d in arg)
-        {
-            var digitValue = d switch
+    private long Parse(string arg) =>
+        arg.Select(d => d switch
             {
-                '2' => 2,
-                '1' => 1,
-                '0' => 0,
+                '2' or '1' or '0' => d - '0',
                 '-' => -1,
                 '=' => -2,
                 _ => throw new Exception(d.ToString())
-            };
-            v = checked(v * 5 + digitValue);
-        }
-        return v;
-    }
+            })
+            .Aggregate(0L, (current, digitValue) => checked(current * 5 + digitValue));
 }
