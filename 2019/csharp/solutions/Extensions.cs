@@ -1,122 +1,70 @@
 ﻿using System.Collections;
+using System.Numerics;
 
-public readonly record struct PathItem(V Pos, V? PrevPos, int Distance);
-public static class Extensions
+public static class BitsExtensions
 {
+    public static bool HasBit(this long v, int bitIndex) => (v & (1L << bitIndex)) != 0;
     public static bool HasBit(this int v, int bitIndex) => (v & (1 << bitIndex)) != 0;
-    public static bool HasBit(this int v, char letter) => v.HasBit(char.ToLower(letter) - 'a');
+
+    public static long SetBit(this long v, int bitIndex) => v | (1L << bitIndex);
     public static int SetBit(this int v, int bitIndex) => v | (1 << bitIndex);
-    public static int SetBit(this int v, char letter) => v.SetBit(char.ToLower(letter) - 'a');
+
+    public static long UnsetBit(this long v, int bitIndex) => v & ~(1L << bitIndex);
     public static int UnsetBit(this int v, int bitIndex) => v & ~(1 << bitIndex);
+
+    public static bool HasBit(this int v, char letter) => v.HasBit(char.ToLower(letter) - 'a');
+    public static int SetBit(this int v, char letter) => v.SetBit(char.ToLower(letter) - 'a');
     public static int UnsetBit(this int v, char letter) => v.UnsetBit(char.ToLower(letter) - 'a');
+}
 
-    public static bool IsOneOf<T>(this T item, params T[] set)
+public static class MapExtensions
+{
+    public static T Get<T>(this T[][] map, V pos)
     {
-        return set.IndexOf(item) >= 0;
+        if (pos.InRange(map))
+            return map[pos.Y][pos.X];
+        else throw new Exception(pos + " is out of range");
     }
 
-    public static IEnumerable<PathItem> Bfs<T>(this T[][] map, V start, Func<T, bool> isPassable, Func<T, bool> isTarget)
-    {
-        var visited = new HashSet<V> {start};
-        var queue = new Queue<PathItem>();
-        queue.Enqueue(new(start, null, 0));
-        while (queue.Count > 0)
-        {
-            var item = queue.Dequeue();
-            if (isTarget(map[item.Pos.Y][item.Pos.X]))
-                yield return item;
-            foreach (var next in V.Directions4.Select(d => item.Pos + d))
-            {
-                if (!next.InRange(map) || !isPassable(map[next.Y][next.X]) || visited.Contains(next))
-                    continue;
-                visited.Add(next);
-                queue.Enqueue(new(next, item.Pos, item.Distance + 1));
-            }
-        }
+    public static T Set<T>(this T[][] map, V pos, T value) => map[pos.Y][pos.X] = value;
 
+    public static V[] GetPositions<T>(this T[][] map, T value)
+    {
+        return map.GetPositions(v => Equals(v, value));
     }
 
-    public static IEnumerable<V> GetAll<T>(this T[][] map, Func<T, bool> predicate)
+    public static V[] GetPositions<T>(this T[][] map, Func<T, bool> predicate)
     {
+        var result = new List<V>();
         for (int y = 0; y < map.Length; y++)
         for (int x = 0; x < map[y].Length; x++)
         {
             if (predicate(map[y][x]))
-                yield return new(x, y);
+                result.Add(new(x, y));
         }
+
+        return result.ToArray();
     }
 
-
-
-
-    public static V GetPos<T>(this T[][] map, T value)
+    public static V GetPosition<T>(this T[][] map, T value)
     {
         for (var y = 0; y < map.Length; y++)
         for (var x = 0; x < map[y].Length; x++)
         {
-            if (map[y][x]!.Equals(value))
+            if (Equals(map[y][x], value))
                 return new(x, y);
         }
+
         throw new KeyNotFoundException();
-    }
-    
-    public static string[] CreateMap(this IEnumerable<V> points, string point = "#", string empty = ".")
-    {
-        var pointsSet = points.ToHashSet();
-        var minX = pointsSet.Min(p => p.X);
-        var minY = pointsSet.Min(p => p.Y);
-        var maxX = pointsSet.Max(p => p.X);
-        var maxY = pointsSet.Max(p => p.Y);
-        var map = new string[maxY - minY + 1];
-        for (int y = 0; y < map.Length; y++)
-        {
-            var line = new List<string>();
-            for (int x = 0; x < maxX - minX + 1; x++)
-            {
-                var p = new V(x + minX, y + minY);
-                line.Add(pointsSet.Contains(p) ? point : empty);
-            }
-            map[y] = string.Join("", line);
-        }
-        return map;
-    }
-
-    public static string Format(this object? value)
-    {
-        if (value is null) return "";
-        if (value is string s) return s;
-        if (value is IEnumerable e)
-        {
-            
-            var parts = e.Cast<object>().Select(Format).ToList();
-            if (parts.All(p => p.Length < 10))
-                return "[" + string.Join(",", parts) + "]";
-            return "[\n" + string.Join(",\n", parts) + "\n]";
-
-        }
-        return value.ToString() ?? "";
-    }
-
-    public static T Out<T>(this T value, string prefix = "")
-    {
-        Console.Write(prefix);
-        Console.WriteLine(value.Format());
-        return value;
-    }
-    public static Stack<T> ToStack<T>(this IEnumerable<T> source)
-    {
-        return new Stack<T>(source);
-    }
-    public static Queue<T> ToQueue<T>(this IEnumerable<T> source)
-    {
-        return new Queue<T>(source);
     }
 
     public static string[] FlipX(this string[] lines) => lines.Select(line => line.Reverse().StrJoin()).ToArray();
-    public static IEnumerable<T> Reversed<T>(this IEnumerable<T> source) => source.Reverse();
+
     public static IEnumerable<T> Column<T>(this T[][] map, int x) =>
         Enumerable.Range(0, map.Length).Select(y => map[y][x]);
+
     public static IEnumerable<T> Row<T>(this T[][] map, int y) => map[y];
+
     public static string[] Columns(this IEnumerable<string> rows)
     {
         var columns = new List<string>();
@@ -133,6 +81,81 @@ public static class Extensions
         }
         return columns.ToArray();
     }
+}
+
+public static class Extensions
+{
+    public static T ModPositive<T>(this T dividend, T divisor) where T : IAdditionOperators<T, T, T>, IModulusOperators<T, T, T> =>
+        (dividend % divisor + divisor) % divisor;
+    
+    public static bool IsOneOf<T>(this T item, params T[] set)
+    {
+        return set.IndexOf(item) >= 0;
+    }
+
+    public static IEnumerable<T> CycleShiftLeft<T>(this IList<T> items, int count)
+    {
+        count = count.ModPositive(items.Count);
+        return items.Skip(count).Concat(items.Take(count));
+    }
+
+    public static string[] CreateMap<T>(this IEnumerable<T> points, Func<T, V> getPoint, Func<V, string> empty, Func<T, string> showPoint, V? min = null)
+    {
+        min ??= new V(int.MaxValue, int.MaxValue);
+        var pointsImage = points.ToDictionary(getPoint, showPoint);
+        var minX = Math.Min(min.X, pointsImage.Keys.Min(p => p.X));
+        var minY = Math.Min(min.Y, pointsImage.Keys.Min(p => p.Y));
+        var maxX = pointsImage.Keys.Max(p => p.X);
+        var maxY = pointsImage.Keys.Max(p => p.Y);
+        var map = new string[maxY - minY + 1];
+        for (int y = 0; y < map.Length; y++)
+        {
+            var line = new List<string>();
+            for (int x = 0; x < maxX - minX + 1; x++)
+            {
+                var p = new V(x + minX, y + minY);
+                line.Add(pointsImage.TryGetValue(p, out var image) ? image: empty(p));
+            }
+            map[y] = string.Join("", line);
+        }
+        return map;
+    }
+
+    public static string[] CreateMap(this IEnumerable<V> points, string point = "#", string empty = ".") => 
+        points.CreateMap(v => v, _ => empty, _ => point);
+
+    public static IEnumerable<V> ToPoints(this string[] lines, Func<V, char, bool> isPoint) => 
+        lines.SelectMany((line, y) => line.Select((_, x) => new V(x, y)).Where(v => isPoint(v, lines[v.Y][v.X])));
+    
+    public static IEnumerable<V> ToPoints(this string[] lines, char pointSymbol) =>
+        lines.ToPoints((_, c) => c == pointSymbol);
+
+    public static string Format(this object? value)
+    {
+        if (value is null) return "";
+        if (value is string s) return s;
+        if (value is IEnumerable e)
+        {
+            
+            var parts = e.Cast<object>().Select(Format).ToList();
+            if (parts.All(p => p.Length < 5))
+                return "[" + string.Join(",", parts) + "]";
+            return "[\n" + string.Join(",\n", parts) + "\n]";
+
+        }
+        return value.ToString() ?? "";
+    }
+
+    public static T Out<T>(this T value, string prefix = "")
+    {
+        Console.Write(prefix);
+        Console.WriteLine(value.Format());
+        return value;
+    }
+    public static Stack<T> ToStack<T>(this IEnumerable<T> source) => new(source);
+    public static Queue<T> ToQueue<T>(this IEnumerable<T> source) => new(source);
+
+    public static IEnumerable<T> Reversed<T>(this IEnumerable<T> source) => source.Reverse();
 
     public static IEnumerable<V> Indices<T>(this T[][] map) =>
         V.AllInRange(map[0].Length, map.Length);
@@ -155,25 +178,6 @@ public static class Extensions
                 values.Remove(option.Item2.Single());
         }
         return d.ToDictionary(p => p.Item1, p => p.Item2.Single());
-    }
-
-    public static IEnumerable<IList<T>> GroupBy<T>(this IEnumerable<T> items, int groupSize) where T : notnull
-    {
-        var index = 0;
-        var group = new List<T>();
-        foreach (var item in items)
-        {
-            group.Add(item);
-            index++;
-            if (index == groupSize)
-            {
-                yield return group;
-                group = new List<T>();
-                index = 0;
-            }
-        }
-        if (group.Count > 0)
-            yield return group;
     }
 
     public static IEnumerable<T[]> SplitBy<T>(this IEnumerable<T> items, Predicate<T> isSeparator)
@@ -222,19 +226,11 @@ public static class Extensions
             yield return (value!, length);
     }
 
-    public static Dictionary<T, int> CountFrequency<T>(this IEnumerable<T> items) where T : notnull
-    {
-        var freq = new Dictionary<T, int>();
-        foreach (var item in items)
-            freq[item] = freq.GetValueOrDefault(item) + 1;
-        return freq;
-    }
-
     public static HashSet<TValue> IntersectAll<TKey, TValue>(this IEnumerable<TKey> items, Func<TKey, IEnumerable<TValue>> get)
     {
         return items.Select(get).IntersectAll();
     }
-    
+
     public static HashSet<T> IntersectAll<T>(this IEnumerable<IEnumerable<T>> items)
     {
         HashSet<T>? set = null;
@@ -245,12 +241,7 @@ public static class Extensions
         }
         return set ?? new HashSet<T>();
     }
-    
-    public static Dictionary<K, int> CountFrequency<T, K>(this IEnumerable<T> items, Func<T, K> getKey) where K : notnull
-    {
-        return items.Select(getKey).CountFrequency();
-    }
-    
+
     public static int IndexOf<T>(this IEnumerable<T> items, Func<T, bool> predicate)
     {
         var i = 0;
@@ -289,9 +280,6 @@ public static class Extensions
         return best;
     }
 
-    public static long Product(this IEnumerable<int> items) => items.Aggregate(1L, (a, b) => a * b);
-    public static long Product(this IEnumerable<long> items) => items.Aggregate(1L, (a, b) => a * b);
-    public static long Product<T>(this IEnumerable<T> items, Func<T, long> map) => items.Aggregate(1L, (a, b) => a * map(b));
     public static T? MaxBy<T>(this IEnumerable<T> items, Func<T, IComparable> getKey)
     {
         var best = default(T);
@@ -307,6 +295,22 @@ public static class Extensions
 
         return best;
     }
+
+    public static int Sum(this IEnumerable<int> items, Func<int, int, int> selectWithIndex)
+    {
+        var i = 0;
+        var sum = 0;
+        foreach (var item in items)
+        {
+            sum += selectWithIndex(item, i);
+            i++;
+        }
+        return sum;
+    }
+
+    public static long Product(this IEnumerable<int> items) => items.Aggregate(1L, (a, b) => a * b);
+    public static long Product(this IEnumerable<long> items) => items.Aggregate(1L, (a, b) => a * b);
+    public static long Product<T>(this IEnumerable<T> items, Func<T, long> map) => items.Aggregate(1L, (a, b) => a * map(b));
 
     public static int BoundTo(this int v, int left, int right)
     {
@@ -332,19 +336,17 @@ public static class Extensions
         return Enumerable.Repeat(item, count);
     }
 
-    public static bool InRange(this int v, int minInclusive, int maxExclusive)
-    {
-        return v >= minInclusive && v < maxExclusive;
-    }
+    public static bool InRange(this int v, int minInclusive, int maxExclusive) => 
+        v >= minInclusive && v < maxExclusive;
+
     public static bool EqAt<T>(this T[][] matrix, V pos, T expectedValue) where T : IEquatable<T> 
         => matrix.ContainsIndices(pos) && matrix[pos.Y][pos.X].Equals(expectedValue);
     
-    public static bool ContainsIndices<T>(this T[][] matrix, V v) => matrix.ContainsIndices(v.Y, v.X);
+    public static bool ContainsIndices<T>(this T[][] matrix, V v) => 
+        matrix.ContainsIndices(v.Y, v.X);
 
-    public static bool ContainsIndices<T>(this T[][] matrix, int i, int j)
-    {
-        return i.InRange(0, matrix.Length) && j.InRange(0, matrix[i].Length);
-    }
+    public static bool ContainsIndices<T>(this T[][] matrix, int rowIndex, int colIndex) => 
+        rowIndex.InRange(0, matrix.Length) && colIndex.InRange(0, matrix[rowIndex].Length);
 
     public static int IndexOf<T>(this IReadOnlyList<T> readOnlyList, T value)
     {
@@ -359,10 +361,30 @@ public static class Extensions
         return -1;
     }
 
+    public static Dictionary<TK, int> CountFrequency<T, TK>(this IEnumerable<T> items, Func<T, TK> getKey) where TK : notnull
+    {
+        return items.Select(getKey).CountFrequency();
+    }
+
+    public static Dictionary<T, int> CountFrequency<T>(this IEnumerable<T> items) where T : notnull
+    {
+        var freq = new Dictionary<T, int>();
+        foreach (var item in items)
+            freq[item] = freq.GetValueOrDefault(item) + 1;
+        return freq;
+    }
+
     public static TV GetValueOrCreate<TK, TV>(this IDictionary<TK, TV> d, TK key, Func<TK, TV> create)
     {
         if (d.TryGetValue(key, out var v)) return v;
         return d[key] = create(key);
+    }
+
+    public static int UpdateMax<TK>(this IDictionary<TK, int> d, TK key, int newValue)
+    {
+        if (d.TryGetValue(key, out var current) && current >= newValue)
+            return current;
+        return d[key] = newValue;
     }
 
     public static int ElementwiseHashcode<T>(this IEnumerable<T> items)
@@ -381,30 +403,18 @@ public static class Extensions
         return int.Parse(s);
     }
 
-    public static string StrJoin<T>(this IEnumerable<T>? items, string delimiter = "")
-    {
-        return items == null ? "" : string.Join(delimiter, items);
-    }
-
     public static string Reverse(this string s)
     {
         return new(s.ToCharArray().Reverse().ToArray());
     }
 
+    public static string StrJoin<T>(this IEnumerable<T>? items, string delimiter = "")
+    {
+        return items == null ? "" : string.Join(delimiter, items);
+    }
+
     public static string StrJoin<T>(this IEnumerable<T> items, string delimiter, Func<T, string> toString)
     {
         return items.Select(toString).StrJoin(delimiter);
-    }
-    
-    public static int Sum(this IEnumerable<int> items, Func<int, int, int> selectWithIndex)
-    {
-        var i = 0;
-        var sum = 0;
-        foreach (var item in items)
-        {
-            sum += selectWithIndex(item, i);
-            i++;
-        }
-        return sum;
     }
 }

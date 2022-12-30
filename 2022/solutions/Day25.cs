@@ -19,7 +19,7 @@ public class Day25
         var snufu = "";
         while (num != 0)
         {
-            var digit = (int)(num.ModPositive(5));
+            var digit = (int)num.ModPositive(5);
             snufu = "012=-"[digit] + snufu;
             num = num / 5 + (digit > 2 ? 1 : 0);
         }

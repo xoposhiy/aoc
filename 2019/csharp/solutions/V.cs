@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 
-public class V : IEquatable<V>
+public sealed class V : IEquatable<V>
 {
     public static readonly V Zero = new V(0, 0);
 
@@ -24,6 +24,31 @@ public class V : IEquatable<V>
             _ => throw new Exception(compass)
         };
     
+    public string ToCompass() =>
+        this switch
+        {
+            (0, 1) => "S",
+            (0, -1) => "N",
+            (1, 0) => "E",
+            (-1, 0) => "W",
+            (-1, 1) => "SW",
+            (-1, -1) => "NW",
+            (1, 1) => "SE",
+            (1, -1) => "NE",
+            _ => throw new Exception(ToString())
+        };
+
+    public char ToArrow() =>
+        this switch
+        {
+            (0, 1) => 'v',
+            (0, -1) => '^',
+            (1, 0) => '>',
+            (-1, 0) => '<',
+            (0, 0) => '*',
+            _ => '?'
+        };
+    
 
     public static V Parse(string s)
     {
@@ -36,39 +61,23 @@ public class V : IEquatable<V>
         X = x;
         Y = y;
     }
+
     public V(double x, double y)
         :this((int)Math.Round(x), (int)Math.Round(y))
     {
     }
 
-
     public bool Equals(V? other)
     {
-        if (ReferenceEquals(null, other))
-            return false;
-        if (ReferenceEquals(this, other))
-            return true;
-        return X.Equals(other.X) && Y.Equals(other.Y);
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return X == other.X && Y == other.Y;
     }
 
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj))
-            return false;
-        if (ReferenceEquals(this, obj))
-            return true;
-        if (obj.GetType() != GetType())
-            return false;
-        return Equals((V)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            return (X.GetHashCode() * 397) ^ Y.GetHashCode();
-        }
-    }
+    public override bool Equals(object? obj) => 
+        ReferenceEquals(this, obj) || obj is V v && Equals(v);
+    
+    public override int GetHashCode() => unchecked((X * 397) ^ Y);
 
     public static bool operator ==(V left, V right) => Equals(left, right);
     public static bool operator !=(V left, V right) => !Equals(left, right);
@@ -105,6 +114,7 @@ public class V : IEquatable<V>
     public static V operator *(V a, int k) => new V(k * a.X, k * a.Y);
     public static V operator *(int k, V a) => new V(k * a.X, k * a.Y);
     public static V operator /(V a, int k) => new V(a.X / k, a.Y / k);
+    public static V operator %(V a, int k) => new V(a.X % k, a.Y % k);
     public long ScalarProd(V b) => X * b.X + Y * b.Y;
     public long VectorProd(V b) => X * b.Y - Y * b.X;
 
@@ -196,17 +206,28 @@ public class V : IEquatable<V>
 
     public IEnumerable<V> Area9()
     {
-        for (int dx = -1; dx <= 1; dx++)
-        for (int dy = -1; dy <= 1; dy++)
-            yield return new V(X + dx, Y + dy);
+        yield return this;
+        yield return new V(X - 1, Y - 1);
+        yield return new V(X - 1, Y);
+        yield return new V(X - 1, Y + 1);
+        yield return new V(X, Y - 1);
+        yield return new V(X, Y + 1);
+        yield return new V(X + 1, Y - 1);
+        yield return new V(X + 1, Y);
+        yield return new V(X + 1, Y + 1);
     }
 
+    //public static readonly V[] Directions8 = { E, SE, S, SW, W, NW, N, NE };
     public IEnumerable<V> Area8()
     {
-        for (int dx = -1; dx <= 1; dx++)
-        for (int dy = -1; dy <= 1; dy++)
-            if (dx != 0 || dy != 0)
-                yield return new V(X + dx, Y + dy);
+        yield return new V(X + 1, Y);
+        yield return new V(X + 1, Y + 1);
+        yield return new V(X, Y + 1);
+        yield return new V(X - 1, Y + 1);
+        yield return new V(X - 1, Y);
+        yield return new V(X - 1, Y - 1);
+        yield return new V(X, Y - 1);
+        yield return new V(X + 1, Y - 1);
     }
 
     public IEnumerable<V> Area4()
@@ -231,5 +252,27 @@ public class V : IEquatable<V>
         if (X == 0 && Y == 0)
             return this;
         return new V(Math.Sign(X), Math.Sign(Y));
+    }
+
+    public V[] SequenceTo(V other)
+    {
+        var delta = (other - this);
+        if (delta.X == 0 || delta.Y == 0 || delta.X == delta.Y)
+        {
+            var stepsCount = delta.CLen;
+            var res = new List<V>();
+            for (int i = 0; i <= stepsCount; i++)
+                res.Add(this + delta.Signum() * i);
+            return res.ToArray();
+        }
+        throw new NotSupportedException("Only diagonals, horizontals or verticals are supported");
+    }
+
+    public V RotateCW() => new(-Y, X); // Right → Down
+    public V RotateCCW() => new(Y, -X);
+
+    public V Mod(int periodX, int periodY)
+    {
+        return new V(X.ModPositive(periodX), Y.ModPositive(periodY));
     }
 }

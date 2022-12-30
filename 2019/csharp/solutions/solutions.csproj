@@ -7,8 +7,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Folder Include="inputs\" />
+    <PackageReference Include="Shouldly" Version="4.1.0" />
+    <PackageReference Include="TextCopy" Version="6.1.0" />
   </ItemGroup>
 
 </Project>

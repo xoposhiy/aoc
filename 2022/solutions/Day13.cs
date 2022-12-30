@@ -22,14 +22,15 @@ public class Day13
             .Where(i => Compare(pairs[i].a, pairs[i].b) <= 0)
             .Sum(i => i + 1)
             .Out("Part1: ").ShouldBe(5013);
-        var divider1 = JsonNode.Parse("[[2]]")!;
-        var divider2 = JsonNode.Parse("[[6]]")!;
-        
+
+
         /*
         Part 2
         Ко всем выражениям из входного файла добавить два разделителя [[2]] и [[6]], отсортировать по возрастанию, 
         и найти произведение индексов разделителей в отсортированном массиве выражений.   
          */
+        var divider1 = JsonNode.Parse("[[2]]")!;
+        var divider2 = JsonNode.Parse("[[6]]")!;
         var all = pairs
             .SelectMany(p => new[] { p.a, p.b })
             .Concat(new[] { divider1, divider2 })

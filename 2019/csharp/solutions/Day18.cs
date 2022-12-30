@@ -1,4 +1,6 @@
-﻿public class Day18
+﻿using Shouldly;
+
+public class Day18
 {
     public void Solve(char[][] map)
     {
@@ -7,17 +9,27 @@
 
         IEnumerable<(V KeyPos, char Key, int Distance)> GetMoves(V pos, int myKeys)
         {
-            var paths = map.Bfs(
-                    pos, 
-                    c => c.IsOneOf('.', '@') 
-                         || char.IsLower(c) 
-                         || char.IsUpper(c) && myKeys.HasBit(c),
-                    char.IsLower)
-                .ToDictionary(p => p.Pos);
-            //paths.Count.Out("reachable points: ");
+            IEnumerable<V> GetNextPos(V cur)
+            {
+                foreach (var next in cur.Area4())
+                {
+                    if (!next.InRange(map)) continue;
+                    var c = map.Get(next);
+                    if (c.IsOneOf('.', '@')
+                        || char.IsLower(c)
+                        || char.IsUpper(c) && myKeys.HasBit(c))
+                        yield return next;
+                }
+            }
+
+            var paths = GraphSearch.Bfs(
+                prev => GetNextPos(prev.State),
+                    int.MaxValue, pos)
+                .Where(p => char.IsLower(map.Get(p.State)))
+                .ToDictionary(p => p.State);
             return keyPositions
                     .Where(keyPos => !myKeys.HasBit(keyPos.Key) && paths.ContainsKey(keyPos.Value))
-                    .Select(keyPos => (keyPos.Value, keyPos.Key, paths[keyPos.Value].Distance));
+                    .Select(keyPos => (keyPos.Value, keyPos.Key, paths[keyPos.Value].Len));
         }
 
         int Dijkstra(V start)
@@ -52,7 +64,7 @@
         }
 
         var start = map.GetPos('@');
-        //Dijkstra(start).Out("Part 1: ");
+        Dijkstra(start).Part1().ShouldBe(4868);
 
         IEnumerable<int> DijkstraPart2(V a, V b, V c, V d)
         {
@@ -131,7 +143,7 @@
         var dists = DijkstraPart2(start+V.SE, start+V.SW, start+V.NE, start+V.NW);
         foreach (var dist in dists)
         {
-            dist.Out("Part 2: ");
+            dist.Part2().ShouldBe(1984);
         }
     }
 }

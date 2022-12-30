@@ -9,19 +9,19 @@ public class Day12
         map.Set(startPos, 'a');
         map.Set(endPos, 'z');
 
-        map.Bfs(V.Directions4, (f, t) => t - f <= 1, startPos)
+        map.BfsLazy(V.Directions4, (f, t) => t - f <= 1, startPos)
             .First(p => p.Pos == endPos)
-            .Distance
+            .Len
             .Out("Part 1: ").ShouldBe(330);
 
-        map.Bfs(V.Directions4, (f, t) => t - f <= 1, starts:map.GetPositions('a'))
+        map.BfsLazy(V.Directions4, (f, t) => t - f <= 1, starts:map.GetPositions('a'))
             .First(p => p.Pos == endPos)
-            .Distance
+            .Len
             .Out("Part 2 (forward from multiple starts):\n").ShouldBe(321);
         
-        map.Bfs(V.Directions4, (f, t) => f - t <= 1, starts:endPos)
+        map.BfsLazy(V.Directions4, (f, t) => f - t <= 1, starts:endPos)
             .First(p => map.Get(p.Pos) == 'a')
-            .Distance
-            .Out("Part 2 (go backwards):\n").ShouldBe(321); ;
+            .Len
+            .Out("Part 2 (go backwards):\n").ShouldBe(321);
     }
 }

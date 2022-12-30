@@ -1,33 +1,46 @@
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
+using System.Text;
 
-Console.WriteLine("# Advent of Code 2019");
+var year = 2022;
 
+Console.WriteLine($"# Advent of Code {year}");
 Console.WriteLine();
 
 await SolveDay(18);
-
 //foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
-async Task SolveDay(int day)
+
+async Task SolveDay(int? optionalDay = null)
 {
+    var day = optionalDay ?? (DateTime.Now.TimeOfDay.Hours < 3 ? DateTime.Now.Day-1 : DateTime.Now.Day);
+    if (day > 25) day = 25;
     Console.WriteLine("## Day " + day);
+    var daySolution = CreateInstanceForDay(day);
 
     var inputFilename = $"../../../inputs/{day:D2}.txt";
     await DownloadInputIfNeeded(inputFilename, day);
 
-    var daySolution = CreateInstanceForDay(day);
     var sw = Stopwatch.StartNew();
-    daySolution.GetType().GetMethod("Solve")!.InvokeWithParsedArgs(daySolution, inputFilename);
+    var singleSolve = daySolution.GetType().GetMethod("Solve");
+    if (singleSolve != null)
+        singleSolve.InvokeWithParsedArgs(daySolution, inputFilename);
+    else
+    {
+        daySolution.GetType().GetMethod("Part1")!.InvokeWithParsedArgs(daySolution, inputFilename);
+        daySolution.GetType().GetMethod("Part2")!.InvokeWithParsedArgs(daySolution, inputFilename);
+    }
     Console.WriteLine("Total time: " + sw.Elapsed);
     Console.WriteLine();
 }
 
-async Task DownloadInputIfNeeded(string s, int i)
+async Task DownloadInputIfNeeded(string filename, int i)
 {
-    if (!File.Exists(s))
+    // if no file filename or it has zero size
+    if (!File.Exists(filename) || new FileInfo(filename).Length == 0)
     {
-        var inputUrl = $"https://adventofcode.com/2019/day/{i}/input";
+        File.WriteAllBytes(filename, Array.Empty<byte>());
+        var inputUrl = $"https://adventofcode.com/{year}/day/{i}/input";
         var httpMessageHandler = new HttpClientHandler();
         var aocSession = Environment.GetEnvironmentVariable("AOC");
         if (string.IsNullOrEmpty(aocSession))
@@ -35,14 +48,24 @@ async Task DownloadInputIfNeeded(string s, int i)
 
         httpMessageHandler.CookieContainer.Add(new Cookie("session", aocSession, "/", "adventofcode.com"));
         var inp = await new HttpClient(httpMessageHandler).GetByteArrayAsync(inputUrl);
-        File.WriteAllBytes(s, inp);
-        Console.WriteLine($"Input downloaded to {Path.GetFullPath(s)}");
+        File.WriteAllBytes(filename, inp);
+        Console.WriteLine($"Input downloaded to {Path.GetFullPath(filename)}");
     }
 }
 
 object CreateInstanceForDay(int dayNumber)
 {
     var assembly = Assembly.GetExecutingAssembly();
-    var dayType = assembly.GetType("Day" + dayNumber) ?? assembly.GetType("Day0" + dayNumber)!;
+    var dayType = assembly.GetType("Day" + dayNumber) ?? assembly.GetType("Day0" + dayNumber);
+    if (dayType == null)
+    {
+        var dayN = FileHelper.PatchFilename("DayN.cs");
+        var content = File.ReadAllText(dayN)
+            .Replace("class DayN", $"class Day{dayNumber:D2}")
+            .Replace("LinkToDayN", $"https://adventofcode.com/{year}/day/{dayNumber}");
+        var daySourceFile = Path.Combine(Path.GetDirectoryName(dayN)!, $"Day{dayNumber:D2}.cs");
+        File.WriteAllText(daySourceFile, content, Encoding.UTF8);
+        throw new NotImplementedException("No Day" + dayNumber + " class found. Created!");
+    }
     return Activator.CreateInstance(dayType) ?? throw new Exception("oops");
 }

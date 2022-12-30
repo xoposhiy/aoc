@@ -9,10 +9,10 @@ public class Day02
     public void Solve((char opponent, char something)[] moves)
     {
         int Score(int opp, int me) =>
-            me + ((me - opp + 4) % 3) * 3 + 1;
+            me + (me - opp + 1).ModPositive(3) * 3 + 1;
 
         int Score2(int opp, int outcome) =>
-            Score(opp, (opp + outcome - 1 + 3) % 3);
+            Score(opp, (opp + outcome - 1).ModPositive(3));
 
         var rounds = moves.Select(p => (p.opponent-'A', p.something-'X')).ToList();
         

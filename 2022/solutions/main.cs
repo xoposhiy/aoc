@@ -8,12 +8,14 @@ var year = 2022;
 Console.WriteLine($"# Advent of Code {year}");
 Console.WriteLine();
 
-await SolveDay();
+//await SolveDay();
 //foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
+foreach (var dayNumber in Enumerable.Range(1, 25)) await SolveDay(dayNumber);
 
 async Task SolveDay(int? optionalDay = null)
 {
     var day = optionalDay ?? (DateTime.Now.TimeOfDay.Hours < 3 ? DateTime.Now.Day-1 : DateTime.Now.Day);
+    if (day > 25) day = 25;
     Console.WriteLine("## Day " + day);
     var daySolution = CreateInstanceForDay(day);
 
