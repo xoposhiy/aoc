@@ -7,9 +7,8 @@ using System.Text.RegularExpressions;
 
 public static class ParsingExtensions
 {
-    public static void InvokeWithParsedArgs(this MethodInfo method, object instance, string inputFilename)
+    public static void InvokeWithParsedArgs(this MethodInfo method, object instance, string[] lines)
     {
-        var lines = File.ReadAllLines(inputFilename);
         var separators = method.GetCustomAttribute<SeparatorsAttribute>()?.SeparatorChars ?? " \t,;:";
         var args = lines.ParseArguments(method.GetParameters(), new ParseSettings(separators));
         method.Invoke(instance, args);
@@ -69,8 +68,14 @@ public static class ParsingExtensions
     {
         if (blockType == typeof(string))
             return lines.StrJoin("\n");
+        if (blockType == typeof(int))
+            return int.Parse(lines.Single());
+        if (blockType == typeof(long))
+            return long.Parse(lines.Single());
         if (blockType == typeof(JsonNode))
             return JsonNode.Parse(lines.StrJoin("\n"))!;
+        if (blockType == typeof(JsonObject))
+            return (JsonObject)JsonNode.Parse(lines.StrJoin("\n"))!;
         if (blockType.IsArray) // line → element
         {
             var elementType = blockType.GetElementType()!;
@@ -111,6 +116,10 @@ public static class ParsingExtensions
         var initialStartIndex = startIndex;
         try
         {
+            if (type.IsArray)
+                return ParseArray(type, ps, ref startIndex, allowSplitToFields, settings);
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+                return ParseList(type, ps, ref startIndex);
             if (startIndex >= ps.Length)
                 throw new FormatException($"Line {ps.StrJoin(" ")} has not enough parts :(");
             if (type == typeof(int))
@@ -125,10 +134,6 @@ public static class ParsingExtensions
                 return ps[startIndex++][0];
             if (type.IsEnum)
                 return Enum.Parse(type, ps[startIndex++], ignoreCase: true);
-            if (type.IsArray)
-                return ParseArray(type, ps, ref startIndex, allowSplitToFields, settings);
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                return ParseList(type, ps, ref startIndex);
             return ParseObject(ps, type, ref startIndex, allowSplitToFields, settings);
         }
         catch (Exception e)

@@ -23,18 +23,17 @@ public static class AocExtensions
         }
         var answers = File.ReadLines(answerFilename).ToList();
         if (answers.Count < partNumber)
-        {
             answers.Add(answer.Format());
-            File.WriteAllLines(answerFilename, answers);
-            return;
-        }
-
         if (answers[partNumber - 1] != answer.Format())
         {
-            Console.WriteLine($"========================================================================");
-            Console.WriteLine($"WRONG ANSWER! Expected: {answers[partNumber-1]} Actual: {answer.Format()}");
-            Console.WriteLine($"========================================================================");
+            Console.WriteLine("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
+            Console.WriteLine($"OTHER ANSWER! Was: {answers[partNumber-1]} Now: {answer.Format()}. Replace stored answer with the new one");
+            Console.WriteLine("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+            Console.WriteLine();
+            answers[partNumber - 1] = answer.Format();
         }
+        File.WriteAllLines(answerFilename, answers);
+
     }
 
     public static T Part2<T>(this T answer, string comment = "")

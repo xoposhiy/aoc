@@ -25,12 +25,13 @@ async Task SolveDay(int? optionalDay = null)
 
     var sw = Stopwatch.StartNew();
     var singleSolve = daySolution.GetType().GetMethod("Solve");
+    var lines = File.ReadAllLines(inputFilename);
     if (singleSolve != null)
-        singleSolve.InvokeWithParsedArgs(daySolution, inputFilename);
+        singleSolve.InvokeWithParsedArgs(daySolution, lines);
     else
     {
-        daySolution.GetType().GetMethod("Part1")!.InvokeWithParsedArgs(daySolution, inputFilename);
-        daySolution.GetType().GetMethod("Part2")!.InvokeWithParsedArgs(daySolution, inputFilename);
+        daySolution.GetType().GetMethod("Part1")!.InvokeWithParsedArgs(daySolution, lines);
+        daySolution.GetType().GetMethod("Part2")!.InvokeWithParsedArgs(daySolution, lines);
     }
     Console.WriteLine("Total time: " + sw.Elapsed);
     Console.WriteLine();
