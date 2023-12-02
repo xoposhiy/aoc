@@ -1,4 +1,4 @@
-public record MapPathItem(V Pos, MapPathItem? Prev, int Len);
+﻿public record MapPathItem(V Pos, MapPathItem? Prev, int Len);
 
 public static class GraphSearch
 {
@@ -65,10 +65,7 @@ public static class GraphSearch
         }
     }
 
-    public static IEnumerable<MapPathItem> BfsLazy<T>(
-		this T[][] map, V[] neighbors, 
-		Func<T, T, bool> canPassFromTo, 
-		params V[] starts)
+    public static IEnumerable<MapPathItem> BfsLazy<T>(this T[][] map, V[] neighbors, Func<T, T, bool> canPassFromTo, params V[] starts)
     {
         var visited = starts.ToHashSet();
         var queue = new Queue<MapPathItem>();
