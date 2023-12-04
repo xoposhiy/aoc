@@ -11,7 +11,6 @@ public class Day03
     public void Solve(char[][] map)
     {
         var sp = map.GetPositions(c => !char.IsDigit(c) && c != '.').ToHashSet();
-        Console.WriteLine(sp.Count);
         var numbers = new List<(V nPos, V sPos, long number, char symbol)>();
         for (int y = 0; y < map.Length; y++)
         {
@@ -41,7 +40,6 @@ public class Day03
 
         var gears = numbers.Distinct().Where(t => t.symbol == '*').GroupBy(t => t.sPos)
             .Where(g => g.Count() == 2).ToList();
-        gears.Out();
         gears
             .Sum(t => t.Product(g => g.number)).Part2();
     }

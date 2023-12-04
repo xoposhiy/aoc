@@ -13,9 +13,9 @@ public class Day02
 {
     public enum Color { Red, Green, Blue }
 
-    public record Game(int Id, (int Count, Color Color)[] Turns);
+    public record Game(string _, int Id, (int Count, Color Color)[] Turns);
     
-    public void Solve(string _, Game[] games)
+    public void Solve(Game[] games)
     {
         bool CanPlay(Game game)
         {
