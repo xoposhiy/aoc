@@ -7,13 +7,15 @@
     - Sum of all games its power — the product of max count of each color
  */
 
+using System.Xml.Serialization;
+
 public class Day02
 {
     public enum Color { Red, Green, Blue }
-    public record Game(string _ , int Id, (int Count, Color Color)[] Turns);
+
+    public record Game(int Id, (int Count, Color Color)[] Turns);
     
-    
-    public void Solve(Game[] games)
+    public void Solve(string _, Game[] games)
     {
         bool CanPlay(Game game)
         {

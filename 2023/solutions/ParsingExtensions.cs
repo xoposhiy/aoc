@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -9,7 +10,7 @@ public static class ParsingExtensions
 {
     public static void InvokeWithParsedArgs(this MethodInfo method, object instance, string[] lines)
     {
-        var separators = method.GetCustomAttribute<SeparatorsAttribute>()?.SeparatorChars ?? " \t,;:";
+        var separators = method.GetCustomAttribute<SeparatorsAttribute>()?.SeparatorChars ?? " \t,;:|";
         var args = lines.ParseArguments(method.GetParameters(), new ParseSettings(separators));
         method.Invoke(instance, args);
     }
@@ -225,8 +226,9 @@ public static class ParsingExtensions
         foreach (var regex in regExes)
         {
             var m = regex.Match(parts[startIndex++]);
+            //Line Card   1: 30 48 49 69  1 86 94 68 12 85 | 86 57 89  8 81 85 82 68  1 22 90  2 74 12 30 45 69 92 62  4 94 48 47 64 49 does not match template Game (?<id>-?\d+): (?<my>.+) \| (?<win>.+)
             if (!m.Success)
-                throw new FormatException($"Line {parts.StrJoin(" ")} does not match template {regex}");
+                throw new FormatException($"Line {parts.StrJoin(" ")} does not match template {regex} starting from {startIndex-1}");
             foreach (var name in regex.GetGroupNames())
                 matchesByName[name] = m.Groups[name].Value;
         }
@@ -240,7 +242,7 @@ public static class ParsingExtensions
         {
             var typeRe = ".+";
             if (p.ParameterType == typeof(int) || p.ParameterType == typeof(long))
-                typeRe = "-?\\d+";
+                typeRe = @"-?\d+";
             else if (p.ParameterType == typeof(char))
                 typeRe = ".";
             template = template.Replace($"@{p.Name}", $"(?<{p.Name}>{typeRe})");
@@ -278,6 +280,10 @@ public class TemplateAttribute : Attribute
     public string Template { get; }
 
     public TemplateAttribute(string template)
+    {
+        Template = template;
+    }
+    public TemplateAttribute(string template, params Expression<Func<string, (string separator, string template)>>[] arrayTemplates)
     {
         Template = template;
     }

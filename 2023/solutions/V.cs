@@ -80,7 +80,7 @@ public sealed class V : IEquatable<V>
     public override int GetHashCode() => unchecked((X * 397) ^ Y);
 
     public static bool operator ==(V left, V right) => Equals(left, right);
-    public static bool operator !=(V left, V right) => !Equals(left, right);
+    public static bool operator !=(V left, V? right) => !Equals(left, right);
 
     public long Len2 => (long)X * X + (long)Y * Y;
     public static readonly V None = new V(-1, -1);
