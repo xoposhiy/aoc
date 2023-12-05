@@ -16,6 +16,8 @@ public class Day02
         Blue
     }
 
+    public record Game(string _, int Id, (int Count, Color Color)[] Turns);
+
     public void Solve(Game[] games)
     {
         bool CanPlay(Game game)
@@ -39,6 +41,4 @@ public class Day02
             )
             .Part2();
     }
-
-    public record Game(string _, int Id, (int Count, Color Color)[] Turns);
 }
