@@ -16,8 +16,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Shouldly" Version="4.1.0"/>
-        <PackageReference Include="TextCopy" Version="6.1.0"/>
+        <PackageReference Include="Shouldly" Version="4.1.0" />
+        <PackageReference Include="TextCopy" Version="6.1.0" />
     </ItemGroup>
 
 </Project>
