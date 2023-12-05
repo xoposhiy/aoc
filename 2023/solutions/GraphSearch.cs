@@ -17,19 +17,17 @@ public static class GraphSearch
         {
             var pathItem = q.Dequeue();
             foreach (var state in getNextStates(pathItem.State))
-            {
-                if (visited.Add(state)) 
+                if (visited.Add(state))
                 {
                     var nextPathItem = new PathItem<TState>(state, pathItem, pathItem.Len + 1);
                     q.Enqueue(nextPathItem, getPriority(state));
                     yield return nextPathItem;
                 }
-            }
         }
     }
 
     public static List<PathItem<TState>> Bfs<TState>(
-        Func<PathItem<TState>, IEnumerable<TState>> getNextStates, 
+        Func<PathItem<TState>, IEnumerable<TState>> getNextStates,
         int maxDistance,
         params TState[] starts)
     {
@@ -44,11 +42,12 @@ public static class GraphSearch
                     .Where(visited.Add)
                     .Select(nextState => new PathItem<TState>(nextState, path, path.Len + 1)));
         }
+
         return queue;
     }
 
     public static IEnumerable<PathItem<TState>> BfsLazy<TState>(
-        Func<PathItem<TState>, IEnumerable<TState>> getNextStates, 
+        Func<PathItem<TState>, IEnumerable<TState>> getNextStates,
         params TState[] starts)
     {
         var visited = starts.ToHashSet();
@@ -65,12 +64,13 @@ public static class GraphSearch
         }
     }
 
-    public static IEnumerable<MapPathItem> BfsLazy<T>(this T[][] map, V[] neighbors, Func<T, T, bool> canPassFromTo, params V[] starts)
+    public static IEnumerable<MapPathItem> BfsLazy<T>(this T[][] map, V[] neighbors, Func<T, T, bool> canPassFromTo,
+        params V[] starts)
     {
         var visited = starts.ToHashSet();
         var queue = new Queue<MapPathItem>();
         foreach (var start in starts)
-            queue.Enqueue(new(start, null, 0));
+            queue.Enqueue(new MapPathItem(start, null, 0));
         while (queue.Count > 0)
         {
             var item = queue.Dequeue();
@@ -81,29 +81,25 @@ public static class GraphSearch
                 if (!next.InRange(map) || !canPassFromTo(from, map.Get(next)) || visited.Contains(next))
                     continue;
                 visited.Add(next);
-                queue.Enqueue(new(next, item, item.Len + 1));
+                queue.Enqueue(new MapPathItem(next, item, item.Len + 1));
             }
         }
     }
 
     public static IEnumerable<V> GetAll<T>(this T[][] map, Func<T, bool> predicate)
     {
-        for (int y = 0; y < map.Length; y++)
-        for (int x = 0; x < map[y].Length; x++)
-        {
+        for (var y = 0; y < map.Length; y++)
+        for (var x = 0; x < map[y].Length; x++)
             if (predicate(map[y][x]))
-                yield return new(x, y);
-        }
+                yield return new V(x, y);
     }
 
     public static V GetPos<T>(this T[][] map, T value)
     {
         for (var y = 0; y < map.Length; y++)
         for (var x = 0; x < map[y].Length; x++)
-        {
             if (map[y][x]!.Equals(value))
-                return new(x, y);
-        }
+                return new V(x, y);
         throw new KeyNotFoundException();
     }
 
@@ -131,20 +127,22 @@ public static class GraphSearch
             if (first)
             {
                 ShowDescription(0, step.from);
-                Console.SetCursorPosition(from.X, from.Y+1);
+                Console.SetCursorPosition(from.X, from.Y + 1);
                 Console.Write('*');
                 first = false;
             }
-            Console.SetCursorPosition(to.X, to.Y+1);
-            Console.Write((to-from).ToArrow());
+
+            Console.SetCursorPosition(to.X, to.Y + 1);
+            Console.Write((to - from).ToArrow());
             if (stepByStep)
             {
-                var key = Console.ReadKey(intercept: true);
+                var key = Console.ReadKey(true);
                 if (key.Key == ConsoleKey.Escape) stepByStep = false;
                 var state = step.to;
                 ShowDescription(len, state);
             }
         }
+
         ShowDescription(path.Len, path.State);
         Console.ReadLine();
         return path;
@@ -170,12 +168,15 @@ public static class GraphSearch
                 nextToClear.Add(pos);
                 toClear.Remove(pos);
                 if (curItem.Prev == null)
+                {
                     Console.Write('*');
+                }
                 else
                 {
                     var prevPos = getPosition(curItem.Prev.State);
                     Console.Write((pos - prevPos).ToArrow());
                 }
+
                 curItem = curItem.Prev;
             }
 
@@ -184,6 +185,7 @@ public static class GraphSearch
                 Console.SetCursorPosition(v.X, v.Y);
                 Console.Write(' ');
             }
+
             toClear = nextToClear;
             var end = getPosition(pathItem.State);
             Console.SetCursorPosition(end.X, end.Y);
@@ -200,8 +202,9 @@ public static class GraphSearch
         for (var p = mapPathEnd; p != null; p = p.Prev)
             pathItems.Add(p);
 
-        string DirChar(V next, V? prev) =>
-            (next - (prev ?? next)) switch
+        string DirChar(V next, V? prev)
+        {
+            return (next - (prev ?? next)) switch
             {
                 (0, -1) => "↑",
                 (0, 1) => "↓",
@@ -209,13 +212,13 @@ public static class GraphSearch
                 (1, 0) => "→",
                 _ => "*"
             };
+        }
 
         pathItems
-            .CreateMap(pi => pi.Pos, v => map == null ? "." : (map.Get(v) + ""), pi => DirChar(pi.Pos, pi.Prev?.Pos))
+            .CreateMap(pi => pi.Pos, v => map == null ? "." : map.Get(v) + "", pi => DirChar(pi.Pos, pi.Prev?.Pos))
             .Out();
         return mapPathEnd;
     }
-
 }
 
 public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Len)
@@ -243,6 +246,7 @@ public record PathItem<TState>(TState State, PathItem<TState>? Prev, int Len)
             cur.State.Out();
             cur = cur.Prev;
         }
+
         return this;
     }
 }

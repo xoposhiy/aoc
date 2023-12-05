@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using static System.Linq.Enumerable;
-using static System.Math;
+﻿// LinkToDayN
 
-// LinkToDayN
 public class DayN
 {
     public void Solve(string[] lines)

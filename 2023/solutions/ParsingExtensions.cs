@@ -14,15 +14,17 @@ public static class ParsingExtensions
         var args = lines.ParseArguments(method.GetParameters(), new ParseSettings(separators));
         method.Invoke(instance, args);
     }
+
     public static object[] ParseArguments(this string[] lines, ParameterInfo[] parameters, ParseSettings settings)
     {
         if (parameters.Length == 1)
         {
-            ParameterInfo param = parameters[0];
+            var param = parameters[0];
             if (param.GetCustomAttribute<ParamArrayAttribute>() != null)
-                return new object []{ lines.ParseBlocks(param, settings) };
+                return new object[] { lines.ParseBlocks(param, settings) };
             return new[] { lines.ParseBlock(param, settings) };
         }
+
         return lines.SplitBy(string.IsNullOrEmpty)
             .Select((block, i) => block.ParseBlock(parameters[i], settings))
             .ToArray();
@@ -31,7 +33,7 @@ public static class ParsingExtensions
     private static Array ParseBlocks(this string[] lines, ParameterInfo blocksParameter, ParseSettings settings)
     {
         if (!blocksParameter.ParameterType.IsArray)
-            throw new("Parameter 'blocks' must be an array");
+            throw new Exception("Parameter 'blocks' must be an array");
         var blockType = blocksParameter.ParameterType.GetElementType()!;
 
         return lines.SplitBy(string.IsNullOrEmpty)
@@ -82,8 +84,8 @@ public static class ParsingExtensions
             var elementType = blockType.GetElementType()!;
             return lines.Select(line => ParseLine(line, elementType, settings)).ToArray(elementType);
         }
-        return ParseObject(lines, blockType, allowSplitToFields: true, settings);
 
+        return ParseObject(lines, blockType, true, settings);
     }
 
     public static object ParseLine(this string line, Type resultType, ParseSettings settings)
@@ -94,11 +96,11 @@ public static class ParsingExtensions
                 return line;
             var templateAttr = resultType.GetCustomAttribute<TemplateAttribute>();
             if (templateAttr != null)
-                return new[]{line}.ParseObject(resultType, allowSplitToFields:true, settings);
+                return new[] { line }.ParseObject(resultType, true, settings);
             if (resultType.IsOneOf(typeof(JsonNode), typeof(JsonArray), typeof(JsonValue), typeof(JsonObject)))
                 return JsonNode.Parse(line)!;
             var fields = line.Split(settings.FieldSeparators.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            return Parse(fields, resultType, allowSplitToFields: false, settings);
+            return Parse(fields, resultType, false, settings);
         }
         catch (Exception e)
         {
@@ -112,7 +114,8 @@ public static class ParsingExtensions
         return Parse(ps, type, ref start, allowSplitToFields, settings);
     }
 
-    private static object Parse(this string[] ps, Type type, ref int startIndex, bool allowSplitToFields, ParseSettings settings)
+    private static object Parse(this string[] ps, Type type, ref int startIndex, bool allowSplitToFields,
+        ParseSettings settings)
     {
         var initialStartIndex = startIndex;
         try
@@ -134,7 +137,7 @@ public static class ParsingExtensions
             if (type == typeof(char))
                 return ps[startIndex++][0];
             if (type.IsEnum)
-                return Enum.Parse(type, ps[startIndex++], ignoreCase: true);
+                return Enum.Parse(type, ps[startIndex++], true);
             return ParseObject(ps, type, ref startIndex, allowSplitToFields, settings);
         }
         catch (Exception e)
@@ -150,14 +153,15 @@ public static class ParsingExtensions
         var addMethod = listType.GetMethod("Add", BindingFlags.Public | BindingFlags.Instance, new[] { elementType })!;
         while (startIndex < ps.Length)
         {
-            var value = Parse(ps, elementType, ref startIndex, allowSplitToFields: false, settings: null!);
+            var value = Parse(ps, elementType, ref startIndex, false, null!);
             addMethod.Invoke(list, new[] { value });
         }
 
         return list;
     }
 
-    private static object ParseArray(Type arrayType, string[] ps, ref int startIndex, bool allowSplitToFields, ParseSettings settings)
+    private static object ParseArray(Type arrayType, string[] ps, ref int startIndex, bool allowSplitToFields,
+        ParseSettings settings)
     {
         var items = new List<object>();
         while (startIndex < ps.Length)
@@ -169,13 +173,15 @@ public static class ParsingExtensions
         return items.ToArray(arrayType.GetElementType()!);
     }
 
-    private static object ParseObject(this string[] fields, Type objectType, bool allowSplitToFields, ParseSettings settings)
+    private static object ParseObject(this string[] fields, Type objectType, bool allowSplitToFields,
+        ParseSettings settings)
     {
         var start = 0;
         return ParseObject(fields, objectType, ref start, allowSplitToFields, settings);
     }
 
-    public static object ParseObject(this string[] fields, Type objectType, ref int startIndex, bool allowSplitToFields, ParseSettings settings)
+    public static object ParseObject(this string[] fields, Type objectType, ref int startIndex, bool allowSplitToFields,
+        ParseSettings settings)
     {
         var ctor = objectType.GetConstructors().MaxBy(c => c.GetParameters().Length)!;
         var parameters = ctor.GetParameters();
@@ -185,7 +191,9 @@ public static class ParsingExtensions
             var args = new List<object>();
             foreach (var param in parameters)
                 if (startIndex >= fields.Length && param.IsOptional)
+                {
                     args.Add(param.DefaultValue!);
+                }
                 else
                 {
                     var newSettings = settings.UpdateFrom(param);
@@ -194,11 +202,13 @@ public static class ParsingExtensions
                         : Parse(fields, param.ParameterType, ref startIndex, false, newSettings);
                     args.Add(arg);
                 }
+
             return ctor.Invoke(args.ToArray());
         }
         else
         {
-            var args = ParseArgumentsWithTemplate(parameters, templateAttribute.Template, fields, ref startIndex, settings);
+            var args = ParseArgumentsWithTemplate(parameters, templateAttribute.Template, fields, ref startIndex,
+                settings);
             return ctor.Invoke(args);
         }
     }
@@ -217,6 +227,7 @@ public static class ParsingExtensions
             else
                 args.Add(value.ParseLine(param.ParameterType, settings.UpdateFrom(param)));
         }
+
         return args.ToArray();
     }
 
@@ -228,7 +239,8 @@ public static class ParsingExtensions
             var m = regex.Match(parts[startIndex++]);
             //Line Card   1: 30 48 49 69  1 86 94 68 12 85 | 86 57 89  8 81 85 82 68  1 22 90  2 74 12 30 45 69 92 62  4 94 48 47 64 49 does not match template Game (?<id>-?\d+): (?<my>.+) \| (?<win>.+)
             if (!m.Success)
-                throw new FormatException($"Line {parts.StrJoin(" ")} does not match template {regex} starting from {startIndex-1}");
+                throw new FormatException(
+                    $"Line {parts.StrJoin(" ")} does not match template {regex} starting from {startIndex - 1}");
             foreach (var name in regex.GetGroupNames())
                 matchesByName[name] = m.Groups[name].Value;
         }
@@ -277,16 +289,18 @@ public record ParseSettings(string FieldSeparators = ",; \t")
 
 public class TemplateAttribute : Attribute
 {
-    public string Template { get; }
-
     public TemplateAttribute(string template)
     {
         Template = template;
     }
-    public TemplateAttribute(string template, params Expression<Func<string, (string separator, string template)>>[] arrayTemplates)
+
+    public TemplateAttribute(string template,
+        params Expression<Func<string, (string separator, string template)>>[] arrayTemplates)
     {
         Template = template;
     }
+
+    public string Template { get; }
 }
 
 public class SeparatorsAttribute : Attribute

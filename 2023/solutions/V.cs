@@ -1,17 +1,58 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 
 public sealed class V : IEquatable<V>
 {
-    public static readonly V Zero = new V(0, 0);
+    public static readonly V Zero = new(0, 0);
+    public static readonly V None = new(-1, -1);
+    public static readonly V Up = new(0, -1);
+    public static readonly V Down = new(0, 1);
+    public static readonly V Left = new(-1, 0);
+    public static readonly V Right = new(1, 0);
+    public static readonly V N = Up;
+    public static readonly V E = Right;
+    public static readonly V W = Left;
+    public static readonly V S = Down;
+    public static readonly V SE = S + E;
+    public static readonly V SW = S + W;
+    public static readonly V NE = N + E;
+    public static readonly V NW = N + W;
+
+    public static readonly V[] Directions2 = { Right, Down };
+    public static readonly V[] Directions4 = { Right, Down, Left, Up };
+    public static readonly V[] Directions5 = { Zero, Right, Down, Left, Up };
+    public static readonly V[] Directions8 = { E, SE, S, SW, W, NW, N, NE };
+    public static readonly V[] Directions9 = { Zero, E, SE, S, SW, W, NW, N, NE };
 
     public readonly int X;
     public readonly int Y;
 
-    public static V FromCompass(string compass) =>
-        compass switch
+    public V(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public V(double x, double y)
+        : this((int)Math.Round(x), (int)Math.Round(y))
+    {
+    }
+
+    public long Len2 => (long)X * X + (long)Y * Y;
+
+    public int MLen => Math.Abs(X) + Math.Abs(Y);
+
+    public int CLen => Math.Max(Math.Abs(X), Math.Abs(Y));
+
+    public bool Equals(V? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return X == other.X && Y == other.Y;
+    }
+
+    public static V FromCompass(string compass)
+    {
+        return compass switch
         {
             "W" or "L" => new V(-1, 0),
             "E" or "R" => new V(1, 0),
@@ -23,9 +64,11 @@ public sealed class V : IEquatable<V>
             "SW" => new V(1, 1),
             _ => throw new Exception(compass)
         };
-    
-    public string ToCompass() =>
-        this switch
+    }
+
+    public string ToCompass()
+    {
+        return this switch
         {
             (0, 1) => "S",
             (0, -1) => "N",
@@ -37,9 +80,11 @@ public sealed class V : IEquatable<V>
             (1, -1) => "NE",
             _ => throw new Exception(ToString())
         };
+    }
 
-    public char ToArrow() =>
-        this switch
+    public char ToArrow()
+    {
+        return this switch
         {
             (0, 1) => 'v',
             (0, -1) => '^',
@@ -48,7 +93,8 @@ public sealed class V : IEquatable<V>
             (0, 0) => '*',
             _ => throw new Exception(ToString())
         };
-    
+    }
+
 
     public static V Parse(string s)
     {
@@ -56,73 +102,88 @@ public sealed class V : IEquatable<V>
         return new V(int.Parse(parts[0]), int.Parse(parts[1]));
     }
 
-    public V(int x, int y)
+    public override bool Equals(object? obj)
     {
-        X = x;
-        Y = y;
+        return ReferenceEquals(this, obj) || (obj is V v && Equals(v));
     }
 
-    public V(double x, double y)
-        :this((int)Math.Round(x), (int)Math.Round(y))
+    public override int GetHashCode()
     {
+        return unchecked((X * 397) ^ Y);
     }
 
-    public bool Equals(V? other)
+    public static bool operator ==(V left, V right)
     {
-        if (other is null) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return X == other.X && Y == other.Y;
+        return Equals(left, right);
     }
 
-    public override bool Equals(object? obj) => 
-        ReferenceEquals(this, obj) || obj is V v && Equals(v);
-    
-    public override int GetHashCode() => unchecked((X * 397) ^ Y);
-
-    public static bool operator ==(V left, V right) => Equals(left, right);
-    public static bool operator !=(V left, V? right) => !Equals(left, right);
-
-    public long Len2 => (long)X * X + (long)Y * Y;
-    public static readonly V None = new V(-1, -1);
-    public static readonly V Up = new V(0, -1);
-    public static readonly V Down = new V(0, 1);
-    public static readonly V Left = new V(-1, 0);
-    public static readonly V Right = new V(1, 0);
-    public static readonly V N = Up;
-    public static readonly V E = Right;
-    public static readonly V W = Left;
-    public static readonly V S = Down;
-    public static readonly V SE = S + E;
-    public static readonly V SW = S + W;
-    public static readonly V NE = N + E;
-    public static readonly V NW = N + W;
-
-    public static readonly V[] Directions2 = { Right, Down }; 
-    public static readonly V[] Directions4 = { Right, Down, Left, Up }; 
-    public static readonly V[] Directions5 = { Zero, Right, Down, Left, Up }; 
-    public static readonly V[] Directions8 = { E, SE, S, SW, W, NW, N, NE }; 
-    public static readonly V[] Directions9 = { Zero, E, SE, S, SW, W, NW, N, NE }; 
+    public static bool operator !=(V left, V? right)
+    {
+        return !Equals(left, right);
+    }
 
     public override string ToString()
     {
         return $"{X.ToString(CultureInfo.InvariantCulture)} {Y.ToString(CultureInfo.InvariantCulture)}";
     }
 
-    public static V operator +(V a, V b) => new V(a.X + b.X, a.Y + b.Y);
-    public static V operator -(V a, V b) => new V(a.X - b.X, a.Y - b.Y);
-    public static V operator -(V a) => new V(-a.X, -a.Y);
-    public static V operator *(V a, int k) => new V(k * a.X, k * a.Y);
-    public static V operator *(int k, V a) => new V(k * a.X, k * a.Y);
-    public static V operator /(V a, int k) => new V(a.X / k, a.Y / k);
-    public static V operator %(V a, int k) => new V(a.X % k, a.Y % k);
-    public long ScalarProd(V b) => X * b.X + Y * b.Y;
-    public long VectorProd(V b) => X * b.Y - Y * b.X;
+    public static V operator +(V a, V b)
+    {
+        return new V(a.X + b.X, a.Y + b.Y);
+    }
 
-    public long Dist2To(V point) => (this - point).Len2;
+    public static V operator -(V a, V b)
+    {
+        return new V(a.X - b.X, a.Y - b.Y);
+    }
 
-    public double DistTo(V b) => Math.Sqrt(Dist2To(b));
-    
-    public double GetCollisionTime(V speed, V other, double radius) {
+    public static V operator -(V a)
+    {
+        return new V(-a.X, -a.Y);
+    }
+
+    public static V operator *(V a, int k)
+    {
+        return new V(k * a.X, k * a.Y);
+    }
+
+    public static V operator *(int k, V a)
+    {
+        return new V(k * a.X, k * a.Y);
+    }
+
+    public static V operator /(V a, int k)
+    {
+        return new V(a.X / k, a.Y / k);
+    }
+
+    public static V operator %(V a, int k)
+    {
+        return new V(a.X % k, a.Y % k);
+    }
+
+    public long ScalarProd(V b)
+    {
+        return X * b.X + Y * b.Y;
+    }
+
+    public long VectorProd(V b)
+    {
+        return X * b.Y - Y * b.X;
+    }
+
+    public long Dist2To(V point)
+    {
+        return (this - point).Len2;
+    }
+
+    public double DistTo(V b)
+    {
+        return Math.Sqrt(Dist2To(b));
+    }
+
+    public double GetCollisionTime(V speed, V other, double radius)
+    {
         if (DistTo(other) <= radius)
             return 0.0;
 
@@ -159,7 +220,7 @@ public sealed class V : IEquatable<V>
     public double GetAngleTo(V p2)
     {
         var (x, y) = p2;
-        return Math.Atan2(y-Y, x-X);
+        return Math.Atan2(y - Y, x - X);
     }
 
     public void Deconstruct(out int x, out int y)
@@ -170,28 +231,22 @@ public sealed class V : IEquatable<V>
 
     public static IEnumerable<V> AllInRange(int width, int height)
     {
-        for (int x = 0; x < width; x++)
-        for (int y = 0; y < height; y++)
-        {
+        for (var x = 0; x < width; x++)
+        for (var y = 0; y < height; y++)
             yield return new V(x, y);
-        }
     }
 
     public int MDistTo(V v2)
     {
         var (x, y) = v2;
-        return Math.Abs(x-X) + Math.Abs(y-Y);
+        return Math.Abs(x - X) + Math.Abs(y - Y);
     }
-
-    public int MLen =>  Math.Abs(X) + Math.Abs(Y);
 
     public int CDistTo(V v2)
     {
         var (x, y) = v2;
-        return Math.Max(Math.Abs(x-X), Math.Abs(y-Y));
+        return Math.Max(Math.Abs(x - X), Math.Abs(y - Y));
     }
-
-    public int CLen => Math.Max(Math.Abs(X), Math.Abs(Y));
 
     public bool InRange(int width, int height)
     {
@@ -256,20 +311,29 @@ public sealed class V : IEquatable<V>
 
     public V[] SequenceTo(V other)
     {
-        var delta = (other - this);
+        var delta = other - this;
         if (delta.X == 0 || delta.Y == 0 || delta.X == delta.Y)
         {
             var stepsCount = delta.CLen;
             var res = new List<V>();
-            for (int i = 0; i <= stepsCount; i++)
+            for (var i = 0; i <= stepsCount; i++)
                 res.Add(this + delta.Signum() * i);
             return res.ToArray();
         }
+
         throw new NotSupportedException("Only diagonals, horizontals or verticals are supported");
     }
 
-    public V RotateCW() => new(-Y, X); // Right → Down
-    public V RotateCCW() => new(Y, -X);
+    public V RotateCW()
+    {
+        return new V(-Y, X);
+        // Right → Down
+    }
+
+    public V RotateCCW()
+    {
+        return new V(Y, -X);
+    }
 
     public V Mod(int periodX, int periodY)
     {

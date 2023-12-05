@@ -14,7 +14,7 @@ await SolveDay();
 
 async Task SolveDay(int? optionalDay = null)
 {
-    var day = optionalDay ?? (DateTime.Now.TimeOfDay.Hours < 3 ? DateTime.Now.Day-1 : DateTime.Now.Day);
+    var day = optionalDay ?? (DateTime.Now.TimeOfDay.Hours < 3 ? DateTime.Now.Day - 1 : DateTime.Now.Day);
     if (day > 25) day = 25;
     Console.WriteLine("## Day " + day);
     CurrentDay.Day = day;
@@ -27,12 +27,15 @@ async Task SolveDay(int? optionalDay = null)
     var singleSolve = daySolution.GetType().GetMethod("Solve");
     var lines = File.ReadAllLines(inputFilename);
     if (singleSolve != null)
+    {
         singleSolve.InvokeWithParsedArgs(daySolution, lines);
+    }
     else
     {
         daySolution.GetType().GetMethod("Part1")!.InvokeWithParsedArgs(daySolution, lines);
         daySolution.GetType().GetMethod("Part2")!.InvokeWithParsedArgs(daySolution, lines);
     }
+
     Console.WriteLine("Total time: " + sw.Elapsed);
     Console.WriteLine();
 }
@@ -71,6 +74,7 @@ object CreateInstanceForDay(int dayNumber)
         File.WriteAllText(daySourceFile, content, Encoding.UTF8);
         throw new NotImplementedException("No Day" + dayNumber + " class found. Created!");
     }
+
     return Activator.CreateInstance(dayType) ?? throw new Exception("oops");
 }
 
