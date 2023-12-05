@@ -14,6 +14,8 @@ public record R(long Start, long End)
         return new R(start, end);
     }
 
+    public R ShiftBy(long value) => new(Start + value, End + value);
+
     public static R operator +(R range, long value) => new(range.Start + value, range.End + value);
     public static R operator -(R range, long value) => new(range.Start - value, range.End - value);
 }

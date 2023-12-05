@@ -9,42 +9,31 @@ public class Day05
 
         var stages = blocks.Skip(1).Select(ParseStage).ToList();
 
-        long Process(long seed)
-        {
-            foreach (var stage in stages)
-            foreach (var range in stage.Ranges)
-                if (range.Src.Contains(seed))
-                {
-                    seed = range.Dest.Start + seed - range.Src.Start;
-                    break;
-                }
-
-            return seed;
-        }
+        long Process(long seed) =>
+            stages.Aggregate(
+                seed, 
+                (cur, stage) => 
+                    cur + stage.Ranges
+                        .Where(r => r.Src.Contains(cur))
+                        .Select(r => r.Dest.Start - r.Src.Start)
+                        .FirstOrDefault(0));
 
         seeds.Select(Process).Min()
             .Part1();
         
-        var cur = new List<R>();
-        for (var index = 0; index < seeds.Length; index+=2)
-            cur.Add(new R(seeds[index], seeds[index]+seeds[index+1]-1));
-        var next = new List<R>();
-        foreach (var stage in stages)
-        {
-            foreach (var currentSeedRange in cur)
-            {
-                foreach (var r2 in stage.Ranges)
-                {
-                    var intersection = currentSeedRange.IntersectWith(r2.Src);
-                    if (intersection != null) next.Add(intersection + (r2.Dest.Start - r2.Src.Start));
-                }
-                var sourceRanges = stage.Ranges.Select(r => r.Src);
-                next.AddRange(currentSeedRange.MinusAll(sourceRanges)); // unmapped
-            }
-            cur = next;
-            next = new List<R>();
-        }
-        cur.Min(r => r.Start)
+        var seedRanges = 
+            seeds.Chunk(2)
+                .Select(chunk => R.FromLen(chunk[0], chunk[1]))
+                .ToList();
+        stages.Aggregate(seedRanges, 
+            (current, stage) => 
+                current.SelectMany(seedRange => 
+                        stage.Ranges.Select(mapRange => seedRange.IntersectWith(mapRange.Src)
+                                ?.ShiftBy(mapRange.Dest.Start - mapRange.Src.Start))
+                    .ExceptNulls()
+                    .Concat(seedRange.MinusAll(stage.Ranges.Select(r => r.Src))))
+                .ToList())
+            .Min(r => r.Start)
             .Part2();
     }
 

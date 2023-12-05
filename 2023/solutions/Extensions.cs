@@ -3,6 +3,13 @@ using System.Numerics;
 
 public static class BitsExtensions
 {
+    public static IEnumerable<T> ExceptNulls<T>(this IEnumerable<T?> items)
+    {
+        foreach (var item in items)
+        {
+            if (item is not null) yield return (T)item;
+        }
+    }
     public static void AddRange<T>(this HashSet<T> set, IEnumerable<T> items)
     {
         foreach (var item in items)
