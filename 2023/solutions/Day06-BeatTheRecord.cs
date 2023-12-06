@@ -3,12 +3,12 @@
 using Shouldly;
 using static System.Math;
 
-public class Day06
+public class Day061
 {
-    public void Solve((string what, int[] records)[] lines)
+    public void Solve((string what, int[] values)[] lines)
     {
-        var times = lines[0].records;
-        var records = lines[1].records;
+        var times = lines[0].values;
+        var records = lines[1].values;
 
         int WaysToWinNaive(long time, long record) =>
             Enumerable.Range(1, (int)time).Count(button => button * (time - button) > record);

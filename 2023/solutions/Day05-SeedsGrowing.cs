@@ -1,7 +1,7 @@
 ﻿using static System.Math;
 
 // https://adventofcode.com/2023/day/5
-public class Day05
+public class _Day05
 {
     [Oneline]
     public record Mapping(long DestStart, long SrcStart, long Len)
