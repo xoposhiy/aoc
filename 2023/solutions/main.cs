@@ -8,7 +8,7 @@ var year = 2023;
 Console.WriteLine($"# Advent of Code {year}");
 Console.WriteLine();
 
-await SolveDay(4);
+await SolveDay();
 //foreach (var dayNumber in Enumerable.Range(1, DateTime.Now.Day)) await SolveDay(dayNumber);
 //foreach (var dayNumber in Enumerable.Range(1, 25)) await SolveDay(dayNumber);
 
