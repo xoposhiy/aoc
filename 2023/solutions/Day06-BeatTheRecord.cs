@@ -3,7 +3,7 @@
 using Shouldly;
 using static System.Math;
 
-public class Day061
+public class Day06
 {
     public void Solve((string what, int[] values)[] lines)
     {
