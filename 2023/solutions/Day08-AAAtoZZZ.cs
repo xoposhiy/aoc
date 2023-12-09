@@ -1,7 +1,6 @@
 ﻿// https://adventofcode.com/2023/day/8
 
 using System.Diagnostics;
-using System.Numerics;
 using System.Text;
 using TextCopy;
 
@@ -35,7 +34,7 @@ public class Day08
                         ));
             // Constraints necessary for this solution:
             Debug.Assert(cycle.Single(n => n.node.Name.EndsWith("Z")).index == cycle.Count);
-            Debug.Assert(cycle.Count(n => n.node.Name.EndsWith("Z")) == 1);
+            //Debug.Assert(cycle.Count(n => n.node.Name.EndsWith("Z")) == 1);
             return cycle.Count;
         }
     }

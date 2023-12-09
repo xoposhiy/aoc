@@ -1,6 +1,4 @@
-﻿using static System.Math;
-
-// https://adventofcode.com/2023/day/5
+﻿// https://adventofcode.com/2023/day/5
 public class Day05
 {
     [Oneline]
@@ -42,7 +40,7 @@ public class Day05
         stage.Ranges.Select(mapRange =>
                 curRange.IntersectWith(mapRange.Src)?.ShiftBy(mapRange.Dest.Start - mapRange.Src.Start))
             .ExceptNulls()
-            .Concat(curRange.MinusAll(stage.Ranges.Select(r => r.Src)));
+            .Concat(curRange.ExcludeAll(stage.Ranges.Select(r => r.Src)));
 
 
 }

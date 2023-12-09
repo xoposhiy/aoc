@@ -1,8 +1,5 @@
 ﻿// https://adventofcode.com/2023/day/6
 
-using Shouldly;
-using static System.Math;
-
 public class Day06
 {
     public void Solve((string what, int[] values)[] lines)
@@ -10,8 +7,10 @@ public class Day06
         var times = lines[0].values;
         var records = lines[1].values;
 
+        #pragma warning disable CS8321 // Local function is declared but never used
         int WaysToWinNaive(long time, long record) =>
             Enumerable.Range(1, (int)time).Count(button => button * (time - button) > record);
+
 
         int WaysToWin(long time, long record)
         {

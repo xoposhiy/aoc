@@ -1,3 +1,4 @@
+global using static System.Math; 
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;
