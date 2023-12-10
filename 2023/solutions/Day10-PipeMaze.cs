@@ -16,10 +16,12 @@ public class Day10
     public void Solve(char[][] map)
     {
         var startPos = map.GetPosition('S');
-        var startSym = GetSymbol(GetNext(startPos).Select(n => n - startPos).ToArray()).Out("start symbol: ");
-        map.Set(startPos, startSym);
         var path = GraphSearch.Dfs(p => GetNext(p.State), startPos).MaxBy(p => p.Len)!;
         //path.VisualizeOnMap(map);
+        var steps = path.StepsForward().ToList();
+        var startSym = GetSymbol(new[] { steps.Last().to - startPos, steps[0].to - startPos }).Out("start symbol: ");
+        map.Set(startPos, startSym);
+        
         var loop = path.Select(p => p.State).ToHashSet();
         (loop.Count/2).Part1();
         
