@@ -1,5 +1,28 @@
 ﻿public static class CombinatoricsExtensions
 {
+    
+    public static IEnumerable<(T left, T right)> Pairs<T>(this IReadOnlyList<T> items)
+    {
+        for (int i = 0; i < items.Count; i++)
+        for (int j = i + 1; j < items.Count; j++)
+        {
+            yield return (items[i], items[j]);
+        }
+    }
+
+    public static IEnumerable<(T left, T right)> Bigrams<T>(this IReadOnlyList<T> items)
+    {
+        for (int i = 1; i < items.Count; i++)
+            yield return (items[i-1], items[i]);
+    }
+
+    public static IEnumerable<(int left, int right)> PairsIndices(this int n)
+    {
+        for (int i = 0; i < n; i++)
+        for (int j = i+1; j < n; j++)
+            yield return (i, j);
+    }
+
     public static IEnumerable<List<T>> Combinations<T>(this T[] items, int r)
     {
         int n = items.Length;

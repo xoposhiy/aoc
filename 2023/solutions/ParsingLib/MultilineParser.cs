@@ -99,6 +99,9 @@ public class MultilineParser
             var line = reader.ReadLine();
             res.Add(line.Select(c => ParseMapChar(c, cellType)).ToArray(cellType));
         }
+        if (!reader.IsEndOfLines && reader.CurrentLine == string.Empty)
+            reader.MoveToNextLine(); // skip empty line;
+
         return res.ToArray(mapType.GetElementType()!);
     }
     

@@ -34,12 +34,15 @@ public static class ParsingExtensions
             }
             else
             {
-                var paramSettings = settings.UpdateFrom(parameter);
                 var paramsArray = new List<object>();
                 var elementType = parameter.ParameterType.GetElementType()!;
+                var paramSettings = settings.UpdateFrom(parameter).UpdateFrom(elementType);
                 while (!reader.IsEndOfLines)
                 {
-                    var paramsItem = parser.Parse(elementType, reader, paramSettings.UpdateFrom(elementType));
+                    var isMap = parameter.Name!.EndsWith("maps", StringComparison.OrdinalIgnoreCase);
+                    var paramsItem = isMap 
+                        ? parser.ParseMap(elementType, reader)
+                        : parser.Parse(elementType, reader, paramSettings);
                     paramsArray.Add(paramsItem);
                 }
                 args.Add(paramsArray.ToArray(elementType));

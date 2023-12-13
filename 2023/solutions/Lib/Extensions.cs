@@ -1,11 +1,36 @@
 ﻿using System.Collections;
+using System.Numerics;
 
 public static class Extensions
 {
+    public static IEnumerable<TOut> SelectWithPrev<TIn, TOut>(
+        this IEnumerable<TIn> items, 
+        TOut outSeed,
+        Func<TIn, TOut, TOut> nextByCurrentInAndPrevOut)
+    {
+        yield return outSeed;
+        var curr = outSeed;
+        foreach (var item in items)
+            yield return curr = nextByCurrentInAndPrevOut(item, curr);
+    }
+    
     public static char Translate(this char ch, string sourceChars, string targetChars)
     {
         var index = sourceChars.IndexOf(ch);
         return index < 0 ? ch : targetChars[index];
+    }
+    
+    public static T[,] FillWith<T>(this T[,] array, T value)
+    {
+        for (var y = 0; y < array.GetLength(0); y++)
+        for (var x = 0; x < array.GetLength(1); x++)
+            array[y, x] = value;
+        return array;
+    }
+
+    public static T Sum<TIn, T>(this IEnumerable<TIn> vs, Func<TIn, T> map) where T : INumber<T>
+    {
+        return vs.Aggregate(T.Zero, (a, x) => a + map(x));
     }
     
     public static string Translate(this string s, string sourceChars, string targetChars) => 

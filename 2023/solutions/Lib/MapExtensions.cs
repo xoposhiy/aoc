@@ -97,6 +97,10 @@
     {
         return Enumerable.Range(0, map.Length).Select(y => map[y][x]);
     }
+    public static T[][] Columns<T>(this T[][] map)
+    {
+        return Enumerable.Range(0, map.Width()).Select(x => map.Column(x).ToArray()).ToArray();
+    }
 
     public static IEnumerable<T> Row<T>(this T[][] map, int y)
     {
