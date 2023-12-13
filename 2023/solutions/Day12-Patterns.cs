@@ -26,7 +26,7 @@ public class Day12
                     count += WayCount(nChars-1, nBlocks);
                 
                 // На клетке можем закончить блок:
-                if (nBlocks > 0 && FitBlockAt2(nChars-Blocks[nBlocks-1], Blocks[nBlocks-1])) 
+                if (nBlocks > 0 && FitBlockAt(nChars-Blocks[nBlocks-1], Blocks[nBlocks-1])) 
                     count += WayCount(nChars-Blocks[nBlocks-1]-1, nBlocks-1);
                 return dp[nChars, nBlocks] = count;
             }
@@ -129,11 +129,10 @@ public class Day12
     {
         CachingServices.DefaultBackend = new MemoryCachingBackend();
         lines.Sum(l => l.CountWays<int>()).Part1();
+        lines.Sum(l => l.Unfold(5).CountWays<long>()).Part2();
         // lines.Sum(l => l.CountWaysDp<int>()).Out("DP1: ");
-        // lines.Sum(l => l.Unfold(5).CountWays<long>()).Part2();
         // lines.Sum(l => l.Unfold(10).CountWays<decimal>()).Out("Part 3: ");
         // lines.Sum(l => l.Unfold(10).CountWays<BigInteger>()).Out("Part 4: ");
-        
-        lines.Sum(l => l.CountWaysCached<int>()).Out("Cached 1: ");
+        //lines.Sum(l => l.CountWaysCached<int>()).Out("Cached 1: ");
     }
 }
