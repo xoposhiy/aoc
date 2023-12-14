@@ -120,7 +120,7 @@ public static class Extensions
                     if (log){
                         i.Out("period found at index: ");
                         period.Out("period: ");
-                        skipCount.Out("sould skip after period found: ");
+                        skipCount.Out("should skip after period found: ");
                     }
                     if (skipCount == 0) return item;
                     foundLoop = true;
