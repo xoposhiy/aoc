@@ -10,7 +10,7 @@ public class Day14
 
         GetLoadOnLeftBorder(
                 map.MakeSequence(ApplyOneCycle)
-                    .ElementAtWithTrackingLoop(1000000000))
+                    .ElementAtWithTrackingLoop(1_000_000_000))
             .Part2();
     }
 
