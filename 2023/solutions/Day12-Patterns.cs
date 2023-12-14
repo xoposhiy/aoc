@@ -6,9 +6,8 @@ using PostSharp.Patterns.Caching.Backends;
 
 public class Day12
 {
-    public record Line(string Pattern, int[] Blocks)
+    public record Record(string Pattern, int[] Blocks)
     {
-        private int[] maxPrefix;
         public T CountWays<T>() where T : INumber<T>
         {
             //dp[i, j] - number of ways to place wirst j blocks to the Pattern[0..i] prefix.
@@ -39,17 +38,8 @@ public class Day12
             return res;
         }
 
-        private int[] CreateMaxPrefix()
-        {
-            var arr = new int[Pattern.Length + 1];
-            for (int i = 0; i < Pattern.Length; i++)
-                if (Pattern[i] is not '.') arr[i + 1] = arr[i] + 1;
-            return arr;
-        }
-
         public T CountWaysDp<T>() where T : INumber<T>
         {
-            maxPrefix = CreateMaxPrefix();
             var count = new T[Pattern.Length + 1, Blocks.Length + 1];
             count[0, 0] = T.One;
             for (int i = 1; i <= Pattern.Length; i++)
@@ -96,7 +86,7 @@ public class Day12
             if (start < 0) return false;
             if (start+len > Pattern.Length) return false;
             return 
-                maxPrefix[start + len] >= len  // no holes in block
+                Pattern[start..(start + len)].All(c => c is not '.')  // no holes in block
                 &&  (start == 0 || Pattern[start - 1] is not '#'); // no # just before
 
         }
@@ -111,7 +101,7 @@ public class Day12
         }
 
 
-        public Line Unfold(int repeats)
+        public Record Unfold(int repeats)
         {
             var res = Pattern;
             var lens = Blocks.ToList();
@@ -121,11 +111,11 @@ public class Day12
                 lens.AddRange(Blocks);
             }
 
-            return new Line(res, lens.ToArray());
+            return new Record(res, lens.ToArray());
         }
     }
     
-    public void Solve(Line[] lines)
+    public void Solve(Record[] lines)
     {
         CachingServices.DefaultBackend = new MemoryCachingBackend();
         lines.Sum(l => l.CountWays<int>()).Part1();

@@ -19,7 +19,7 @@ public class Day11
         
         var galaxies = map.GetPositions('#');
         SumPairDistances(2).Out("Part 1 v2: ");
-        SumPairDistances(1000000).Part2();
+        SumPairDistances(1_000_000).Part2();
 
         long SumPairDistances(int exp)
         {
@@ -34,10 +34,8 @@ public class Day11
     private static IEnumerable<long> Expand(IEnumerable<int> xs, int exp)
     {
         var values = xs.Order().ToList();
-
-        return values.Bigrams()
-            .Scan(0L, (item, prev) => prev + Max(0, item.right - item.left - 1) * (exp - 1))
-            .Zip(values.Bigrams(), (shift, pair) => pair.right + shift)
-            .Prepend(values[0]);
+        return values.Bigrams().Select(p => (long)p.right - p.left)
+            .Scan((long)values[0], (step, prevX) => 
+                    prevX + (step == 0 ? 0 : exp * (step - 1) + 1));
     }
 }

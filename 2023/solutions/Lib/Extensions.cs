@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Numerics;
 
+public record SequenceCycle<TNode>(TNode StartNode, long StartIndex, long PeriodLen);
+
 public static class Extensions
 {
     /// <summary>
@@ -98,43 +100,53 @@ public static class Extensions
         count = count.ModPositive(items.Count);
         return items.Skip(count).Concat(items.Take(count));
     }
-
-    public static T ElementAtWithTrackingLoop<T>(this IEnumerable<T> items, long indexToFind, Func<T, long>? getHash = null, bool log = false)
+    
+    /// <summary>
+    /// Find cycle in sequence where next value is fully determined by the previous value
+    /// </summary>
+    /// <returns>Periodic part of sequence. Index - in the initial sequence</returns>
+    public static List<(TNode node, int index)> GetCycle<TNode>(
+        this IEnumerable<TNode> sequence, Func<TNode, long>? getHash = null)
     {
-        getHash ??= v => v.Format().GetHashCode(); 
-        var cache = new Dictionary<long, int>();
-        var i = 0;
-        var foundLoop = false;
-        long skipCount = 0;
-        foreach (var item in items)
+        if (sequence == null) throw new ArgumentNullException(nameof(sequence));
+        getHash ??= v => v?.GetHashCode() ?? 0; 
+        var period = new List<(TNode node, int index)>();
+        var seenAt = new Dictionary<long, int>();
+        var index = 0;
+        var inCycle = false;
+        var cycleStartHash = 0L; 
+        foreach (var node in sequence)
         {
-            if (i == indexToFind) return item;
-            var hash = getHash(item);
-            if (!foundLoop)
+            var hash = getHash(node);
+            if (!inCycle)
             {
-                if (cache.TryGetValue(hash, out var prevIndex))
+                if (seenAt.TryGetValue(hash, out var prevIndex))
                 {
-                    var period = i - prevIndex;
-                    var left = indexToFind - i;
-                    skipCount = left % period;
-                    if (log){
-                        i.Out("period found at index: ");
-                        period.Out("period: ");
-                        skipCount.Out("should skip after period found: ");
-                    }
-                    if (skipCount == 0) return item;
-                    foundLoop = true;
+                    cycleStartHash = hash;
+                    period.Add((node, prevIndex));
+                    inCycle = true;
                 }
-                cache[hash] = i;
+                else
+                {
+                    seenAt.Add(hash, index);
+                }
             }
             else
             {
-                skipCount--;
-                if (skipCount == 0) return item;
+                if (getHash(node) == cycleStartHash)
+                    return period;
+                period.Add((node, period[^1].index+1));
             }
-            i++;
+            index++;
         }
         throw new Exception("Unexpected end of sequence");
+    }
+    
+    public static T ElementAtWithTrackingLoop<T>(this IEnumerable<T> items, long indexToFind, Func<T, long>? getHash = null, bool log = false)
+    {
+        var cycle = items.GetCycle(getHash);
+        var skipCount = (int)((indexToFind - cycle[0].index) % cycle.Count);
+        return cycle[skipCount].node;
     }
     
     public static string Format(this object? value)
