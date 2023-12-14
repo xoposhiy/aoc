@@ -102,6 +102,16 @@
         return Enumerable.Range(0, map.Width()).Select(x => map.Column(x).ToArray()).ToArray();
     }
 
+    public static T[][] RotateCW<T>(this T[][] map)
+    {
+        return map.Reversed().ToArray().Columns();
+    }
+
+    public static T[][] RotateCCW<T>(this T[][] map)
+    {
+        return map.Columns().Reverse().ToArray();
+    }
+
     public static IEnumerable<T> Row<T>(this T[][] map, int y)
     {
         return map[y];

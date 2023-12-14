@@ -3,7 +3,10 @@ using System.Numerics;
 
 public static class Extensions
 {
-    public static IEnumerable<TOut> SelectWithPrev<TIn, TOut>(
+    /// <summary>
+    /// Select, witch can use previous outputed value to map current input value
+    /// </summary>
+    public static IEnumerable<TOut> Scan<TIn, TOut>(
         this IEnumerable<TIn> items, 
         TOut outSeed,
         Func<TIn, TOut, TOut> nextByCurrentInAndPrevOut)
@@ -96,12 +99,52 @@ public static class Extensions
         return items.Skip(count).Concat(items.Take(count));
     }
 
+    public static T ElementAtWithTrackingLoop<T>(this IEnumerable<T> items, long indexToFind, Func<T, long>? getHash = null, bool log = false)
+    {
+        getHash ??= v => v.Format().GetHashCode(); 
+        var cache = new Dictionary<long, int>();
+        var i = 0;
+        var foundLoop = false;
+        long skipCount = 0;
+        foreach (var item in items)
+        {
+            if (i == indexToFind) return item;
+            var hash = getHash(item);
+            if (!foundLoop)
+            {
+                if (cache.TryGetValue(hash, out var prevIndex))
+                {
+                    var period = i - prevIndex;
+                    var left = indexToFind - i;
+                    skipCount = left % period;
+                    if (log){
+                        i.Out("period found at index: ");
+                        period.Out("period: ");
+                        skipCount.Out("sould skip after period found: ");
+                    }
+                    if (skipCount == 0) return item;
+                    foundLoop = true;
+                }
+                cache[hash] = i;
+            }
+            else
+            {
+                skipCount--;
+                if (skipCount == 0) return item;
+            }
+            i++;
+        }
+        throw new Exception("Unexpected end of sequence");
+    }
+    
     public static string Format(this object? value)
     {
         if (value is null) return "";
         if (value is string s) return s;
         if (value is char[][] map)
-            return map.Select(row => new string(row)).StrJoin("\n");
+        {
+            return map.Select(row => new string(row)).StrJoin("\n") + "\n";
+        }
         if (value is IEnumerable e)
         {
             var parts = e.Cast<object>().Select(Format).ToList();
@@ -166,14 +209,14 @@ public static class Extensions
         return d.ToDictionary(p => p.Item1, p => p.Item2.Single());
     }
 
-    public static IEnumerable<T[]> SplitBy<T>(this IEnumerable<T> items, Predicate<T> isSeparator)
+    public static IEnumerable<T[]> SplitBy<T>(this IEnumerable<T> items, Predicate<T> isSeparator, bool returnEmptyGroups = false)
         where T : IEquatable<T>?
     {
         var group = new List<T>();
         foreach (var item in items)
             if (isSeparator(item))
             {
-                if (group.Count > 0)
+                if (group.Count > 0 || returnEmptyGroups)
                 {
                     yield return group.ToArray();
                     group.Clear();
@@ -184,8 +227,20 @@ public static class Extensions
                 group.Add(item);
             }
 
-        if (group.Count > 0)
+        if (group.Count > 0 || returnEmptyGroups)
             yield return group.ToArray();
+    }
+
+    public static IEnumerable<T> JoinWith<T>(this IEnumerable<IEnumerable<T>> parts, T delimiter)
+    {
+        var index = 0;
+        foreach (var part in parts)
+        {
+            if (index != 0) yield return delimiter;
+            foreach (var item in part)
+                yield return item;
+            index++;
+        }
     }
 
     public static IEnumerable<(T value, int length)> ConstantSegments<T>(this IEnumerable<T> items)

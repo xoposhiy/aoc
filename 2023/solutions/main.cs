@@ -1,4 +1,5 @@
 global using static System.Math; 
+global using static System.Linq.Enumerable; 
 using System.Diagnostics;
 using System.Net;
 using System.Reflection;

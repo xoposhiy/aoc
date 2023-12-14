@@ -15,22 +15,15 @@ public class Day13
             return GetReflectionLineY(map.Columns(), expectedDiffs);
         }
 
-        long GetReflectionLineY(char[][] map, int diffs) => 
-            Enumerable.Range(1, map.Height() - 1).FirstOrDefault(y => GetDiffsInReflection(y, map) == diffs);
+        long GetReflectionLineY(char[][] map, int diff) => 
+            Range(1, map.Height() - 1).FirstOrDefault(y => GetDiffsInReflection(y, map) == diff);
 
-        int GetDiffsInReflection(int reflectionLineY, char[][] map)
-        {
-            var width = map.Width();
-            var height = map.Height();
-            var diffs = 0;
-            for (var y = 0; y < reflectionLineY; y++)
-            for (var x = 0; x < width; x++)
-            {
-                var symY = 2*reflectionLineY-1-y;
-                if (symY.InRange(0, height) && map[y][x] != map[symY][x])
-                    diffs++;
-            }
-            return diffs;
-        }
+        int GetDiffsInReflection(int reflectionLineY, char[][] map) =>
+            (
+                from y in Range(0, reflectionLineY)
+                let symY = 2 * reflectionLineY - 1 - y
+                where symY < map.Height()
+                select map[y].Zip(map[symY]).Count(x => x.First != x.Second)
+            ).Sum();
     }
 }

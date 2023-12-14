@@ -36,7 +36,7 @@ public class Day11
         var values = xs.Order().ToList();
 
         return values.Bigrams()
-            .SelectWithPrev(0L, (item, prev) => prev + Max(0, item.right - item.left - 1) * (exp - 1))
+            .Scan(0L, (item, prev) => prev + Max(0, item.right - item.left - 1) * (exp - 1))
             .Zip(values.Bigrams(), (shift, pair) => pair.right + shift)
             .Prepend(values[0]);
     }
