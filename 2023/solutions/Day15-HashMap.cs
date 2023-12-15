@@ -2,7 +2,7 @@
 
 public class Day15
 {
-    private int Hash(string s) => s.Aggregate(0, (h, c) => (h + c) * 17 % 256);
+    private static int Hash(string s) => s.Aggregate(0, (h, c) => (h + c) * 17 % 256);
 
     // rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7
     public void Solve([Separators(",")][Oneline]string[] lines)
@@ -14,7 +14,7 @@ public class Day15
             .ToArray();
         foreach (var line in lines)
         {
-            var parts = line.Split(new[] { '-', '=' });
+            var parts = line.Split('-', '=');
             var label = parts[0];
             var op = line[label.Length];
             var box = boxes[Hash(label)];
