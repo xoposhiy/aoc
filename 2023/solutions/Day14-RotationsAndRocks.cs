@@ -8,11 +8,15 @@ public class Day14
     {
         map = map.RotateCCW(); // top become left
         
-        GetLoadOnLeftBorder(MoveRoundRocksLeft(map)).Part1();
+        GetLoadOnLeftBorder(MoveRoundRocksLeft(map))
+            .Part1();
 
-        var cycle = GraphSearch.GetCycle(map, ApplyOneCycle, m => m.Format().GetHashCode());
+        var cycle = map
+            .MakeSequence(ApplyOneCycle)
+            .GetCycle(m => m.Format().GetHashCode());
         var finalMap = cycle[(1_000_000_000 - cycle[0].index) % cycle.Count].node;
-        GetLoadOnLeftBorder(finalMap).Part2();
+        GetLoadOnLeftBorder(finalMap)
+            .Part2();
     }
 
     private char[][] MoveRoundRocksLeft(char[][] map) => 
@@ -27,7 +31,6 @@ public class Day14
     {
         var result = new char[row.Length];
         var emptyCount = 0;
-        var rockCount = 0;
         var j = 0;
         foreach (var t in row)
         {
@@ -35,11 +38,9 @@ public class Day14
             {
                 case '#':
                 {
-                    Array.Fill(result, 'O', j, rockCount);
-                    j += rockCount;
-                    Array.Fill(result, '.', j, emptyCount);
-                    j += emptyCount;
-                    emptyCount = rockCount = 0;
+                    for(var i = 0; i < emptyCount; i++)
+                        result[j++] = '.';
+                    emptyCount = 0;
                     result[j++] = '#';
                     break;
                 }
@@ -47,14 +48,14 @@ public class Day14
                     emptyCount++;
                     break;
                 case 'O':
-                    rockCount++;
+                    result[j++] = 'O';
                     break;
                 default:
                     throw new Exception(t.ToString());
             }
         }
-        Array.Fill(result, 'O', j, rockCount);
-        Array.Fill(result, '.', j+rockCount, emptyCount);
+        for(var i = 0; i < emptyCount; i++)
+            result[j++] = '.';
         return result;
     }
 
@@ -67,5 +68,5 @@ public class Day14
             .Sum(t => row.Length - t.index);
 
     private char[][] ApplyOneCycle(char[][] map) 
-        => map.MakeSequence(m => MoveRoundRocksLeft(m).RotateCW()).ElementAt(4);
+        => map.MakeSequence(m => MoveRoundRocksLeft(m).RotateCWInplace()).ElementAt(4);
 }

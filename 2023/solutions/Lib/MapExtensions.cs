@@ -111,6 +111,28 @@
 
     public static T[][] RotateCW<T>(this T[][] map) => 
         map.Reverse().ToArray().Columns();
+    
+    public static T[][] RotateCWInplace<T>(this T[][] map)
+    {
+        var size = map.Height();
+        if (map.Width() != size)
+            throw new ArgumentException("width != height", nameof(map));
+        var partSize = size / 2 + size % 2;
+        var sizeMinus1 = size - 1;
+        for (var y = 0; y < size / 2; y++)
+        for (var x = 0; x < partSize; x++)
+        {
+            var xx = sizeMinus1 - x;
+            var yy = sizeMinus1 - y;
+            // rotate 4 values clockwise
+            var temp = map[y][x];
+            map[y][x] = map[xx][y];
+            map[xx][y] = map[yy][xx];
+            map[yy][xx] = map[x][yy];
+            map[x][yy] = temp;
+        }
+        return map;
+    }
 
     public static T[][] RotateCCW<T>(this T[][] map) => 
         map.Columns().Reverse().ToArray();
