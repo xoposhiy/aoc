@@ -28,10 +28,10 @@ public class Day08
             var cycle = GraphSearch.GetCycle(
                 (Name: start, Index: 0),
                 n => 
-                    (
-                        actions[n.Index % actions.Length] == 'L' ? graph[n.Name].Left : graph[n.Name].Right,
+                (
+                    actions[n.Index % actions.Length] == 'L' ? graph[n.Name].Left : graph[n.Name].Right,
                     (n.Index + 1)%actions.Length
-                        ));
+                ));
             // Constraints necessary for this solution:
             Debug.Assert(cycle.Single(n => n.node.Name.EndsWith("Z")).index == cycle.Count);
             //Debug.Assert(cycle.Count(n => n.node.Name.EndsWith("Z")) == 1);

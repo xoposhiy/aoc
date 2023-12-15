@@ -1,21 +1,28 @@
 ﻿public static class MapExtensions
 {
-    public static int Width<T>(this T[][] map)
+    public static T[][] CloneMap<T>(this T[][] map)
     {
-        return map[0].Length;
+        var result = new T[map.Length][];
+        for (var y = 0; y < map.Length; y++)
+        {
+            result[y] = new T[map[y].Length];
+            for (var x = 0; x < map[y].Length; x++)
+                result[y][x] = map[y][x];
+        }
+        return result;
     }
-    //Height
-    public static int Height<T>(this T[][] map)
-    {
-        return map.Length;
-    }
+    
+    public static int Width<T>(this T[][] map) => map[0].Length;
+
+    public static int Height<T>(this T[][] map) => map.Length;
+
     public static string[] CreateMap<T>(this IEnumerable<T> points, Func<T, V> getPoint, Func<V, string> empty,
         Func<T, string> showPoint, V? min = null)
     {
         min ??= new V(int.MaxValue, int.MaxValue);
         var pointsImage = points.ToDictionary(getPoint, showPoint);
-        var minX = Math.Min(min.X, pointsImage.Keys.Min(p => p.X));
-        var minY = Math.Min(min.Y, pointsImage.Keys.Min(p => p.Y));
+        var minX = Min(min.X, pointsImage.Keys.Min(p => p.X));
+        var minY = Min(min.Y, pointsImage.Keys.Min(p => p.Y));
         var maxX = pointsImage.Keys.Max(p => p.X);
         var maxY = pointsImage.Keys.Max(p => p.Y);
         var map = new string[maxY - minY + 1];
@@ -95,22 +102,18 @@
 
     public static IEnumerable<T> Column<T>(this T[][] map, int x)
     {
-        return Enumerable.Range(0, map.Length).Select(y => map[y][x]);
+        return Range(0, map.Length).Select(y => map[y][x]);
     }
     public static T[][] Columns<T>(this T[][] map)
     {
-        return Enumerable.Range(0, map.Width()).Select(x => map.Column(x).ToArray()).ToArray();
+        return Range(0, map.Width()).Select(x => map.Column(x).ToArray()).ToArray();
     }
 
-    public static T[][] RotateCW<T>(this T[][] map)
-    {
-        return map.Reversed().ToArray().Columns();
-    }
+    public static T[][] RotateCW<T>(this T[][] map) => 
+        map.Reverse().ToArray().Columns();
 
-    public static T[][] RotateCCW<T>(this T[][] map)
-    {
-        return map.Columns().Reverse().ToArray();
-    }
+    public static T[][] RotateCCW<T>(this T[][] map) => 
+        map.Columns().Reverse().ToArray();
 
     public static IEnumerable<T> Row<T>(this T[][] map, int y)
     {

@@ -109,6 +109,7 @@ public static class Extensions
         this IEnumerable<TNode> sequence, Func<TNode, long>? getHash = null)
     {
         if (sequence == null) throw new ArgumentNullException(nameof(sequence));
+        if (typeof(TNode).IsArray && getHash == null) throw new ArgumentException(nameof(getHash));
         getHash ??= v => v?.GetHashCode() ?? 0; 
         var period = new List<(TNode node, int index)>();
         var seenAt = new Dictionary<long, int>();

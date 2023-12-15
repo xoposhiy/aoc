@@ -1,5 +1,7 @@
 ﻿// https://adventofcode.com/2023/day/14
 
+using System.Buffers;
+
 public class Day14
 {
     public void Solve(char[][] map)
@@ -8,19 +10,53 @@ public class Day14
         
         GetLoadOnLeftBorder(MoveRoundRocksLeft(map)).Part1();
 
-        GetLoadOnLeftBorder(
-                map.MakeSequence(ApplyOneCycle)
-                    .ElementAtWithTrackingLoop(1_000_000_000, m => m.Format().GetHashCode()))
-            .Part2();
+        var cycle = GraphSearch.GetCycle(map, ApplyOneCycle, m => m.Format().GetHashCode());
+        var finalMap = cycle[(1_000_000_000 - cycle[0].index) % cycle.Count].node;
+        GetLoadOnLeftBorder(finalMap).Part2();
     }
 
     private char[][] MoveRoundRocksLeft(char[][] map) => 
         map.Select(MoveRoundRocksLeft).ToArray();
 
-    private char[] MoveRoundRocksLeft(char[] row) =>
+    private char[] MoveRoundRocksLeft_Slow(char[] row) =>
         row.SplitBy(c => c is '#', true)
             .Select(group => group.OrderBy(x => "O.".IndexOf(x))).JoinWith('#')
             .ToArray();
+
+    private char[] MoveRoundRocksLeft(char[] row)
+    {
+        var result = new char[row.Length];
+        var emptyCount = 0;
+        var rockCount = 0;
+        var j = 0;
+        foreach (var t in row)
+        {
+            switch (t)
+            {
+                case '#':
+                {
+                    Array.Fill(result, 'O', j, rockCount);
+                    j += rockCount;
+                    Array.Fill(result, '.', j, emptyCount);
+                    j += emptyCount;
+                    emptyCount = rockCount = 0;
+                    result[j++] = '#';
+                    break;
+                }
+                case '.':
+                    emptyCount++;
+                    break;
+                case 'O':
+                    rockCount++;
+                    break;
+                default:
+                    throw new Exception(t.ToString());
+            }
+        }
+        Array.Fill(result, 'O', j, rockCount);
+        Array.Fill(result, '.', j+rockCount, emptyCount);
+        return result;
+    }
 
     private long GetLoadOnLeftBorder(char[][] map) =>
         map.Sum(GetLoadOnLeftBorder);
@@ -30,6 +66,6 @@ public class Day14
             .Where(t => t.ch == 'O')
             .Sum(t => row.Length - t.index);
 
-    private char[][] ApplyOneCycle(char[][] map) => 
-        map.MakeSequence(m => MoveRoundRocksLeft(m).RotateCW()).ElementAt(4);
+    private char[][] ApplyOneCycle(char[][] map) 
+        => map.MakeSequence(m => MoveRoundRocksLeft(m).RotateCW()).ElementAt(4);
 }
