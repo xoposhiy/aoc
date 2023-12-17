@@ -1,5 +1,17 @@
 ﻿public static class MapExtensions
 {
+    public static V BottomRight<T>(this T[][] map) => new(map.Width() - 1, map.Height() - 1);
+    public static V BottomLeft<T>(this T[][] map) => new(0, map.Height() - 1);
+    public static V TopRight<T>(this T[][] map) => new(map.Width() - 1, 0);
+    public static V TopLeft<T>(this T[][] map) => V.Zero;
+    
+    
+    public static IEnumerable<(V Pos, V Dir)> NextSteps<T>(this T[][] map, V pos, V dir) =>
+        V.Directions4
+            .Where(d => d != -dir)
+            .Select(d => (pos: pos + d, dir: d))
+            .Where(p => p.pos.InRange(map));
+
     public static T[][] CloneMap<T>(this T[][] map)
     {
         var result = new T[map.Length][];

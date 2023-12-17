@@ -1,34 +1,36 @@
 ﻿using System.Collections;
+using System.Numerics;
 
 public record MapPathItem(V Pos, MapPathItem? Prev, int Len);
 
 public static class GraphSearch
 {
-    public static IEnumerable<(PathItem<TState> path, int cost)> Dijkstra<TState>(
+    public static IEnumerable<(PathItem<TState> Path, TCost Cost)> Dijkstra<TState, TCost>(
         Func<TState, IEnumerable<TState>> getNextStates,
-        Func<TState, TState, int> getStepCost,
+        Func<TState, TState, TCost> getStepCost,
         TState start)
+    where TCost : INumber<TCost> where TState : notnull
     {
         var q = new PriorityQueue<PathItem<TState>, IComparable>();
-        var costs = new Dictionary<TState, int>();
+        var costs = new Dictionary<TState, TCost>();
         var visited = new HashSet<TState>();
         var startPathItem = new PathItem<TState>(start, null, 0);
         
         q.Enqueue(startPathItem, 0);
-        costs[start] = 0;
+        costs[start] = TCost.Zero;
         visited.Add(start);
-        yield return (startPathItem, 0);
+        yield return (startPathItem, TCost.Zero);
         while (q.Count > 0)
         {
             var pathItem = q.Dequeue();
-            var curCost = costs.GetValueOrDefault(pathItem.State, int.MaxValue);
+            var curCost = costs[pathItem.State];
             foreach (var nextState in getNextStates(pathItem.State))
                 if (visited.Add(nextState))
                 {
                     var nextPathItem = new PathItem<TState>(nextState, pathItem, pathItem.Len + 1);
                     var newCost = curCost + getStepCost(pathItem.State, nextState);
                     q.Enqueue(nextPathItem, newCost);
-                    if (newCost < costs.GetValueOrDefault(nextState, int.MaxValue))
+                    if (!costs.TryGetValue(nextState, out var prevCost) || newCost < prevCost)
                         costs[nextState] = newCost;
                     yield return (nextPathItem, newCost);
                 }
