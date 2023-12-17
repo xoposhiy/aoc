@@ -4,26 +4,33 @@ public record MapPathItem(V Pos, MapPathItem? Prev, int Len);
 
 public static class GraphSearch
 {
-    public static IEnumerable<PathItem<TState>> Dijkstra<TState>(
+    public static IEnumerable<(PathItem<TState> path, int cost)> Dijkstra<TState>(
         Func<TState, IEnumerable<TState>> getNextStates,
-        Func<TState, IComparable> getPriority,
+        Func<TState, TState, int> getStepCost,
         TState start)
     {
         var q = new PriorityQueue<PathItem<TState>, IComparable>();
+        var costs = new Dictionary<TState, int>();
         var visited = new HashSet<TState>();
         var startPathItem = new PathItem<TState>(start, null, 0);
-        q.Enqueue(startPathItem, getPriority(start));
+        
+        q.Enqueue(startPathItem, 0);
+        costs[start] = 0;
         visited.Add(start);
-        yield return startPathItem;
+        yield return (startPathItem, 0);
         while (q.Count > 0)
         {
             var pathItem = q.Dequeue();
-            foreach (var state in getNextStates(pathItem.State))
-                if (visited.Add(state))
+            var curCost = costs.GetValueOrDefault(pathItem.State, int.MaxValue);
+            foreach (var nextState in getNextStates(pathItem.State))
+                if (visited.Add(nextState))
                 {
-                    var nextPathItem = new PathItem<TState>(state, pathItem, pathItem.Len + 1);
-                    q.Enqueue(nextPathItem, getPriority(state));
-                    yield return nextPathItem;
+                    var nextPathItem = new PathItem<TState>(nextState, pathItem, pathItem.Len + 1);
+                    var newCost = curCost + getStepCost(pathItem.State, nextState);
+                    q.Enqueue(nextPathItem, newCost);
+                    if (newCost < costs.GetValueOrDefault(nextState, int.MaxValue))
+                        costs[nextState] = newCost;
+                    yield return (nextPathItem, newCost);
                 }
         }
     }
@@ -176,7 +183,7 @@ public static class GraphSearch
         throw new Exception(exitDirs.Format());
     }
 
-    public static PathItem<TState> Visualize<TState>(
+    public static PathItem<TState> VisualizeOne<TState>(
         this PathItem<TState> path,
         Func<TState, V> getPosition, Func<TState, string>? getDescription = null)
     {
