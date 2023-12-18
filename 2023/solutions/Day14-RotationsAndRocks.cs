@@ -28,21 +28,17 @@ public class Day14
         sw.Restart();
 
 
-        for (int repeat = 0; repeat < 100; repeat++)
-        {
-            map = backup.CloneMap();
-            // Imperative way
-            
-            cycle = map
-                .MakeSequence(ApplyOneCycleInPlace)
-                .GetCycle(m => m.Format().GetHashCode());
-            (cycle[0].index, cycle.Count).Out("2: ");
-            for (int i = 0; i < (1_000_000_000 - cycle[0].index) % cycle.Count; i++) 
-                ApplyOneCycleInPlace(map);
-            GetLoadOnUpperBorder(map)
-                .Part2();
-            
-        }
+        map = backup.CloneMap();
+        // Imperative way
+        
+        cycle = map
+            .MakeSequence(ApplyOneCycleInPlace)
+            .GetCycle(m => m.Format().GetHashCode());
+        (cycle[0].index, cycle.Count).Out("2: ");
+        for (int i = 0; i < (1_000_000_000 - cycle[0].index) % cycle.Count; i++) 
+            ApplyOneCycleInPlace(map);
+        GetLoadOnUpperBorder(map)
+            .Part2();
         
         sw.Elapsed.Out("Imperative: ");
         
