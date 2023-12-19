@@ -5,6 +5,8 @@ public record R(long Start, long End)
 {
     public static R FromLen(long start, long len) => new(start, start + len - 1);
     public long Len => End - Start + 1;
+    public bool IsValid => End >= Start;
+
     public override string ToString() => $"[{Start}..{End}]";
 
     public static R FromPoints(IReadOnlyCollection<int> points)
@@ -22,14 +24,8 @@ public static class RangeExtensions
     public static bool Contains(this R range, R other) => range.Start <= other.Start && range.End >= other.End;
     public static bool Contains(this R range, long p) => range.Start <= p && range.End >= p;
     public static bool IsIntersected(this R range, R other) => Math.Max(range.Start, other.Start) <= Math.Min(range.End, other.End);
-    public static R? IntersectWith(this R range, R b)
-    {
-        var startIntersect = Math.Max(range.Start, b.Start);
-        var endIntersect = Math.Min(range.End, b.End);
-        return startIntersect > endIntersect ? null : new R(startIntersect, endIntersect);
-    }
 
-    public static R SafeIntersectWith(this R range, R b)
+    public static R IntersectWith(this R range, R b)
     {
         var startIntersect = Math.Max(range.Start, b.Start);
         var endIntersect = Math.Min(range.End, b.End);

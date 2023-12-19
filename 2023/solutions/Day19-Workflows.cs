@@ -34,7 +34,7 @@ public class Day19
 
         parts.Where(IsAccepted).Sum(p => p.Sum(r => r.Value)).Part1();
 
-        long Dfs(string workflow, (string name, R range)[] curParts)
+        long GetAcceptedCombinationsCount(string workflow, (string name, R range)[] curParts)
         {
             if (workflow == "A")
                 return curParts.Product(p => p.range.Len);
@@ -45,30 +45,30 @@ public class Day19
             {
                 if (rule.Exit is null)
                 {
-                    count += Dfs(rule.Expr, curParts);
+                    count += GetAcceptedCombinationsCount(rule.Expr, curParts);
                     break;
                 }
 
                 var acceptParts = curParts
                     .Select(p =>
                         p.name == rule.RatingName
-                            ? p with { range = p.range.SafeIntersectWith(rule.AcceptRange) }
+                            ? p with { range = p.range.IntersectWith(rule.AcceptRange) }
                             : p)
                     .ToArray();
                 if (acceptParts.All(p => p.range.Len > 0))
-                    count += Dfs(rule.Exit, acceptParts);
+                    count += GetAcceptedCombinationsCount(rule.Exit, acceptParts);
                 curParts = curParts
                     .Select(
                         p =>
                             p.name == rule.RatingName
-                                ? p with { range = p.range.SafeIntersectWith(rule.RejectRange) }
+                                ? p with { range = p.range.IntersectWith(rule.RejectRange) }
                                 : p).ToArray();
             }
 
             return count;
         }
 
-        var count = Dfs("in", new[]
+        var count = GetAcceptedCombinationsCount("in", new[]
         {
             ("x", new R(1, 4000)),
             ("m", new R(1, 4000)),

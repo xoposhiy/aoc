@@ -38,8 +38,8 @@ public class Day05
 
     private static IEnumerable<R> ApplyMapping(R curRange, Stage stage) =>
         stage.Ranges.Select(mapRange =>
-                curRange.IntersectWith(mapRange.Src)?.ShiftBy(mapRange.Dest.Start - mapRange.Src.Start))
-            .ExceptNulls()
+                curRange.IntersectWith(mapRange.Src).ShiftBy(mapRange.Dest.Start - mapRange.Src.Start))
+            .Where(r => r.IsValid)
             .Concat(curRange.ExcludeAll(stage.Ranges.Select(r => r.Src)));
 
 
