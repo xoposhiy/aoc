@@ -56,7 +56,7 @@ public sealed class V : IEquatable<V>
         return X == other.X && Y == other.Y;
     }
 
-    public static V FromCompass(string compass)
+    public static V FromName(string compass)
     {
         return compass switch
         {

@@ -28,6 +28,13 @@ public static class RangeExtensions
         var endIntersect = Math.Min(range.End, b.End);
         return startIntersect > endIntersect ? null : new R(startIntersect, endIntersect);
     }
+
+    public static R SafeIntersectWith(this R range, R b)
+    {
+        var startIntersect = Math.Max(range.Start, b.Start);
+        var endIntersect = Math.Min(range.End, b.End);
+        return startIntersect > endIntersect ? new R(startIntersect, startIntersect-1) : new R(startIntersect, endIntersect);
+    }
     
     public static (R? left, R? right) Exclude(this R range, R subtrahend)  
     {
