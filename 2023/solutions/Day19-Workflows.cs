@@ -4,24 +4,24 @@ public class Day19
 {
     public record Rule(string Expr, string? Exit = null)
     {
-        public string RatingName => Expr[..1];
+        public int RatingIndex => "xmas".IndexOf(Expr[0]);
         public char Op => Expr[1];
         public int Value => int.Parse(Expr[2..]);
 
-        public bool Accept((string name, int value)[] part) => 
-            Exit is null || AcceptRange.Contains(part.First(p => p.name == RatingName).value);
+        public bool Accept(int[] part) =>
+            Exit is null || AcceptRange.Contains(part[RatingIndex]);
 
         public R AcceptRange => Op == '<' ? new R(1, Value - 1) : new R(Value + 1, 4000);
         public R RejectRange => Op == '<' ? new R(Value, 4000) : new R(1, Value);
     }
 
     public void Solve(
-        [Separators("{},:")](string Name, Rule[] Rules)[] workflows, 
-        [Separators("{=,}")](string Name, int Value)[][] parts)
+        [Separators("{},:")] (string Name, Rule[] Rules)[] workflows,
+        [Separators("{=,xmas}")]int[][] parts)
     {
         var ws = workflows.ToDictionary(w => w.Name, w => w.Rules);
 
-        bool IsAccepted((string name, int value)[] part)
+        bool IsAccepted(int[] part)
         {
             var wName = "in";
             while (!wName.IsOneOf("A", "R"))
@@ -29,15 +29,16 @@ public class Day19
                 var rule = ws[wName].First(r => r.Accept(part));
                 wName = rule.Exit ?? rule.Expr;
             }
+
             return wName == "A";
         }
 
-        parts.Where(IsAccepted).Sum(p => p.Sum(r => r.Value)).Part1();
+        parts.Where(IsAccepted).Sum(p => p.Sum()).Part1();
 
-        long GetAcceptedCombinationsCount(string workflow, (string name, R range)[] curParts)
+        long GetAcceptedCombinationsCount(string workflow, IList<R> curParts)
         {
             if (workflow == "A")
-                return curParts.Product(p => p.range.Len);
+                return curParts.Product(p => p.Len);
             if (workflow == "R")
                 return 0;
             var count = 0L;
@@ -49,32 +50,25 @@ public class Day19
                     break;
                 }
 
-                var acceptParts = curParts
-                    .Select(p =>
-                        p.name == rule.RatingName
-                            ? p with { range = p.range.IntersectWith(rule.AcceptRange) }
-                            : p)
-                    .ToArray();
-                if (acceptParts.All(p => p.range.Len > 0))
+                var acceptParts = curParts.ToArray();
+                acceptParts[rule.RatingIndex] = curParts[rule.RatingIndex].IntersectWith(rule.AcceptRange);
+                if (acceptParts.All(range => range.Len > 0))
                     count += GetAcceptedCombinationsCount(rule.Exit, acceptParts);
-                curParts = curParts
-                    .Select(
-                        p =>
-                            p.name == rule.RatingName
-                                ? p with { range = p.range.IntersectWith(rule.RejectRange) }
-                                : p).ToArray();
+                curParts[rule.RatingIndex] = curParts[rule.RatingIndex].IntersectWith(rule.RejectRange);
             }
 
             return count;
         }
 
-        var count = GetAcceptedCombinationsCount("in", new[]
-        {
-            ("x", new R(1, 4000)),
-            ("m", new R(1, 4000)),
-            ("a", new R(1, 4000)),
-            ("s", new R(1, 4000))
-        });
-        count.Part2();
+        GetAcceptedCombinationsCount(
+            "in",
+            new[]
+            {
+                new R(1, 4000),
+                new R(1, 4000),
+                new R(1, 4000),
+                new R(1, 4000)
+            })
+            .Part2();
     }
 }
