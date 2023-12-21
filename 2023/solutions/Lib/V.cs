@@ -235,6 +235,8 @@ public sealed class V : IEquatable<V>
         y = Y;
     }
 
+    public static IEnumerable<V> AllInRange<T>(T[][] map) => AllInRange(map.Width(), map.Height());
+
     public static IEnumerable<V> AllInRange(int width, int height)
     {
         for (var x = 0; x < width; x++)

@@ -6,6 +6,51 @@ public record SequenceCycle<TNode>(TNode StartNode, long StartIndex, long Period
 public static class Extensions
 {
     /// <summary>
+    /// Ожидает, что у последовательности второй разностный член станет константой.
+    /// Как только он не меняется на протяжении <paramref name="constantD2Steps"/> шагов,
+    /// применяется формула n-ого члена арифметической последовательности второго порядка.
+    /// an = a0 + d*n + d2*n*(n-1)/2
+    /// </summary>
+    /// <param name="items">последовательность</param>
+    /// <param name="index">номер элемента последовательности, который нужно предсказать</param>
+    /// <param name="constantD2Steps">сколько шагов проверять, что d2 стал константой</param>
+    /// <returns>Предсказанное значение</returns>
+    /// <exception cref="Exception">Если d2 так и не стал константой, а последовательность закончилась</exception>
+    public static long TryPredictSequence(this IEnumerable<int> items, int index, int constantD2Steps = 3)
+    {
+        var prev = 0L;
+        var prevD = 0L;
+        var prevD2 = 0L;
+        var i = 0;
+        Console.WriteLine($"TryPredictSequence(x_i)");
+        Console.WriteLine($"i\tx\td\tdd");
+        var constantD2Count = 0;
+        foreach (var x in items)
+        {
+            var d = x - prev;
+            var d2 = d - prevD;
+            if (d2 == prevD2) constantD2Count++;
+            else constantD2Count = 0;
+            Console.WriteLine($"{i}\t{x}\t{d}\t{d2}");
+            if (constantD2Count >= constantD2Steps)
+            {
+                Console.WriteLine($"Found constant d2 at index {i}. Predicting...");
+                var a0 = x;
+                var n = index - i;
+                d += d2;
+                var xx = a0 + d * n + d2 * n * (n - 1) / 2;
+                Console.WriteLine($"x_{index} = {a0} + {d} * {n} + {d2} * {n} * ({n} - 1) / 2 = {xx}");
+                return xx;
+            }
+            prev = x;
+            prevD = d;
+            prevD2 = d2;
+            i++;
+        }
+        throw new Exception("Can't predict");
+    }
+    
+    /// <summary>
     /// Select, witch can use previous outputed value to map current input value
     /// </summary>
     public static IEnumerable<TOut> Scan<TIn, TOut>(

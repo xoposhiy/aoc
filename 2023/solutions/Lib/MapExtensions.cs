@@ -78,6 +78,8 @@
 
     public static T Set<T>(this T[][] map, V pos, T value)
     {
+        if (!pos.InRange(map))
+            throw new Exception(pos.ToString());
         return map[pos.Y][pos.X] = value;
     }
 
