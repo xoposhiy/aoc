@@ -11,35 +11,40 @@ public static class Extensions
     /// применяется формула n-ого члена арифметической последовательности второго порядка.
     /// an = a0 + d*n + d2*n*(n-1)/2
     /// </summary>
-    /// <param name="items">последовательность</param>
-    /// <param name="index">номер элемента последовательности, который нужно предсказать</param>
+    /// <param name="xs">последовательность</param>
+    /// <param name="indexToPredict">номер элемента последовательности, который нужно предсказать</param>
     /// <param name="constantD2Steps">сколько шагов проверять, что d2 стал константой</param>
+    /// <param name="log">логгировать на консоль</param>
     /// <returns>Предсказанное значение</returns>
     /// <exception cref="Exception">Если d2 так и не стал константой, а последовательность закончилась</exception>
-    public static long TryPredictSequence(this IEnumerable<int> items, int index, int constantD2Steps = 3)
+    public static long PredictArithmeticSequenceItem(this IEnumerable<int> xs, int indexToPredict, int constantD2Steps = 3, bool log = false)
     {
         var prev = 0L;
         var prevD = 0L;
         var prevD2 = 0L;
         var i = 0;
-        Console.WriteLine($"TryPredictSequence(x_i)");
-        Console.WriteLine($"i\tx\td\tdd");
+        if (log)
+        {
+            Console.WriteLine($"TryPredictSequence(x_i)");
+            Console.WriteLine($"i\tx\td\tdd");
+        }
+
         var constantD2Count = 0;
-        foreach (var x in items)
+        foreach (var x in xs)
         {
             var d = x - prev;
             var d2 = d - prevD;
             if (d2 == prevD2) constantD2Count++;
             else constantD2Count = 0;
-            Console.WriteLine($"{i}\t{x}\t{d}\t{d2}");
+            if (log) Console.WriteLine($"{i}\t{x}\t{d}\t{d2}");
             if (constantD2Count >= constantD2Steps)
             {
-                Console.WriteLine($"Found constant d2 at index {i}. Predicting...");
+                if (log) Console.WriteLine($"Found constant d2 at index {i}. Predicting...");
                 var a0 = x;
-                var n = index - i;
+                var n = indexToPredict - i;
                 d += d2;
                 var xx = a0 + d * n + d2 * n * (n - 1) / 2;
-                Console.WriteLine($"x_{index} = {a0} + {d} * {n} + {d2} * {n} * ({n} - 1) / 2 = {xx}");
+                if (log) Console.WriteLine($"x_{indexToPredict} = {a0} + {d} * {n} + {d2} * {n} * ({n} - 1) / 2 = {xx}");
                 return xx;
             }
             prev = x;

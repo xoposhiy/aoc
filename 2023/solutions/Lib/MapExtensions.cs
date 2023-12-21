@@ -76,6 +76,11 @@
         return defaultValue;
     }
 
+    public static T GetByModulo<T>(this T[][] map, V pos)
+    {
+        return map[pos.Y.ModPositive(map.Height())][pos.X.ModPositive(map.Width())];
+    }
+
     public static T Set<T>(this T[][] map, V pos, T value)
     {
         if (!pos.InRange(map))
