@@ -65,7 +65,6 @@ public class Day20
         var presses = 0;
         var rxSourcePresses = new Dictionary<string, int>();
         var rxSource = chips[chips["rx"].Inputs.Single()];
-        rxSource.Inputs.Out();
         void Pulse(string initialInput, int initialLevel)
         {
             presses++;
@@ -90,7 +89,6 @@ public class Day20
 
         for (int i = 0; i < 1000; i++) 
             Pulse("broadcaster", 0);
-        pulsesCount.Out();
         pulsesCount.Product().Part1();
         
 
